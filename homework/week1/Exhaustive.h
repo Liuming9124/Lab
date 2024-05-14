@@ -41,9 +41,12 @@ void Exhaustive::RunALG(int Bit, int Run, int Iter, double rate)
     // this->rate = rate;
     this->nfes = this->mnfes = 0;
 
-    vector<int> sol = Init();
-    Evaluation(sol);
-    Reset();
+    while (this->_Run--){
+        vector<int> sol = Init();
+        Evaluation(sol);
+        Reset();
+    }
+    cout << "Average NFEs : " << this->mnfes/Run << endl;
 }
 
 void Exhaustive::Evaluation(vector<int> sol){
@@ -51,10 +54,10 @@ void Exhaustive::Evaluation(vector<int> sol){
     vector<int> candidate = sol;
     bool best_flag = false;
     for (int i=0; i<this->_Iter; i++){
+        this->nfes++;
         Adder(&candidate, 1);
         int value = OneMaxProblem(candidate, this->_Bit);
         if (value > OneMaxProblem(best, this->_Bit)){
-            this->nfes++;
             best = candidate;
             Print(i, best);
             if (value == this->_Bit){
@@ -71,7 +74,10 @@ void Exhaustive::Evaluation(vector<int> sol){
 
 void Exhaustive::Reset(){
     this->mnfes += this->nfes;
+    cout << this->nfes << endl;
     this->nfes = 0;
+    this->_Iter_len = 0;
+    cout << "-------------------Run" << this->_Run << "---------------------" << endl;
 }
 
 vector<int> Exhaustive::Init(){
