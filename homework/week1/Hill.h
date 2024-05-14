@@ -9,7 +9,7 @@ using namespace std;
 class Hill : OneMax
 {
 public:
-    void RunALG(int, int, int, double);
+    void RunALG(int, int, int);
 
 
 private:
@@ -29,12 +29,11 @@ private:
     void Init();
 };
 
-void Hill::RunALG(int Bit, int Run, int Iter, double rate)
+void Hill::RunALG(int Bit, int Run, int Iter)
 {
     this->Bit = Bit;
     this->Run = Run;
     this->Iter = Iter;
-    this->rate = rate;
 
     for (int i = 0; i < Run; i++)
     {
