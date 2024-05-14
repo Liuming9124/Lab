@@ -22,10 +22,6 @@ private:
 
     int _Iter_len = 0;
 
-    // // calculate the evaluation
-    // int nfes; // number fitness
-    // int mnfes;// mean number fitness
-
     vector<int> Init();
     void Evaluation(vector<int>);
     void Reset();
@@ -50,18 +46,27 @@ void Exhaustive::RunALG(int Bit, int Run, int Iter, double rate)
 void Exhaustive::Evaluation(vector<int> sol){
     vector<int> best = sol;
     vector<int> candidate = sol;
+    bool best_flag = false;
     for (int i=0; i<this->_Iter; i++){
         Adder(&candidate, 1);
-        if (OneMaxProblem(candidate, this->_Bit) > OneMaxProblem(best, this->_Bit)){
+        int value = OneMaxProblem(candidate, this->_Bit);
+        if (value > OneMaxProblem(best, this->_Bit)){
             best = candidate;
             Print(i, best);
+            if (value == this->_Bit){
+                cout << "Best Solution Found before " << this->_Iter << endl;
+                best_flag = true;
+                break;
+            }
         }
     }
-    Print(this->_Iter, best);
+    if (!best_flag){
+        Print(this->_Iter, best);
+    }
 }
 
 void Exhaustive::Reset(){
-    // this->nfes = 0;   
+    // this->nfes = 0;
 }
 
 vector<int> Exhaustive::Init(){

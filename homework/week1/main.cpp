@@ -10,8 +10,6 @@ int main(int argc, char *argv[])
     int Iter = atoi(argv[3]);    // 世代數
     double rate = atof(argv[4]); // 演算法參數
 
-    std::cout << Bit << Run << Iter << std::endl;
-
     Exhaustive alg_exhaustive;
     alg_exhaustive.RunALG(Bit, Run, Iter, rate);
     
