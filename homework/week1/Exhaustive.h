@@ -20,6 +20,9 @@ private:
     int _Iter;
     // double _rate;
 
+    int nfes;
+    int mnfes;
+
     int _Iter_len = 0;
 
     vector<int> Init();
@@ -36,7 +39,7 @@ void Exhaustive::RunALG(int Bit, int Run, int Iter, double rate)
     this->_Run = Run;
     this->_Iter = Iter;
     // this->rate = rate;
-    // this->nfes = this->mnfes = 0;
+    this->nfes = this->mnfes = 0;
 
     vector<int> sol = Init();
     Evaluation(sol);
@@ -51,6 +54,7 @@ void Exhaustive::Evaluation(vector<int> sol){
         Adder(&candidate, 1);
         int value = OneMaxProblem(candidate, this->_Bit);
         if (value > OneMaxProblem(best, this->_Bit)){
+            this->nfes++;
             best = candidate;
             Print(i, best);
             if (value == this->_Bit){
@@ -66,7 +70,8 @@ void Exhaustive::Evaluation(vector<int> sol){
 }
 
 void Exhaustive::Reset(){
-    // this->nfes = 0;
+    this->mnfes += this->nfes;
+    this->nfes = 0;
 }
 
 vector<int> Exhaustive::Init(){
