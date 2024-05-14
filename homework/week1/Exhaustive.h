@@ -4,7 +4,9 @@
 #include "OneMax.cpp"
 #include <iostream>
 #include <vector>
+#include <iomanip>
 using namespace std;
+using std::setw;
 
 class Exhaustive : OneMax
 {
@@ -16,18 +18,20 @@ private:
     int _Bit;
     int _Run;
     int _Iter;
-    double _rate;
+    // double _rate;
 
-    // calculate the evaluation
-    int nfes; // number fitness
-    int mnfes;// mean number fitness
+    int _Iter_len = 0;
+
+    // // calculate the evaluation
+    // int nfes; // number fitness
+    // int mnfes;// mean number fitness
 
     vector<int> Init();
     void Evaluation(vector<int>);
     void Reset();
 
     void Adder(vector<int>*, int);
-    void Print(vector<int>);
+    void Print(int iter, vector<int>);
 };
 
 void Exhaustive::RunALG(int Bit, int Run, int Iter, double rate)
@@ -50,16 +54,14 @@ void Exhaustive::Evaluation(vector<int> sol){
         Adder(&candidate, 1);
         if (OneMaxProblem(candidate, this->_Bit) > OneMaxProblem(best, this->_Bit)){
             best = candidate;
-            cout << "Better : ";
-            Print(best);
+            Print(i, best);
         }
     }
-    cout << "Best   : ";
-    Print(best);
+    Print(this->_Iter, best);
 }
 
 void Exhaustive::Reset(){
-    this->nfes = 0;   
+    // this->nfes = 0;   
 }
 
 vector<int> Exhaustive::Init(){
@@ -67,14 +69,19 @@ vector<int> Exhaustive::Init(){
     for (int i=0; i<this->_Bit; i++){
         sol[i] = rand()%2;
     }
+    int count = this->_Iter;
+    do {
+        this->_Iter_len++;
+    } while (count/=10);
     return sol;
 }
 
-void Exhaustive::Print(vector<int> show){
+void Exhaustive::Print(int iter, vector<int> show){
+    cout << "Iter " << std::setw(this->_Iter_len) << iter << " : ";
     for (int x : show){
         cout << x;
     }
-    cout << endl;
+    cout << ", Value : " << OneMaxProblem(show, this->_Bit) << endl;
 }
 
 void Exhaustive::Adder(vector<int> *x, int y){
