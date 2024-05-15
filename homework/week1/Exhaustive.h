@@ -5,6 +5,8 @@
 #include <iostream>
 #include <vector>
 #include <iomanip>
+#include <fstream>
+#include <string>
 using namespace std;
 using std::setw;
 
@@ -42,6 +44,7 @@ void Exhaustive::RunALG(int Bit, int Run, int Iter, double rate)
     this->nfes = this->mnfes = 0;
 
     while (this->_Run--){
+        cout << "-------------------Run" << Run - this->_Run << "---------------------" << endl;
         vector<int> sol = Init();
         Evaluation(sol);
         Reset();
@@ -77,7 +80,6 @@ void Exhaustive::Reset(){
     cout << this->nfes << endl;
     this->nfes = 0;
     this->_Iter_len = 0;
-    cout << "-------------------Run" << this->_Run << "---------------------" << endl;
 }
 
 vector<int> Exhaustive::Init(){
@@ -98,6 +100,20 @@ void Exhaustive::Print(int iter, vector<int> show){
         cout << x;
     }
     cout << ", Value : " << OneMaxProblem(show, this->_Bit) << endl;
+
+    std::string filename = "../result/exhaustive/result_" + std::to_string(this->_Run) + ".txt";
+    std::ofstream file(filename, std::ios_base::app);
+
+    if (file.is_open()) {
+        file << "Iter " << std::setw(10) << iter << " : ";
+        for (int x : show) {
+            file << x;
+        }
+        file << ", Value : " << OneMaxProblem(show, this->_Bit) << std::endl;
+    }
+    else {
+        std::cerr << "Unable to open file!\n";
+    }
 }
 
 void Exhaustive::Adder(vector<int> *x, int y){
