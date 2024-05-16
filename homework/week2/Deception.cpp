@@ -4,8 +4,17 @@
 class Deception
 {
 public:
-    std::vector<int> DeceptionProblem(std::vector<int> sol, int bit_size){
-        return Abs_Minus(B2D(sol), Power(2, find_highest_bit(sol)-2));
+    std::vector<int> DeceptionProblem(std::vector<int> sol){
+        int highest_bit = find_highest_bit(sol);
+        if (highest_bit > 2){
+            std::vector<int> minus ;
+            for (int i = 0; i < highest_bit-2; i++){
+                minus.push_back(0);
+            }
+            minus.push_back(1);
+            return B2D(Binary_Minus(sol, minus));
+        }
+        return std::vector<int> {0};
     }
     std::vector<int> GetEndValue(int bit_size){
         std::vector<int> Best(bit_size);
@@ -14,39 +23,74 @@ public:
         }
         return Best;
     }
-    bool DeceptionProblemCompare(std::vector<int> a, std::vector<int> b, int bit_size){
-        std::vector<int> value_a = DeceptionProblem(a, bit_size);
-        std::vector<int> value_b = DeceptionProblem(b, bit_size);
-        return value_a.size() < value_b.size();
+    bool DeceptionProblemCompare(std::vector<int> a, std::vector<int> b){
+        std::vector<int> value_a = DeceptionProblem(a);
+        std::vector<int> value_b = DeceptionProblem(b);
+        int length;
+        value_a.size() > value_b.size()? length = value_a.size(): length = value_b.size();
+        for (int i = length-1 ; i >= 0; i--){
+            if (i >= value_b.size() && value_a[i] == 0){
+                continue;
+            }
+            if (value_a[i] > value_b[i]){
+                return true;
+            }
+            else if (value_a[i] < value_b[i]){
+                return false;
+            }
+            else{
+                continue;
+            }
+        }
+        return false;
     }
 private:
     std::vector<int> B2D(std::vector<int> sol){
-        std::vector<int> decimal = {0};
-        for (int i = 0; i < sol.size(); i++){ // TODO i 條件 size is moving
+        std::vector<int> decimal;
+        decimal.push_back(0);
+        for (int i = 0; i < sol.size(); i++){
             if (sol[i] == 1){
-                Adder(&decimal, Power(2, i));
+                Adder(&decimal, Power_2(i));
             }
         }
         return decimal;
     }
-    std::vector<int> Power(int base, int exp){
+    std::vector<int> Power_2(int exp){
         std::vector<int> result = {1};
         for (int i = 0; i < exp; i++){
-            for (int x : result){
-                x *= base;
+            bool cout_flag = false;
+            int cout_start = 0;
+            for (int j = 0; j < result.size(); j++){
+                result[j] *= 2;
+                if (result[j] >= 10 && !cout_flag){
+                    cout_flag = true;
+                    cout_start = j;
+                }
             }
-            Carryout(&result, i);
+            if (cout_flag){
+                Carryout(&result, cout_start);
+            }
         }
         return result;
     }
     void Adder(std::vector<int>* data, std::vector<int> adder){
         for (int i = 0; i < adder.size(); i++){
-            (*data)[i] += adder[i];
-            Carryout(data, i);
+            if (i >= data->size()){
+                data->push_back(adder[i]);
+            }
+            else {
+                (*data)[i] += adder[i];
+                if ((*data)[i] >= 10){
+                    Carryout(data, i);
+                }
+            }
         }
     }
     void Carryout(std::vector<int>* data, int place){
-        if ((*data)[place]>=10){
+        if (place >= data->size()) {
+            return; // set error break
+        }
+        else if ((*data)[place]>=10){
             int carryout = (*data)[place]/10;
             (*data)[place] %= 10;
             if (place+1 == data->size()){
@@ -58,38 +102,36 @@ private:
             Carryout(data, place+1);
         }
     }
-    void CarryMinus(std::vector<int>* data, int place){
+    void Binary_CarryMinus(std::vector<int>* data, int place){
         if ((*data)[place]<0){
-            // carry minus
             int borrow = place+1;
             while ((*data)[borrow]<=0){
                 borrow++;
             }
             (*data)[borrow]--;
-            for (int i = borrow-1; i > place; i--){
-                (*data)[i] += 9;
+            for (int i = borrow-1; i >= place; i--){
+                (*data)[i] += 1;
             }
-            (*data)[place] += 10;
         }
     }
-    std::vector<int> Abs_Minus(std::vector<int> a, std::vector<int> b){
+    std::vector<int> Binary_Minus(std::vector<int> a, std::vector<int> b){
         if (a.size() < b.size() || (a.size() == b.size() && a[a.size()-1] < b[b.size()-1])){
             std::vector<int> temp;
             temp = a;
             a = b;
             b = temp;
         }
-        for (int i = 0; i < a.size(); i++){
+        for (int i = 0; i < b.size(); i++){
             a[i] -= b[i];
             if (a[i] < 0){
-                CarryMinus(&a, i);
+                Binary_CarryMinus(&a, i);
             }
         }
         return a;
     }
     int find_highest_bit(std::vector<int> sol){
         int highest_bit = 0;
-        for (int i = sol.size()-1; i >= 0; i++){
+        for (int i = sol.size()-1; i >= 0; i--){
             if (sol[i] == 1){
                 highest_bit = i;
                 break;

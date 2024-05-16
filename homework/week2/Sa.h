@@ -50,7 +50,6 @@ void Sa::RunALG(int Bit, int Run, int Iter, double Temp, double Rate){
         vector<int> sol = Init();
         Evaluation(sol);
         Reset();
-        cout << "test" << endl;
     }
     cout << "Average NFEs : " << this->mnfes/Run << endl;
 }
@@ -62,7 +61,7 @@ void Sa::Evaluation(vector<int> sol){
     for (int i=0; i<this->_Iter; i++){
         this->nfes++;
         transaction(&candidate);
-        if ( DeceptionProblemCompare(candidate, best, this->_Bit) ){
+        if ( DeceptionProblemCompare(candidate, best) ){
             best = candidate;
             Print(i, best);
             if (this->_end_value == best){
@@ -118,7 +117,7 @@ void Sa::Print(int iter, vector<int> show){
         cout << x;
     }
     cout << ", Value : ";
-    for (int x: DeceptionProblem(show, this->_Bit)){
+    for (int x: DeceptionProblem(show)){
         cout << x;
     }
     cout << endl;
@@ -133,7 +132,7 @@ void Sa::Print(int iter, vector<int> show){
             file << x;
         }
         file << ", Value : ";
-        for (int x: DeceptionProblem(show, this->_Bit)){
+        for (int x: DeceptionProblem(show)){
             file << x;
         }
         file << std::endl;
