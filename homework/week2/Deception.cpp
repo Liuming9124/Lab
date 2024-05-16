@@ -19,7 +19,7 @@ public:
     std::vector<int> GetEndValue(int bit_size){
         std::vector<int> Best(bit_size);
         for (int i = 0; i < bit_size; i++){
-            (i==bit_size-2)? Best[i] = 0: Best[i] = 1;
+            (i==(bit_size-2)-1)? Best[i] = 0: Best[i] = 1;
         }
         return Best;
     }

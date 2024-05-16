@@ -71,8 +71,8 @@ void Sa::Evaluation(vector<int> sol){
             }
         }
         else{
-            double p = (rand()%10)/10.0;
-            if (p > this->_Temp){
+            double p = (rand()%10000)/100000.0;
+            if (p < this->_Temp){
                 best = candidate;
                 Print(i, best);
             }
