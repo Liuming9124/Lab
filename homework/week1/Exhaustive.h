@@ -10,7 +10,7 @@
 using namespace std;
 using std::setw;
 
-class Exhaustive
+class Exhaustive: OneMax
 {
 public:
     void RunALG(int, int, int, double);

@@ -1,5 +1,5 @@
-#include "Hill.h"
-// #include "Exhaustive.h"
+// #include "Hill.h"
+#include "Exhaustive.h"
 #include <iostream>
 
 int main(int argc, char *argv[])
@@ -10,10 +10,10 @@ int main(int argc, char *argv[])
     int Iter = atoi(argv[3]);    // 世代數
     double rate = atof(argv[4]); // 演算法參數
 
-    // Exhaustive alg_exhaustive;
-    // alg_exhaustive.RunALG(Bit, Run, Iter, rate);
+    Exhaustive alg_exhaustive;
+    alg_exhaustive.RunALG(Bit, Run, Iter, rate);
     
-    Hill alg_hill;
-    alg_hill.RunALG(Bit, Run, Iter, rate);
+    // Hill alg_hill;
+    // alg_hill.RunALG(Bit, Run, Iter, rate);
 
 }
