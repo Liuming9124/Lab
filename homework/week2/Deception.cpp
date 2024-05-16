@@ -29,7 +29,7 @@ public:
         int length;
         value_a.size() > value_b.size()? length = value_a.size(): length = value_b.size();
         for (int i = length-1 ; i >= 0; i--){
-            if (i >= value_b.size() && value_a[i] == 0){
+            if ( (i >= value_b.size() && value_a[i] == 0) || (i >= value_a.size() && value_b[i] == 0) ){
                 continue;
             }
             if (value_a[i] > value_b[i]){

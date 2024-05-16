@@ -31,7 +31,7 @@ private:
 
     vector<int> Init();
     void Evaluation(vector<int>);
-    void Reset();
+    void Reset(double);
 
     void transaction(vector<int>*);
     void Print(int iter, vector<int>);
@@ -49,7 +49,7 @@ void Sa::RunALG(int Bit, int Run, int Iter, double Temp, double Rate){
         cout << "-------------------Run" << Run - this->_Run << "---------------------" << endl;
         vector<int> sol = Init();
         Evaluation(sol);
-        Reset();
+        Reset(Temp);
     }
     cout << "Average NFEs : " << this->mnfes/Run << endl;
 }
@@ -85,11 +85,12 @@ void Sa::Evaluation(vector<int> sol){
     
 }
 
-void Sa::Reset(){
+void Sa::Reset(const double Temp){
     this->mnfes += this->nfes;
     cout << this->nfes << endl;
     this->nfes = 0;
     this->_Iter_len = 0;
+    this->_Temp = Temp;
 }
 
 vector<int> Sa::Init(){
