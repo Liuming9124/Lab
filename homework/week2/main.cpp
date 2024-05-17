@@ -10,9 +10,6 @@ int main(int argc, char *argv[])
     int Iter = atoi(argv[3]);    // 世代數
     double Temp = atof(argv[4]); // 溫度
     double Rate = atof(argv[5]); // 降溫速率
-
-    // Exhaustive alg_exhaustive;
-    // alg_exhaustive.RunALG(Bit, Run, Iter, rate);
     
     Sa alg_sa;
     alg_sa.RunALG(Bit, Run, Iter, Temp, Rate);

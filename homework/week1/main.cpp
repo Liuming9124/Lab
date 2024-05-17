@@ -1,4 +1,4 @@
-// #include "Hill.h"
+#include "Hill.h"
 #include "Exhaustive.h"
 #include <iostream>
 
@@ -13,7 +13,7 @@ int main(int argc, char *argv[])
     Exhaustive alg_exhaustive;
     alg_exhaustive.RunALG(Bit, Run, Iter, rate);
     
-    // Hill alg_hill;
-    // alg_hill.RunALG(Bit, Run, Iter, rate);
+    Hill alg_hill;
+    alg_hill.RunALG(Bit, Run, Iter, rate);
 
 }

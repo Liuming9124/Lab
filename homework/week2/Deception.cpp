@@ -1,5 +1,6 @@
 #include <vector>
 #include <iostream>
+#pragma once
 
 class Deception
 {
