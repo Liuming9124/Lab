@@ -30,9 +30,6 @@ private:
     vector<int> Init();
     void Evaluation(vector<int>);
     void Reset();
-
-    void transaction(vector<int>*);
-    void Print(int iter, vector<int>);
 };
 
 void Hill::RunALG(int Bit, int Run, int Iter, int Rate)
@@ -56,11 +53,11 @@ void Hill::Evaluation(vector<int> sol){
     bool best_flag = false;
     for (int i=0; i<this->_Iter; i++){
         this->nfes++;
-        transaction(&candidate);
+        Transaction(&candidate, this->_Bit);
         int value = OneMaxProblem(candidate, this->_Bit);
         if (value > OneMaxProblem(best, this->_Bit)){
             best = candidate;
-            Print(i, best);
+            Print(i, best, this->_Iter_len, this->_Bit, this->_Run, "hill");
             if (value == this->_Bit){
                 cout << "Best Solution Found before " << this->_Iter << endl;
                 best_flag = true;
@@ -69,7 +66,7 @@ void Hill::Evaluation(vector<int> sol){
         }
     }
     if (!best_flag){
-        Print(this->_Iter, best);
+        Print(this->_Iter, best, this->_Iter_len, this->_Bit, this->_Run, "hill");
     }
 }
 
@@ -90,35 +87,6 @@ vector<int> Hill::Init(){
         this->_Iter_len++;
     } while (count/=10);
     return sol;
-}
-
-
-void Hill::transaction(vector<int>* sol){
-    int index = rand() % this->_Bit;
-    (*sol)[index] = !(*sol)[index];
-}
-
-void Hill::Print(int iter, vector<int> show){
-    cout << "Iter " << std::setw(this->_Iter_len) << iter << " : ";
-    for (int x : show){
-        cout << x;
-    }
-    cout << ", Value : " << OneMaxProblem(show, this->_Bit) << endl;
-
-    // TODO: Write append without clear
-    std::string filename = "../result/sa/sa_" + std::to_string(this->_Run) + ".txt";
-    std::ofstream file(filename, std::ios_base::app);
-
-    if (file.is_open()) {
-        file << "Iter " << std::setw(10) << iter << " : ";
-        for (int x : show) {
-            file << x;
-        }
-        file << ", Value : " << OneMaxProblem(show, this->_Bit) << std::endl;
-    }
-    else {
-        std::cerr << "Unable to open file!\n";
-    }
 }
 
 #endif

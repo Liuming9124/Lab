@@ -32,7 +32,6 @@ private:
     void Reset();
 
     void Adder(vector<int>*, int);
-    void Print(int iter, vector<int>);
 };
 
 void Exhaustive::RunALG(int Bit, int Run, int Iter, double rate)
@@ -62,7 +61,7 @@ void Exhaustive::Evaluation(vector<int> sol){
         int value = OneMaxProblem(candidate, this->_Bit);
         if (value > OneMaxProblem(best, this->_Bit)){
             best = candidate;
-            Print(i, best);
+            Print(i, best, this->_Iter_len, this->_Bit, this->_Run, "exhaustive");
             if (value == this->_Bit){
                 cout << "Best Solution Found before " << this->_Iter << endl;
                 best_flag = true;
@@ -71,7 +70,7 @@ void Exhaustive::Evaluation(vector<int> sol){
         }
     }
     if (!best_flag){
-        Print(this->_Iter, best);
+        Print(this->_Iter, best, this->_Iter_len, this->_Bit, this->_Run, "exhaustive");
     }
 }
 
@@ -94,27 +93,6 @@ vector<int> Exhaustive::Init(){
     return sol;
 }
 
-void Exhaustive::Print(int iter, vector<int> show){
-    cout << "Iter " << std::setw(this->_Iter_len) << iter << " : ";
-    for (int x : show){
-        cout << x;
-    }
-    cout << ", Value : " << OneMaxProblem(show, this->_Bit) << endl;
-
-    std::string filename = "../result/exhaustive/result_" + std::to_string(this->_Run) + ".txt";
-    std::ofstream file(filename, std::ios_base::app);
-
-    if (file.is_open()) {
-        file << "Iter " << std::setw(10) << iter << " : ";
-        for (int x : show) {
-            file << x;
-        }
-        file << ", Value : " << OneMaxProblem(show, this->_Bit) << std::endl;
-    }
-    else {
-        std::cerr << "Unable to open file!\n";
-    }
-}
 
 void Exhaustive::Adder(vector<int> *x, int y){
     int carry = y;

@@ -81,6 +81,12 @@ public:
             std::cerr << "Unable to open file!\n";
         }
     }
+    
+    void transaction(std::vector<int>* sol, int bit_size){
+        int index = rand() % bit_size;
+        (*sol)[index] = !(*sol)[index];
+    }
+
 private:
     std::vector<int> B2D(std::vector<int> sol){
         std::vector<int> decimal;

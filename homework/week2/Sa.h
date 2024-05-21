@@ -32,8 +32,6 @@ private:
     vector<int> Init();
     void Evaluation(vector<int>);
     void Reset(double);
-
-    void transaction(vector<int>*);
 };
 
 void Sa::RunALG(int Bit, int Run, int Iter, double Temp, double Rate){
@@ -59,7 +57,7 @@ void Sa::Evaluation(vector<int> sol){
     bool best_flag = false;
     for (int i=0; i<this->_Iter; i++){
         this->nfes++;
-        transaction(&candidate);
+        transaction(&candidate, this->_Bit);
         if ( DeceptionProblemCompare(candidate, best) ){
             best = candidate;
             Print(i, best, this->_Iter_len, this->_Bit, this->_Run);
@@ -105,10 +103,5 @@ vector<int> Sa::Init(){
     return sol;
 }
 
-
-void Sa::transaction(vector<int>* sol){
-    int index = rand() % this->_Bit;
-    (*sol)[index] = !(*sol)[index];
-}
 
 #endif
