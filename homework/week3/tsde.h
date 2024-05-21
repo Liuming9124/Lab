@@ -7,7 +7,7 @@
 
 class Tsde: Deception {
 public:
-    void RunALG(int, int, int, double, double);
+    void RunALG(int, int, int, int, int);
 
 private:
     // Input from Command-line Argument
@@ -35,7 +35,7 @@ private:
 
 };
 
-void Tsde::RunALG (int Bit, int Run, int Iter, double Tweaks, double Tblen){
+void Tsde::RunALG (int Bit, int Run, int Iter, int Tweaks, int Tblen){
     this->_Bit = Bit;
     this->_Run = Run;
     this->_Iter = Iter;

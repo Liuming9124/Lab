@@ -58,23 +58,23 @@ public:
 
         if (file.is_open()) {
             // debug mode
-            file << "Iter " << std::setw(10) << iter << " : ";
-            for (int x : show) {
-                file << x;
-            }
-            file << ", Value : ";
-            for (int x: DeceptionProblem(show)){
-                file << x;
-            }
-            file << std::endl;
+            // file << "Iter " << std::setw(10) << iter << " : ";
+            // for (int x : show) {
+            //     file << x;
+            // }
+            // file << ", Value : ";
+            // for (int x: DeceptionProblem(show)){
+            //     file << x;
+            // }
+            // file << std::endl;
 
             // chart mode
             string show_str = "";
-            // for (int x: DeceptionProblem(show)){
-            //     show_str += to_string(x);
-            // }
-            // file << show_str;
-            // file << endl;
+            for (int x: DeceptionProblem(show)){
+                show_str += to_string(x);
+            }
+            file << show_str;
+            file << endl;
         }
         else {
             std::cerr << "Unable to open file!\n";
