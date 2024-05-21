@@ -3,6 +3,7 @@
 #include <iostream>
 #include <fstream>
 #include <iomanip>
+#include <string>
 using namespace std;
 using std::setw;
 #pragma once
@@ -22,16 +23,10 @@ public:
         int index = rand() % bit_size;
         (*sol)[index] = !(*sol)[index];
     }
-
-    void Print(int iter, vector<int> show, int iter_len, int bit_size, int run){
-        cout << "Iter " << std::setw(iter_len) << iter << " : ";
-        for (int x : show){
-            cout << x;
-        }
-        cout << ", Value : " << OneMaxProblem(show, bit_size) << endl;
-
+    
+    void Print(int iter, vector<int> show, int iter_len, int bit_size, int run, string folder){
         // TODO: Write append without clear
-        std::string filename = "../result/sa/onemax/saom_" + std::to_string(run) + ".txt";
+        std::string filename = "../result/"+ folder +"/"+ folder + "_" + std::to_string(run) + ".txt";
         std::ofstream file(filename, std::ios_base::app);
 
         if (file.is_open()) {

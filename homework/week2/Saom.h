@@ -59,7 +59,7 @@ void Saom::Evaluation(vector<int> sol){
         Transaction(&candidate, this->_Bit);
         if ( OneMaxProblem(candidate, this->_Bit) > OneMaxProblem(best, this->_Bit)){
             best = candidate;
-            Print(i, best, this->_Iter_len, this->_Bit, this->_Run);
+            Print(i, best, this->_Iter_len, this->_Bit, this->_Run, "onemax/sa");
             if (OneMaxProblem(candidate, this->_Bit) == this->_Bit){
                 cout << "Best Solution Found before " << this->_Iter << endl;
                 best_flag = true;
@@ -70,13 +70,13 @@ void Saom::Evaluation(vector<int> sol){
             double p = (rand()%10000)/100000.0;
             if (p < this->_Temp){
                 best = candidate;
-                Print(i, best, this->_Iter_len, this->_Bit, this->_Run);
+                Print(i, best, this->_Iter_len, this->_Bit, this->_Run, "onemax/sa");
             }
         }
         this->_Temp *= this->_Rate;
     }
     if (!best_flag){
-        Print(this->_Iter, best, this->_Iter_len, this->_Bit, this->_Run);
+        Print(this->_Iter, best, this->_Iter_len, this->_Bit, this->_Run, "onemax/sa");
     }
     
 }

@@ -61,7 +61,7 @@ void Exhaustive::Evaluation(vector<int> sol){
         int value = OneMaxProblem(candidate, this->_Bit);
         if (value > OneMaxProblem(best, this->_Bit)){
             best = candidate;
-            Print(i, best, this->_Iter_len, this->_Bit, this->_Run, "exhaustive");
+            Print(i, best, this->_Iter_len, this->_Bit, this->_Run, "onemax/exhaustive");
             if (value == this->_Bit){
                 cout << "Best Solution Found before " << this->_Iter << endl;
                 best_flag = true;
@@ -70,7 +70,7 @@ void Exhaustive::Evaluation(vector<int> sol){
         }
     }
     if (!best_flag){
-        Print(this->_Iter, best, this->_Iter_len, this->_Bit, this->_Run, "exhaustive");
+        Print(this->_Iter, best, this->_Iter_len, this->_Bit, this->_Run, "onemax/exhaustive");
     }
 }
 

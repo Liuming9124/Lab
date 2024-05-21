@@ -57,7 +57,7 @@ void Hill::Evaluation(vector<int> sol){
         int value = OneMaxProblem(candidate, this->_Bit);
         if (value > OneMaxProblem(best, this->_Bit)){
             best = candidate;
-            Print(i, best, this->_Iter_len, this->_Bit, this->_Run, "hill");
+            Print(i, best, this->_Iter_len, this->_Bit, this->_Run, "onemax/hill");
             if (value == this->_Bit){
                 cout << "Best Solution Found before " << this->_Iter << endl;
                 best_flag = true;
@@ -66,7 +66,7 @@ void Hill::Evaluation(vector<int> sol){
         }
     }
     if (!best_flag){
-        Print(this->_Iter, best, this->_Iter_len, this->_Bit, this->_Run, "hill");
+        Print(this->_Iter, best, this->_Iter_len, this->_Bit, this->_Run, "onemax/hill");
     }
 }
 

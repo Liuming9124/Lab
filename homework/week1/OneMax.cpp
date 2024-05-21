@@ -25,12 +25,6 @@ public:
     }
 
     void Print(int iter, vector<int> show, int iter_len, int bit_size, int run, string folder){
-        cout << "Iter " << std::setw(iter_len) << iter << " : ";
-        for (int x : show){
-            cout << x;
-        }
-        cout << ", Value : " << OneMaxProblem(show, bit_size) << endl;
-
         // TODO: Write append without clear
         std::string filename = "../result/"+ folder +"/"+ folder + "_" + std::to_string(run) + ".txt";
         std::ofstream file(filename, std::ios_base::app);
