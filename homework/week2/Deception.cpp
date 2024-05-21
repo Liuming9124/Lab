@@ -1,5 +1,10 @@
 #include <vector>
 #include <iostream>
+#include <iomanip>
+#include <fstream>
+#include <string>
+using namespace std;
+using std::setw;
 #pragma once
 
 class Deception
@@ -44,6 +49,37 @@ public:
             }
         }
         return false;
+    }
+        
+    void Print(int iter, std::vector<int> show, int iter_len, int bit_size, int run){
+        cout << "Iter " << std::setw(iter_len) << iter << " : ";
+        for (int x : show){
+            cout << x;
+        }
+        cout << ", Value : ";
+        for (int x: DeceptionProblem(show)){
+            cout << x;
+        }
+        cout << endl;
+
+        // TODO: Write append without clear
+        std::string filename = "../result/Sa/deception/Sa_" + std::to_string(run) + ".txt";
+        std::ofstream file(filename, std::ios_base::app);
+
+        if (file.is_open()) {
+            file << "Iter " << std::setw(10) << iter << " : ";
+            for (int x : show) {
+                file << x;
+            }
+            file << ", Value : ";
+            for (int x: DeceptionProblem(show)){
+                file << x;
+            }
+            file << std::endl;
+        }
+        else {
+            std::cerr << "Unable to open file!\n";
+        }
     }
 private:
     std::vector<int> B2D(std::vector<int> sol){

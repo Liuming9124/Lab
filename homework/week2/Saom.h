@@ -1,7 +1,7 @@
-#ifndef SA_H
-#define SA_H
+#ifndef SAOM_H
+#define SAOM_H
 
-#include "Deception.cpp"
+#include "OneMax.cpp"
 #include <iostream>
 #include <vector>
 #include <iomanip>
@@ -10,7 +10,7 @@
 using namespace std;
 using std::setw;
 
-class Sa : Deception
+class Saom : OneMax
 {
 public:
     void RunALG(int, int, int, double, double);
@@ -27,16 +27,13 @@ private:
     int mnfes;
 
     int _Iter_len = 0;
-    vector<int> _end_value;
 
     vector<int> Init();
     void Evaluation(vector<int>);
     void Reset(double);
-
-    void transaction(vector<int>*);
 };
 
-void Sa::RunALG(int Bit, int Run, int Iter, double Temp, double Rate){
+void Saom::RunALG(int Bit, int Run, int Iter, double Temp, double Rate){
     this->_Bit = Bit;
     this->_Run = Run;
     this->_Iter = Iter;
@@ -53,17 +50,17 @@ void Sa::RunALG(int Bit, int Run, int Iter, double Temp, double Rate){
     cout << "Average NFEs : " << this->mnfes/Run << endl;
 }
 
-void Sa::Evaluation(vector<int> sol){
+void Saom::Evaluation(vector<int> sol){
     vector<int> best = sol;
     vector<int> candidate = sol;
     bool best_flag = false;
     for (int i=0; i<this->_Iter; i++){
         this->nfes++;
-        transaction(&candidate);
-        if ( DeceptionProblemCompare(candidate, best) ){
+        Transaction(&candidate, this->_Bit);
+        if ( OneMaxProblem(candidate, this->_Bit) > OneMaxProblem(best, this->_Bit)){
             best = candidate;
             Print(i, best, this->_Iter_len, this->_Bit, this->_Run);
-            if (this->_end_value == best){
+            if (OneMaxProblem(candidate, this->_Bit) == this->_Bit){
                 cout << "Best Solution Found before " << this->_Iter << endl;
                 best_flag = true;
                 break;
@@ -84,7 +81,7 @@ void Sa::Evaluation(vector<int> sol){
     
 }
 
-void Sa::Reset(const double Temp){
+void Saom::Reset(const double Temp){
     this->mnfes += this->nfes;
     cout << this->nfes << endl;
     this->nfes = 0;
@@ -92,7 +89,7 @@ void Sa::Reset(const double Temp){
     this->_Temp = Temp;
 }
 
-vector<int> Sa::Init(){
+vector<int> Saom::Init(){
     vector<int> sol(this->_Bit);
     for (int i=0; i<this->_Bit; i++){
         sol[i] = rand()%2;
@@ -101,14 +98,8 @@ vector<int> Sa::Init(){
     do {
         this->_Iter_len++;
     } while (count/=10);
-    this->_end_value = GetEndValue(this->_Bit);
+
     return sol;
-}
-
-
-void Sa::transaction(vector<int>* sol){
-    int index = rand() % this->_Bit;
-    (*sol)[index] = !(*sol)[index];
 }
 
 #endif

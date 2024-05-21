@@ -1,4 +1,5 @@
 #include "Sa.h"
+#include "Saom.h"
 #include <iostream>
 #include <vector>
 
@@ -11,7 +12,11 @@ int main(int argc, char *argv[])
     double Temp = atof(argv[4]); // 溫度
     double Rate = atof(argv[5]); // 降溫速率
     
-    Sa alg_sa;
-    alg_sa.RunALG(Bit, Run, Iter, Temp, Rate);
+    Sa alg_sa_deception;
+    alg_sa_deception.RunALG(Bit, Run, Iter, Temp, Rate);
+
+    Saom alg_sa_onemax;
+    alg_sa_onemax.RunALG(Bit, Run, Iter, Temp, Rate);
+
 
 }
