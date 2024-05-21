@@ -1,7 +1,7 @@
 #ifndef SAOM_H
 #define SAOM_H
 
-#include "OneMax.cpp"
+#include "../problem/OneMax.cpp"
 #include <iostream>
 #include <vector>
 #include <iomanip>
@@ -59,7 +59,7 @@ void Saom::Evaluation(vector<int> sol){
         Transaction(&candidate, this->_Bit);
         if ( OneMaxProblem(candidate, this->_Bit) > OneMaxProblem(best, this->_Bit)){
             best = candidate;
-            Print(i, best, this->_Iter_len, this->_Bit, this->_Run, "onemax/sa");
+            Print(i, best, this->_Iter_len, this->_Bit, this->_Run, "onemax", "sa");
             if (OneMaxProblem(candidate, this->_Bit) == this->_Bit){
                 cout << "Best Solution Found before " << this->_Iter << endl;
                 best_flag = true;
@@ -70,13 +70,13 @@ void Saom::Evaluation(vector<int> sol){
             double p = (rand()%10000)/100000.0;
             if (p < this->_Temp){
                 best = candidate;
-                Print(i, best, this->_Iter_len, this->_Bit, this->_Run, "onemax/sa");
+                Print(i, best, this->_Iter_len, this->_Bit, this->_Run, "onemax", "sa");
             }
         }
         this->_Temp *= this->_Rate;
     }
     if (!best_flag){
-        Print(this->_Iter, best, this->_Iter_len, this->_Bit, this->_Run, "onemax/sa");
+        Print(this->_Iter, best, this->_Iter_len, this->_Bit, this->_Run, "onemax", "sa");
     }
     
 }

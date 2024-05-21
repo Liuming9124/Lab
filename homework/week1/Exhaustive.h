@@ -1,7 +1,7 @@
 #ifndef EXHAUSTIVE_H
 #define EXHAUSTIVE_H
 
-#include "OneMax.cpp"
+#include "../problem/OneMax.cpp"
 #include <iostream>
 #include <vector>
 #include <iomanip>
@@ -31,7 +31,7 @@ private:
     void Evaluation(vector<int>);
     void Reset();
 
-    void Adder(vector<int>*, int);
+    void Addone(vector<int>*, int);
 };
 
 void Exhaustive::RunALG(int Bit, int Run, int Iter, double rate)
@@ -55,28 +55,23 @@ void Exhaustive::Evaluation(vector<int> sol){
     vector<int> best = sol;
     vector<int> candidate = sol;
     bool best_flag = false;
-    for (int i=0; i<this->_Iter; i++){
+    for (int i=0; i<this->_Iter && best_flag == false; i++){
         this->nfes++;
-        Adder(&candidate, 1);
+        Addone(&candidate, 0);
         int value = OneMaxProblem(candidate, this->_Bit);
         if (value > OneMaxProblem(best, this->_Bit)){
             best = candidate;
-            Print(i, best, this->_Iter_len, this->_Bit, this->_Run, "onemax/exhaustive");
             if (value == this->_Bit){
-                cout << "Best Solution Found before " << this->_Iter << endl;
                 best_flag = true;
-                break;
             }
         }
-    }
-    if (!best_flag){
-        Print(this->_Iter, best, this->_Iter_len, this->_Bit, this->_Run, "onemax/exhaustive");
+        Print(i, best, this->_Iter_len, this->_Bit, this->_Run, "onemax", "exhaustive");
     }
 }
 
 void Exhaustive::Reset(){
     this->mnfes += this->nfes;
-    cout << this->nfes << endl;
+    cout << "End with iter : " << this->nfes << endl;
     this->nfes = 0;
     this->_Iter_len = 0;
 }
@@ -94,21 +89,16 @@ vector<int> Exhaustive::Init(){
 }
 
 
-void Exhaustive::Adder(vector<int> *x, int y){
-    int carry = y;
-    int i = 0;
-    while(1){
-        int temp = (*x)[i]+ carry;
-        (*x)[i] = temp%2;
-        carry = temp/2;
-        if (carry==1 && i==(*x).size()-1){
-            (*x).push_back(1);
-            break;
-        }
-        else if (carry==0){
-            break;
-        }
-        i++;
+void Exhaustive::Addone(vector<int> *x, int place){
+    int carryout;
+    int temp = (*x)[place]+ 1;
+    (*x)[place] = temp%2;
+    carryout = temp/2;
+    if (carryout == 1 && place+1 < this->_Bit){
+        Addone(x, place+1);
+    }
+    else{
+        return;
     }
 }
 

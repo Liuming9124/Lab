@@ -1,7 +1,7 @@
 #ifndef HILL_H
 #define HILL_H
 
-#include "OneMax.cpp"
+#include "../problem/OneMax.cpp"
 #include <iostream>
 #include <vector>
 #include <iomanip>
@@ -37,6 +37,7 @@ void Hill::RunALG(int Bit, int Run, int Iter, int Rate)
     this->_Bit = Bit;
     this->_Run = Run;
     this->_Iter = Iter;
+    this->mnfes = this->nfes = 0;
 
     while (this->_Run--){
         cout << "-------------------Run" << Run - this->_Run << "---------------------" << endl;
@@ -51,28 +52,23 @@ void Hill::Evaluation(vector<int> sol){
     vector<int> best = sol;
     vector<int> candidate = sol;
     bool best_flag = false;
-    for (int i=0; i<this->_Iter; i++){
+    for (int i=0; i<this->_Iter && best_flag == false; i++){
         this->nfes++;
         Transaction(&candidate, this->_Bit);
         int value = OneMaxProblem(candidate, this->_Bit);
         if (value > OneMaxProblem(best, this->_Bit)){
             best = candidate;
-            Print(i, best, this->_Iter_len, this->_Bit, this->_Run, "onemax/hill");
             if (value == this->_Bit){
-                cout << "Best Solution Found before " << this->_Iter << endl;
                 best_flag = true;
-                break;
             }
         }
-    }
-    if (!best_flag){
-        Print(this->_Iter, best, this->_Iter_len, this->_Bit, this->_Run, "onemax/hill");
+        Print(i, best, this->_Iter_len, this->_Bit, this->_Run, "onemax", "hill");
     }
 }
 
 void Hill::Reset(){
     this->mnfes += this->nfes;
-    cout << this->nfes << endl;
+    cout << "End with iter : " << this->nfes << endl;
     this->nfes = 0;
     this->_Iter_len = 0;
 }

@@ -1,7 +1,7 @@
 #ifndef SA_H
 #define SA_H
 
-#include "Deception.cpp"
+#include "../problem/Deception.cpp"
 #include <iostream>
 #include <vector>
 #include <iomanip>
@@ -60,7 +60,7 @@ void Sa::Evaluation(vector<int> sol){
         Transaction(&candidate, this->_Bit);
         if ( DeceptionProblemCompare(candidate, best) ){
             best = candidate;
-            Print(i, best, this->_Iter_len, this->_Bit, this->_Run, "deception/sa");
+            Print(i, best, this->_Iter_len, this->_Bit, this->_Run, "deception", "sa");
             if (this->_end_value == best){
                 cout << "Best Solution Found before " << this->_Iter << endl;
                 best_flag = true;
@@ -71,13 +71,13 @@ void Sa::Evaluation(vector<int> sol){
             double p = (rand()%10000)/100000.0;
             if (p < this->_Temp){
                 best = candidate;
-                Print(i, best, this->_Iter_len, this->_Bit, this->_Run, "deception/sa");
+                Print(i, best, this->_Iter_len, this->_Bit, this->_Run, "deception", "sa");
             }
         }
         this->_Temp *= this->_Rate;
     }
     if (!best_flag){
-        Print(this->_Iter, best, this->_Iter_len, this->_Bit, this->_Run, "deception/sa");
+        Print(this->_Iter, best, this->_Iter_len, this->_Bit, this->_Run, "deception", "sa");
     }
     
 }

@@ -23,18 +23,23 @@ public:
         int index = rand() % bit_size;
         (*sol)[index] = !(*sol)[index];
     }
-    
-    void Print(int iter, vector<int> show, int iter_len, int bit_size, int run, string folder){
+
+    void Print(int iter, vector<int> show, int iter_len, int bit_size, int run, string folder, string alg){
         // TODO: Write append without clear
-        std::string filename = "../result/"+ folder +"/"+ folder + "_" + std::to_string(run) + ".txt";
+        std::string filename = "../result/"+ folder + "/" + alg + "/" + folder + alg + "_" + std::to_string(run) + ".txt";
         std::ofstream file(filename, std::ios_base::app);
 
         if (file.is_open()) {
-            file << "Iter " << std::setw(10) << iter << " : ";
-            for (int x : show) {
-                file << x;
-            }
-            file << ", Value : " << OneMaxProblem(show, bit_size) << std::endl;
+            // debug mode
+            
+            // file << "Iter " << std::setw(10) << iter << " : ";
+            // for (int x : show) {
+            //     file << x;
+            // }
+            // file << ", Value : " << OneMaxProblem(show, bit_size) << std::endl;
+
+            // chart mode
+            file << OneMaxProblem(show, bit_size) << std::endl;
         }
         else {
             std::cerr << "Unable to open file!\n";
