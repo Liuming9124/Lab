@@ -57,7 +57,7 @@ void Saom::Evaluation(vector<int> sol){
     for (int i=0; i<this->_Iter && best_flag ==false; i++){
         this->nfes++;
         Transaction(&candidate, this->_Bit);
-        if ( OneMaxProblem(candidate, this->_Bit) > OneMaxProblem(best, this->_Bit)){
+        if ( OneMaxCompare(candidate, best, this->_Bit) ){
             best = candidate;
             if (OneMaxProblem(candidate, this->_Bit) == this->_Bit){
                 best_flag = true;

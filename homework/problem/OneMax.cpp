@@ -45,4 +45,8 @@ public:
             std::cerr << "Unable to open file!\n";
         }
     }
+
+    bool OneMaxCompare(std::vector<int> sol, std::vector<int> best, int bit_size){
+        return OneMaxProblem(sol, bit_size) > OneMaxProblem(best, bit_size);
+    }
 };

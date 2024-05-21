@@ -5,7 +5,7 @@
 
 class Tsom: OneMax {
 public:
-    void RunALG(int, int, int, double, double);
+    void RunALG(int, int, int, int, int);
 
 private:
     // Input from Command-line Argument
@@ -18,15 +18,21 @@ private:
     int _Nfes;
     int _Mnfes;
 
-    int _Iter_len = 0;
+    std::vector<int> _Sol;
+    std::vector<int> _Best;
+    std::queue<std::vector<int>> _Tblist;
+
 
     void Init();
     void Evaluation();
     void Reset();
 
+    bool Inqueue(const std::vector<int>&);
+    std::vector<int> TweakCp();
+
 };
 
-void Tsom::RunALG (int Bit, int Run, int Iter, double Tweaks, double Tblen){
+void Tsom::RunALG (int Bit, int Run, int Iter, int Tweaks, int Tblen){
     this->_Bit = Bit;
     this->_Run = Run;
     this->_Iter = Iter;
@@ -44,14 +50,66 @@ void Tsom::RunALG (int Bit, int Run, int Iter, double Tweaks, double Tblen){
 }
 
 
-void Tsom::Init(){
-
-}
 void Tsom::Evaluation(){
+    for (int iter=0; iter<this->_Iter && (OneMaxProblem(this->_Best, this->_Bit)!=this->_Bit); iter++){
+        if (this->_Tblist.size() > this->_Tblen){
+            this->_Tblist.pop();
+        }
+        std::vector<int> R = TweakCp();
+        this->_Nfes++;
+        for (int i=0; i<this->_Tweaks-1; i++){
+            this->_Nfes++;
+            std::vector<int> W = TweakCp();
 
+            if ( !Inqueue(W) && ( OneMaxCompare(W, R, this->_Bit) || Inqueue(R)) ){
+                R = W;
+            }
+        }
+        if (!Inqueue(R)){
+            this->_Sol = R;
+            this->_Tblist.push(R);
+        }
+        if (OneMaxCompare(this->_Sol, this->_Best, this->_Bit)){
+            this->_Best = this->_Sol;
+        }
+        Print(iter, this->_Best, 10, this->_Bit, this->_Run, "onemax", "Ts");
+    }
 }
-void Tsom::Reset(){
 
+void Tsom::Init(){
+    this->_Best.resize(this->_Bit);
+    this->_Sol.resize(this->_Bit);
+    for (int i=0; i<this->_Bit; i++){
+        this->_Best[i] = rand()%2;
+    }
+    this->_Sol = this->_Best;
+    this->_Tblist.push(this->_Best);
+}
+
+void Tsom::Reset(){
+    this->_Mnfes += this->_Nfes;
+    this->_Nfes = 0;
+    this->_Sol.clear();
+    this->_Best.clear();
+    this->_Tblist = std::queue<std::vector<int>>();
+}
+
+std::vector<int> Tsom::TweakCp(){
+    std::vector<int> sol(this->_Bit);
+    sol = this->_Sol;
+    Transaction( &sol, this->_Bit);
+    return sol;
+}
+
+bool Tsom::Inqueue(const std::vector<int> &check){
+    std::queue<std::vector<int>> tempQueue = _Tblist;
+    while (!tempQueue.empty()) {
+        if (tempQueue.front() == check) {
+            return true;
+        }
+        tempQueue.pop();  // Remove the front element
+    }
+    return false;
 }
 
 #endif
