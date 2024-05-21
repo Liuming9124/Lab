@@ -57,15 +57,24 @@ public:
         std::ofstream file(filename, std::ios_base::app);
 
         if (file.is_open()) {
-            file << "Iter " << std::setw(10) << iter << " : ";
-            for (int x : show) {
-                file << x;
-            }
-            file << ", Value : ";
+            // debug mode
+            // file << "Iter " << std::setw(10) << iter << " : ";
+            // for (int x : show) {
+            //     file << x;
+            // }
+            // file << ", Value : ";
+            // for (int x: DeceptionProblem(show)){
+            //     file << x;
+            // }
+            // file << std::endl;
+
+            // chart mode
+            string show_str = "";
             for (int x: DeceptionProblem(show)){
-                file << x;
+                show_str += to_string(x);
             }
-            file << std::endl;
+            file << show_str;
+            file << endl;
         }
         else {
             std::cerr << "Unable to open file!\n";

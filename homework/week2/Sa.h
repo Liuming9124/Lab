@@ -55,31 +55,24 @@ void Sa::Evaluation(vector<int> sol){
     vector<int> best = sol;
     vector<int> candidate = sol;
     bool best_flag = false;
-    for (int i=0; i<this->_Iter; i++){
+    for (int i=0; i<this->_Iter && best_flag ==false; i++){
         this->nfes++;
         Transaction(&candidate, this->_Bit);
         if ( DeceptionProblemCompare(candidate, best) ){
             best = candidate;
-            Print(i, best, this->_Iter_len, this->_Bit, this->_Run, "deception", "sa");
             if (this->_end_value == best){
-                cout << "Best Solution Found before " << this->_Iter << endl;
                 best_flag = true;
-                break;
             }
         }
         else{
-            double p = (rand()%10000)/100000.0;
+            double p = (rand() % 10000) / 100;
             if (p < this->_Temp){
                 best = candidate;
-                Print(i, best, this->_Iter_len, this->_Bit, this->_Run, "deception", "sa");
             }
         }
         this->_Temp *= this->_Rate;
+        Print(i, best, this->_Iter_len, this->_Bit, this->_Run, "deception", "sa");
     }
-    if (!best_flag){
-        Print(this->_Iter, best, this->_Iter_len, this->_Bit, this->_Run, "deception", "sa");
-    }
-    
 }
 
 void Sa::Reset(const double Temp){
