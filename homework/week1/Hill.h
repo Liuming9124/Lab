@@ -26,9 +26,10 @@ private:
     int _Mnfes;
 
     int _Iter_len = 0;
+    std::vector<bool> _Sol;
 
-    vector<bool> Init();
-    void Evaluation(vector<bool>);
+    void Init();
+    void Evaluation();
     void Reset();
 };
 
@@ -41,16 +42,16 @@ void Hill::RunALG(int Bit, int Run, int Iter, int Rate)
 
     while (this->_Run--){
         cout << "-------------------Run" << Run - this->_Run << "---------------------" << endl;
-        vector<bool> sol = Init();
-        Evaluation(sol);
+        Init();
+        Evaluation();
         Reset();
     }
     cout << "Average NFEs : " << this->_Mnfes/Run << endl;
 }
 
-void Hill::Evaluation(vector<bool> sol){
-    vector<bool> best = sol;
-    vector<bool> candidate = sol;
+void Hill::Evaluation(){
+    vector<bool> best = this->_Sol;
+    vector<bool> candidate = this->_Sol;
     bool best_flag = false;
     for (int i=0; i<this->_Iter && best_flag == false; i++){
         this->_Nfes++;
@@ -73,16 +74,15 @@ void Hill::Reset(){
     this->_Iter_len = 0;
 }
 
-vector<bool> Hill::Init(){
-    vector<bool> sol(this->_Bit);
+void Hill::Init(){
+    this->_Sol.resize(this->_Bit);
     for (int i=0; i<this->_Bit; i++){
-        sol[i] = rand()%2;
+        this->_Sol[i] = rand()%2;
     }
     int count = this->_Iter;
     do {
         this->_Iter_len++;
     } while (count/=10);
-    return sol;
 }
 
 #endif
