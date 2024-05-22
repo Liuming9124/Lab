@@ -11,7 +11,7 @@ using std::setw;
 class OneMax
 {
 public:
-    int OneMaxProblem(std::vector<int> sol, int bit_size){
+    int OneMaxProblem(std::vector<bool> sol, int bit_size){
         int sum = 0;
         for (int i = 0; i < bit_size; i++){
             sum += sol[i];
@@ -19,12 +19,12 @@ public:
         return sum;
     }
     
-    void Transaction(std::vector<int>* sol, int bit_size){
+    void Transaction(std::vector<bool>* sol, int bit_size){
         int index = rand() % bit_size;
         (*sol)[index] = !(*sol)[index];
     }
 
-    void Print(int iter, vector<int> show, int iter_len, int bit_size, int run, string folder, string alg){
+    void Print(int iter, vector<bool> show, int iter_len, int bit_size, int run, string folder, string alg){
         // TODO: Write append without clear
         std::string filename = "../result/"+ folder + "/" + alg + "/" + folder + alg + "_" + std::to_string(run) + ".txt";
         std::ofstream file(filename, std::ios_base::app);
@@ -46,7 +46,7 @@ public:
         }
     }
 
-    bool OneMaxCompare(std::vector<int> sol, std::vector<int> best, int bit_size){
+    bool OneMaxCompare(std::vector<bool> sol, std::vector<bool> best, int bit_size){
         return OneMaxProblem(sol, bit_size) > OneMaxProblem(best, bit_size);
     }
 };

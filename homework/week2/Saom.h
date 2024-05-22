@@ -28,8 +28,8 @@ private:
 
     int _Iter_len = 0;
 
-    vector<int> Init();
-    void Evaluation(vector<int>);
+    vector<bool> Init();
+    void Evaluation(vector<bool>);
     void Reset(double);
 };
 
@@ -43,16 +43,16 @@ void Saom::RunALG(int Bit, int Run, int Iter, double Temp, double Rate){
 
     while (this->_Run--){
         cout << "-------------------Run" << Run - this->_Run << "---------------------" << endl;
-        vector<int> sol = Init();
+        vector<bool> sol = Init();
         Evaluation(sol);
         Reset(Temp);
     }
     cout << "Average NFEs : " << this->mnfes/Run << endl;
 }
 
-void Saom::Evaluation(vector<int> sol){
-    vector<int> best = sol;
-    vector<int> candidate = sol;
+void Saom::Evaluation(vector<bool> sol){
+    vector<bool> best = sol;
+    vector<bool> candidate = sol;
     bool best_flag = false;
     for (int i=0; i<this->_Iter && best_flag ==false; i++){
         this->nfes++;
@@ -82,8 +82,8 @@ void Saom::Reset(const double Temp){
     this->_Temp = Temp;
 }
 
-vector<int> Saom::Init(){
-    vector<int> sol(this->_Bit);
+vector<bool> Saom::Init(){
+    vector<bool> sol(this->_Bit);
     for (int i=0; i<this->_Bit; i++){
         sol[i] = rand()%2;
     }

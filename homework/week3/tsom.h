@@ -18,17 +18,17 @@ private:
     int _Nfes;
     int _Mnfes;
 
-    std::vector<int> _Sol;
-    std::vector<int> _Best;
-    std::queue<std::vector<int>> _Tblist;
+    std::vector<bool> _Sol;
+    std::vector<bool> _Best;
+    std::queue<std::vector<bool>> _Tblist;
 
 
     void Init();
     void Evaluation();
     void Reset();
 
-    bool Inqueue(const std::vector<int>&);
-    std::vector<int> TweakCp();
+    bool Inqueue(const std::vector<bool>&);
+    std::vector<bool> TweakCp();
 
 };
 
@@ -55,11 +55,11 @@ void Tsom::Evaluation(){
         if (this->_Tblist.size() > this->_Tblen){
             this->_Tblist.pop();
         }
-        std::vector<int> R = TweakCp();
+        std::vector<bool> R = TweakCp();
         this->_Nfes++;
         for (int i=0; i<this->_Tweaks-1; i++){
             this->_Nfes++;
-            std::vector<int> W = TweakCp();
+            std::vector<bool> W = TweakCp();
 
             if ( !Inqueue(W) && ( OneMaxCompare(W, R, this->_Bit) || Inqueue(R)) ){
                 R = W;
@@ -91,18 +91,18 @@ void Tsom::Reset(){
     this->_Nfes = 0;
     this->_Sol.clear();
     this->_Best.clear();
-    this->_Tblist = std::queue<std::vector<int>>();
+    this->_Tblist = std::queue<std::vector<bool>>();
 }
 
-std::vector<int> Tsom::TweakCp(){
-    std::vector<int> sol(this->_Bit);
+std::vector<bool> Tsom::TweakCp(){
+    std::vector<bool> sol(this->_Bit);
     sol = this->_Sol;
     Transaction( &sol, this->_Bit);
     return sol;
 }
 
-bool Tsom::Inqueue(const std::vector<int> &check){
-    std::queue<std::vector<int>> tempQueue = _Tblist;
+bool Tsom::Inqueue(const std::vector<bool> &check){
+    std::queue<std::vector<bool>> tempQueue = _Tblist;
     while (!tempQueue.empty()) {
         if (tempQueue.front() == check) {
             return true;

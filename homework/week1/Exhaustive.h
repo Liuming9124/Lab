@@ -27,11 +27,11 @@ private:
 
     int _Iter_len = 0;
 
-    vector<int> Init();
-    void Evaluation(vector<int>);
+    vector<bool> Init();
+    void Evaluation(vector<bool>);
     void Reset();
 
-    void Addone(vector<int>*, int);
+    void Addone(vector<bool>*, int);
 };
 
 void Exhaustive::RunALG(int Bit, int Run, int Iter, double rate)
@@ -44,16 +44,16 @@ void Exhaustive::RunALG(int Bit, int Run, int Iter, double rate)
 
     while (this->_Run--){
         cout << "-------------------Run" << Run - this->_Run << "---------------------" << endl;
-        vector<int> sol = Init();
+        vector<bool> sol = Init();
         Evaluation(sol);
         Reset();
     }
     cout << "Average NFEs : " << this->mnfes/Run << endl;
 }
 
-void Exhaustive::Evaluation(vector<int> sol){
-    vector<int> best = sol;
-    vector<int> candidate = sol;
+void Exhaustive::Evaluation(vector<bool> sol){
+    vector<bool> best = sol;
+    vector<bool> candidate = sol;
     bool best_flag = false;
     for (int i=0; i<this->_Iter && best_flag == false; i++){
         this->nfes++;
@@ -76,8 +76,8 @@ void Exhaustive::Reset(){
     this->_Iter_len = 0;
 }
 
-vector<int> Exhaustive::Init(){
-    vector<int> sol(this->_Bit);
+vector<bool> Exhaustive::Init(){
+    vector<bool> sol(this->_Bit);
     for (int i=0; i<this->_Bit; i++){
         sol[i] = rand()%2;
     }
@@ -89,7 +89,7 @@ vector<int> Exhaustive::Init(){
 }
 
 
-void Exhaustive::Addone(vector<int> *x, int place){
+void Exhaustive::Addone(vector<bool> *x, int place){
     int carryout;
     int temp = (*x)[place]+ 1;
     (*x)[place] = temp%2;

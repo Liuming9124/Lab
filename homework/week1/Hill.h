@@ -22,13 +22,13 @@ private:
     int _Iter;
     // double _rate;
 
-    int nfes;
-    int mnfes;
+    int _Nfes;
+    int _Mnfes;
 
     int _Iter_len = 0;
 
-    vector<int> Init();
-    void Evaluation(vector<int>);
+    vector<bool> Init();
+    void Evaluation(vector<bool>);
     void Reset();
 };
 
@@ -37,23 +37,23 @@ void Hill::RunALG(int Bit, int Run, int Iter, int Rate)
     this->_Bit = Bit;
     this->_Run = Run;
     this->_Iter = Iter;
-    this->mnfes = this->nfes = 0;
+    this->_Mnfes = this->_Nfes = 0;
 
     while (this->_Run--){
         cout << "-------------------Run" << Run - this->_Run << "---------------------" << endl;
-        vector<int> sol = Init();
+        vector<bool> sol = Init();
         Evaluation(sol);
         Reset();
     }
-    cout << "Average NFEs : " << this->mnfes/Run << endl;
+    cout << "Average NFEs : " << this->_Mnfes/Run << endl;
 }
 
-void Hill::Evaluation(vector<int> sol){
-    vector<int> best = sol;
-    vector<int> candidate = sol;
+void Hill::Evaluation(vector<bool> sol){
+    vector<bool> best = sol;
+    vector<bool> candidate = sol;
     bool best_flag = false;
     for (int i=0; i<this->_Iter && best_flag == false; i++){
-        this->nfes++;
+        this->_Nfes++;
         Transaction(&candidate, this->_Bit);
         int value = OneMaxProblem(candidate, this->_Bit);
         if (value > OneMaxProblem(best, this->_Bit)){
@@ -67,14 +67,14 @@ void Hill::Evaluation(vector<int> sol){
 }
 
 void Hill::Reset(){
-    this->mnfes += this->nfes;
-    cout << "End with iter : " << this->nfes << endl;
-    this->nfes = 0;
+    this->_Mnfes += this->_Nfes;
+    cout << "End with iter : " << this->_Nfes << endl;
+    this->_Nfes = 0;
     this->_Iter_len = 0;
 }
 
-vector<int> Hill::Init(){
-    vector<int> sol(this->_Bit);
+vector<bool> Hill::Init(){
+    vector<bool> sol(this->_Bit);
     for (int i=0; i<this->_Bit; i++){
         sol[i] = rand()%2;
     }
