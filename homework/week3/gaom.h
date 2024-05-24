@@ -65,6 +65,8 @@ void Gaom::Evaluation(){
         Selection_Tournament();
         Crossover();
         Mutation();
+
+        
     }
 }
 
@@ -110,6 +112,8 @@ void Gaom::Crossover(){
                     std::swap(_Offspring[i*2]._InSol[j], _Offspring[i*2+1]._InSol[j]);
                 }
             }
+            _Offspring[i*2]._InFit = OneMaxProblem(_Offspring[i*2]._InSol, this->_Bit);
+            _Offspring[i*2+1]._InFit = OneMaxProblem(_Offspring[i*2+1]._InSol, this->_Bit);
         }
     }
 }
@@ -118,6 +122,7 @@ void Gaom::Mutation(){
         if (rand()%100 < this->_Mr){
             int temp = rand() % this->_Bit;
             _Offspring[i]._InSol[temp] = !_Offspring[i]._InSol[temp];
+            (_Offspring[i]._InSol[temp] == 0) ? _Offspring[i]._InFit-- : _Offspring[i]._InFit++; 
         }
     }
     std::sort(_Offspring.begin(), _Offspring.end(), [](Ind a, Ind b) {return a._InFit > b._InFit;});
