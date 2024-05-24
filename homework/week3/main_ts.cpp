@@ -13,8 +13,8 @@ int main(int argc, char *argv[])
     int Tweaks = atoi(argv[4]);  // 鄰近解的數量
     int Tblen = atoi(argv[5]);   // tabu list length
     
-    // Tsde alg_tb_deception;
-    // alg_tb_deception.RunALG(Bit, Run, Iter, Tweaks, Tblen);
+    Tsde alg_tb_deception;
+    alg_tb_deception.RunALG(Bit, Run, Iter, Tweaks, Tblen);
 
     Tsom alg_tb_onemax;
     alg_tb_onemax.RunALG(Bit, Run, Iter, Tweaks, Tblen);

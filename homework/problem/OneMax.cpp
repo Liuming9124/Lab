@@ -49,4 +49,11 @@ public:
     bool OneMaxCompare(std::vector<bool> sol, std::vector<bool> best, int bit_size){
         return OneMaxProblem(sol, bit_size) > OneMaxProblem(best, bit_size);
     }
+
+    void GenRandSol(std::vector<bool>* sol, int bit_size){
+        sol->resize(bit_size);
+        for (int i=0; i<bit_size; i++){
+            (*sol)[i] = rand()%2;
+        }
+    }
 };
