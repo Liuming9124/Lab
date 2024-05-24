@@ -66,7 +66,15 @@ void Gaom::Evaluation(){
         Crossover();
         Mutation();
 
-        
+        if (_Offspring[0]._InFit > OneMaxProblem(_Best, this->_Bit)){
+            _Best = _Offspring[0]._InSol;
+        }
+
+        // Update Parents
+        _Parents.resize(_Pop-_Offspring.size());
+        std::copy(_Offspring.begin(), _Offspring.end(), std::back_inserter(_Parents));
+
+        Print(iter, _Best, OneMaxProblem(_Best, this->_Bit), this->_Bit, this->_Run, "onemax", "ga");
     }
 }
 

@@ -32,14 +32,14 @@ public:
         if (file.is_open()) {
             // debug mode
             
-            // file << "Iter " << std::setw(10) << iter << " : ";
-            // for (int x : show) {
-            //     file << x;
-            // }
-            // file << ", Value : " << OneMaxProblem(show, bit_size) << std::endl;
+            file << "Iter " << std::setw(10) << iter << " : ";
+            for (int x : show) {
+                file << x;
+            }
+            file << ", Value : " << OneMaxProblem(show, bit_size) << std::endl;
 
-            // chart mode
-            file << OneMaxProblem(show, bit_size) << std::endl;
+            // // chart mode
+            // file << OneMaxProblem(show, bit_size) << std::endl;
         }
         else {
             std::cerr << "Unable to open file!\n";
