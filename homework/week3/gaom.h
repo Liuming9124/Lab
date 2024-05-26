@@ -17,8 +17,8 @@ private:
     int _Cr;
     int _Pop;
 
-    int _Nfes;
-    int _Mnfes;
+    // int _Nfes;
+    // int _Mnfes;
 
     typedef struct Individual{
         std::vector<bool> _InSol;
@@ -33,8 +33,6 @@ private:
     void Reset();
 
     void Selection();
-    void Selection_Wheel();
-    void Selection_Tournament();
     void Crossover();
     void Mutation();
 
@@ -48,7 +46,7 @@ void Gaom::RunALG (int Bit, int Run, int Iter, int Pop, int CR, int MR){
     this->_Cr = CR;
     this->_Mr = MR;
 
-    this->_Nfes = this->_Mnfes = 0;
+    // this->_Nfes = this->_Mnfes = 0;
 
     while (this->_Run--){
         cout << "-------------------Run" << Run - this->_Run << "---------------------" << endl;
@@ -56,13 +54,13 @@ void Gaom::RunALG (int Bit, int Run, int Iter, int Pop, int CR, int MR){
         Evaluation();
         Reset();
     }
-    cout << "Average NFEs : " << this->_Mnfes/Run << endl;
+    // cout << "Average NFEs : " << this->_Mnfes/Run << endl;
 }
 
 void Gaom::Evaluation(){
     for (int iter=0; iter<this->_Iter && (OneMaxProblem(this->_Best, this->_Bit)!=this->_Bit); iter++){
         // (iter < this->_Iter/2) ? Selection_Wheel() : Selection_Tournament();
-        Selection_Tournament();
+        Selection();
         Crossover();
         Mutation();
 
@@ -78,12 +76,7 @@ void Gaom::Evaluation(){
     }
 }
 
-
-void Gaom::Selection_Wheel(){
-
-}
-
-void Gaom::Selection_Tournament(){
+void Gaom::Selection(){
     // Randomly select a number of individuals from the population
     int offset = rand()%this->_Pop;
     int found[offset]={0};
@@ -146,8 +139,8 @@ void Gaom::Init(){
 }
 
 void Gaom::Reset(){
-    this->_Mnfes += this->_Nfes;
-    this->_Nfes = 0;
+    // this->_Mnfes += this->_Nfes;
+    // this->_Nfes = 0;
     this->_Best.clear();
     this->_Parents.clear();
 }
