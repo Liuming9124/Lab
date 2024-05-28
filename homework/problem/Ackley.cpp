@@ -12,15 +12,17 @@ using std::setw;
 class Ackley
 {
 public:
-    float AckleyProblem(int x){
-        float xfor2, xfor1;
+    float AckleyProblem(std::vector<float> xx){
+        float sum1, sum2;
         
         for (int i=1; i<=_Dim; i++){
-            xfor2 += pow(i, 2);
-            xfor1 += cos(_C*i);
+            sum1 += pow(xx[i], 2);
+            sum2 += cos(_C*xx[i]);
         }
+        float term1 = (-_A)*exp(-_B*sqrt( sum1/_Dim));
+        float term2 = -exp( sum2/_Dim );
 
-        return (-_A)*exp(-_B*sqrt( (1/_Dim) * xfor2) - exp( (1/_Dim) * xfor1 )) + _A + exp(1);
+        return term1 + term2 + _A + exp(1);
     }
     
     void Print(int iter, vector<bool> show, int iter_len, int bit_size, int run, string folder, string alg){
@@ -35,9 +37,23 @@ public:
             std::cerr << "Unable to open file!\n";
         }
     }
+
+    void setArgs(float A, float B, float C, int Dim){
+        _A = A;
+        _B = B;
+        _C = C;
+        _Dim = Dim;
+    }
+
+
+    // get args
+    int getDim(){
+        return _Dim;
+    }
+
 private:
     int _Dim;
-    int _A;
-    int _B;
-    int _C;
+    float _A;
+    float _B;
+    float _C;
 };
