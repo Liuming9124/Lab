@@ -32,6 +32,7 @@ private:
     void Reset();
 
     float Frand();
+    void CheckBorder(_Particle);
 
 };
 
@@ -78,6 +79,10 @@ void Psoack::Evaluation(){
             for (int j=0; j<getDim(); j++){
                 _Swarm[i]._velocity[j] = omega * _Swarm[i]._velocity[j] + alpha1 * Frand() * (_Swarm[i]._pbest[j] - _Swarm[i]._position[j]) + alpha2 * Frand() * (_Gbest._position[j] - _Swarm[i]._position[j]);
                 _Swarm[i]._position[j] = _Swarm[i]._position[j] + _Swarm[i]._velocity[j];
+                if(true){
+                    // check border _Swarm[i]._position[j]
+                    CheckBorder(_Swarm[i]);
+                }
             }
             _Swarm[i]._fitness = AckleyProblem(_Swarm[i]._position);
             
@@ -88,6 +93,7 @@ void Psoack::Evaluation(){
                 _Gbest = _Swarm[i];
             }
         }
+        cout << "Iter: " << iter << " Best fitness: " << _Gbest._fitness << endl;
     }
     cout << "Best fitness: " << _Gbest._fitness << endl;
 }
@@ -106,5 +112,12 @@ float Psoack::Frand(){
     return r / 1000.0;
 }
 
+void Psoack::CheckBorder(_Particle check){
+    for (int i = 0; i<getDim(); i++){
+        if (!(check._position[i]<=this->_Bounder&& check._position[i]>=this->_Bounder)){
+            check._position[i] = (rand() % _Bounder*2 - _Bounder);
+        }
+    }
+}
 
 #endif
