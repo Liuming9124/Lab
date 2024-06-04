@@ -70,6 +70,7 @@ void Psoack::Init(){
 }
 
 void Psoack::Evaluation(){
+    // set end situation
     for (int iter=0; iter<this->_Iter; iter++){
         for (int i=0; i<this->_Pop; i++){
             // TODO figure out how to set alpha1 and alpha2 and omega
