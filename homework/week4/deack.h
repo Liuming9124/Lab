@@ -9,7 +9,7 @@
 
 class Deack: Ackley {
 public:
-    void RunALG( int, int, int, int, int, int, int);
+    void RunALG( int, int, int, int, int, int, float);
 
 private:
     int _Pop;
@@ -17,7 +17,7 @@ private:
     int _Iter;
     int _Bounder;
     int _Cr;
-    int _F;
+    float _F;
     int _Place;
 
     typedef struct Particle{
@@ -40,7 +40,7 @@ private:
     void CheckBorder(_Particle);
 };
 
-void Deack::RunALG(int Pop, int Run, int Iter, int Dim, int Bounder,int Cr, int F){
+void Deack::RunALG(int Pop, int Run, int Iter, int Dim, int Bounder,int Cr, float F){
 
     this->_Pop = Pop;
     this->_Run = Run;
@@ -60,6 +60,7 @@ void Deack::RunALG(int Pop, int Run, int Iter, int Dim, int Bounder,int Cr, int 
 
 void Deack::Init(){
     _Swarm.resize(this->_Pop);
+    _Offspring._position.resize(getDim());
     int dim = getDim();
     for (int i=0; i<this->_Pop; i++){
         _Swarm[i]._position.resize(dim);
@@ -107,16 +108,16 @@ void Deack::CheckBorder(_Particle check){
 
 void Deack::Mutation(){
     // init rand r1,r2 with different value
-    int r1 = rand() % this->_Pop;
-    int r2 = rand() % this->_Pop;
-    while(r1 == r2){
+    int p, r1, r2;
+    do {
+        p  = rand() % this->_Pop;
+        r1 = rand() % this->_Pop;
         r2 = rand() % this->_Pop;
-    }
-    int r = rand() % this->_Pop;
-    this->_Place = r;
+    } while(r1 == r2 || r1 == p || r2 == p);
+    this->_Place = p;
     for (int i=0; i<getDim(); i++){
-        _Offspring._position[i] = _Swarm[r]._position[i] 
-            + _F * ( _Gbest._position[i] - _Swarm[r]._position[i]) 
+        _Offspring._position[i] = _Swarm[p]._position[i]
+            + _F * ( _Gbest._position[i] - _Swarm[p]._position[i]) 
             + _F * ( _Swarm[r1]._position[i] - _Swarm[r2]._position[i]);
     }
     CheckBorder(_Offspring);
@@ -133,9 +134,9 @@ void Deack::Crossover(){
 
 void Deack::Selection(){
     _Offspring._fitness = AckleyProblem(_Offspring._position);
-    if (_Offspring._fitness < AckleyProblem(_Swarm[_Place]._position)){
+    if (_Offspring._fitness < _Swarm[_Place]._fitness){
         _Swarm[_Place] = _Offspring;
-        if (_Offspring._fitness < AckleyProblem(_Gbest._position)){
+        if (_Swarm[_Place]._fitness < _Gbest._fitness){
             _Gbest = _Offspring;
         }
     }
