@@ -75,11 +75,14 @@ void Deack::Init(){
 void Deack::Evaluation(){
     // set end situation
     for (int iter=0; iter<this->_Iter; iter++){
+        float temp = _Gbest._fitness;
         Mutation();
         Crossover();
         Selection();
 
-        cout << "Iter: " << iter << " Best fitness: " << _Gbest._fitness << endl;
+        if (temp != _Gbest._fitness){
+            cout << "Iter: " << iter << " Best fitness: " << _Gbest._fitness << endl;
+        }
     }
     cout << "Best fitness: " << _Gbest._fitness << endl;
 }
