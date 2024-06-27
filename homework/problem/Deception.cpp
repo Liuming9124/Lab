@@ -51,7 +51,7 @@ public:
         return false;
     }
         
-    void Print(int iter, std::vector<int> show, int iter_len, int bit_size, int run, string folder, string alg){
+    void Print(int iter, std::vector<int> show, int bit_size, int run, string folder, string alg){
         // TODO: Write append without clear
         std::string filename = "../result/" + folder + "/" + alg + "/" + folder + alg + "_" + std::to_string(run) + ".txt";
         std::ofstream file(filename, std::ios_base::app);

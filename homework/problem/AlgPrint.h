@@ -26,7 +26,7 @@ public:
         }
     }
 
-    void SetDataInt(int num, int place){
+    void SetDataInt(long int num, int place){
         _dataInt[place] += num;
     }
 
@@ -51,5 +51,5 @@ private:
     string _alg;
     int _run;
     int _iter;
-    vector<int> _dataInt;
+    vector<long int> _dataInt;
 };

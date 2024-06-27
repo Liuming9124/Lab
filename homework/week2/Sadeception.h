@@ -1,19 +1,20 @@
-#ifndef SAOM_H
-#define SAOM_H
+#ifndef SADECEPTION_H
+#define SADECEPTION_H
 
-#include "../problem/OneMax.cpp"
+#include "../problem/Deception.cpp"
 #include "../problem/AlgPrint.h"
 #include <iostream>
 #include <vector>
 #include <iomanip>
 #include <fstream>
 #include <string>
+#include <math.h>
 using namespace std;
 using std::setw;
 
 AlgPrint Show;
 
-class Saom : OneMax
+class Sa : Deception
 {
 public:
     void RunALG(int, int, int, double, double);
@@ -29,14 +30,14 @@ private:
     int _nfes;
     int _mnfes;
 
-    std::vector<bool> _Sol;
+    vector<int> _end_value;
 
-    void Init();
-    void Evaluation();
+    vector<int> Init();
+    void Evaluation(vector<int>);
     void Reset(double);
 };
 
-void Saom::RunALG(int Bit, int Run, int Iter, double Temp, double Rate){
+void Sa::RunALG(int Bit, int Run, int Iter, double Temp, double Rate){
     _Bit = Bit;
     _Run = Run;
     _Iter = Iter;
@@ -45,33 +46,33 @@ void Saom::RunALG(int Bit, int Run, int Iter, double Temp, double Rate){
     _nfes = _mnfes = 0;
 
     
-    Show = AlgPrint(_Run, "onemax", "sa");
+    Show = AlgPrint(_Run, "deception", "sa");
     Show.NewShowDataInt(_Iter);
     for (int i = 0; i < _Run; i++){
-        Show.clearResult("../result/onemax/sa/onemaxsa_" + to_string(i) + ".txt");
+        Show.clearResult("../result/deception/sa/deceptionsa_" + to_string(i) + ".txt");
     }
 
     while (_Run--){
         cout << "-------------------Run" << Run - _Run << "---------------------" << endl;
-        Init();
-        Evaluation();
+        vector<int> sol = Init();
+        Evaluation(sol);
         Reset(Temp);
     }
-    Show.PrintToFile("../result/onemax/sa/onemaxsaAvg.txt");
+    Show.PrintToFile("../result/deception/sa/deceptionsaAvg.txt");
     cout << "Average _nfes : " << _mnfes/Run << endl;
 }
 
-void Saom::Evaluation(){
-    vector<bool> best = _Sol;
-    vector<bool> candidate = _Sol;
+void Sa::Evaluation(vector<int> sol){
+    vector<int> best = sol;
+    vector<int> candidate = sol;
     bool best_flag = false;
     for (int i=0; i<_Iter; i++){
         if (best_flag ==false){
             _nfes++;
             Transaction(&candidate, _Bit);
-            if ( OneMaxCompare(candidate, best, _Bit) ){
+            if ( DeceptionProblemCompare(candidate, best) ){
                 best = candidate;
-                if (OneMaxProblem(candidate, _Bit) == _Bit){
+                if (_end_value == best){
                     best_flag = true;
                 }
             }
@@ -82,29 +83,41 @@ void Saom::Evaluation(){
                 }
             }
             _Temp *= _Rate;
-            Print( best, _Bit, _Run, "onemax", "sa");
-            Show.SetDataInt(OneMaxProblem(best, _Bit), i);
+            Print(i, best, _Bit, _Run, "deception", "sa");
+            int temp = 0;
+            for (int x:DeceptionProblem(best)){
+                temp = temp*10 + x;
+            }
+            Show.SetDataInt(temp, i);
         }
         else{
             for (int j=i; j<_Iter; j++){
-                Show.SetDataInt(OneMaxProblem(best, _Bit), j);
+                int temp = 0;
+                for (int x:DeceptionProblem(best)){
+                    temp = temp*10 + x;
+                }
+                Show.SetDataInt(temp, j);
             }
             break;
         }
     }
 }
 
-void Saom::Reset(const double Temp){
+void Sa::Reset(const double Temp){
     _mnfes += _nfes;
+    cout << _nfes << endl;
     _nfes = 0;
     _Temp = Temp;
 }
 
-void Saom::Init(){
-    _Sol.resize(_Bit);
+vector<int> Sa::Init(){
+    vector<int> sol(_Bit);
     for (int i=0; i<_Bit; i++){
-        _Sol[i] = rand()%2;
+        sol[i] = rand()%2;
     }
+    _end_value = GetEndValue(_Bit);
+    return sol;
 }
+
 
 #endif

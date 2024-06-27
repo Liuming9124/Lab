@@ -9,7 +9,7 @@ set ylabel 'value'
 set output 'deception.png'
 
 
-plot '../result/deception/sa/deceptionsa_0.txt' with lines lw 2 lc rgb "blue" title 'deceptionsa_0'
+plot '../result/deception/sa/deceptionsaAvg.txt' with lines lw 2 lc rgb "blue" title 'SA'
 
 
 set output
