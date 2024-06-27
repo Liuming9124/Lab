@@ -64,8 +64,8 @@ void AntTsp::RunALG(string fileName, int Run, int iteration, int numAnts, int al
 
     Read_City(fileName);
 
-    while (this->_Run--){
-        cout << "-------------------Run" << Run - this->_Run << "---------------------" << endl;
+    while (_Run--){
+        cout << "-------------------Run" << Run - _Run << "---------------------" << endl;
         Init();
         Evaluation();
         Reset();

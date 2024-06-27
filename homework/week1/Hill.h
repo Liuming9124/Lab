@@ -2,6 +2,7 @@
 #define HILL_H
 
 #include "../problem/OneMax.cpp"
+#include "../problem/AlgPrint.h"
 #include <iostream>
 #include <vector>
 #include <iomanip>
@@ -10,22 +11,22 @@
 using namespace std;
 using std::setw;
 
+AlgPrint Show;
+
 class Hill : OneMax
 {
 public:
-    void RunALG(int, int, int, int);
+    void RunALG(int, int, int);
 
 private:
     // Input from Command-line Argument
     int _Bit;
     int _Run;
     int _Iter;
-    // double _rate;
 
     int _Nfes;
     int _Mnfes;
 
-    int _Iter_len = 0;
     std::vector<bool> _Sol;
 
     void Init();
@@ -33,56 +34,67 @@ private:
     void Reset();
 };
 
-void Hill::RunALG(int Bit, int Run, int Iter, int Rate)
+void Hill::RunALG(int Bit, int Run, int Iter)
 {
-    this->_Bit = Bit;
-    this->_Run = Run;
-    this->_Iter = Iter;
-    this->_Mnfes = this->_Nfes = 0;
+    _Bit = Bit;
+    _Run = Run;
+    _Iter = Iter;
+    _Mnfes = _Nfes = 0;
 
-    while (this->_Run--){
-        cout << "-------------------Run" << Run - this->_Run << "---------------------" << endl;
+    
+    Show = AlgPrint(_Run, "onemax", "hill");
+    Show.NewShowDataInt(_Iter);
+    for (int i = 0; i < _Run; i++){
+        Show.clearResult("../result/onemax/hill/onemaxhill_" + to_string(i) + ".txt");
+    }
+
+    while (_Run--){
+        cout << "-------------------Run" << Run - _Run << "---------------------" << endl;
         Init();
         Evaluation();
         Reset();
     }
-    cout << "Average NFEs : " << this->_Mnfes/Run << endl;
+    Show.PrintToFile("../result/onemax/hill/onemaxhillAvg.txt");
+    cout << "Average NFEs : " << _Mnfes/Run << endl;
 }
 
 void Hill::Evaluation(){
-    vector<bool> best = this->_Sol;
-    vector<bool> candidate = this->_Sol;
+    vector<bool> best = _Sol;
+    vector<bool> candidate = _Sol;
     bool best_flag = false;
-    for (int i=0; i<this->_Iter && best_flag == false; i++){
-        this->_Nfes++;
-        Transaction(&candidate, this->_Bit);
-        int value = OneMaxProblem(candidate, this->_Bit);
-        if (value > OneMaxProblem(best, this->_Bit)){
-            best = candidate;
-            if (value == this->_Bit){
-                best_flag = true;
+    for (int i=0; i<_Iter; i++){
+        if (best_flag == false){
+            _Nfes++;
+            Transaction(&candidate, _Bit);
+            int value = OneMaxProblem(candidate, _Bit);
+            if (value > OneMaxProblem(best, _Bit)){
+                best = candidate;
+                if (value == _Bit){
+                    best_flag = true;
+                }
             }
+            Print( best, _Bit, _Run, "onemax", "hill");
+            Show.SetDataInt(OneMaxProblem(best, _Bit), i);
         }
-        Print(i, best, this->_Iter_len, this->_Bit, this->_Run, "onemax", "hill");
+        else {
+            for (int j=i; j<_Iter; j++){
+                Show.SetDataInt(OneMaxProblem(best, _Bit), j);
+            }
+            break;
+        }
     }
 }
 
 void Hill::Reset(){
-    this->_Mnfes += this->_Nfes;
-    cout << "End with iter : " << this->_Nfes << endl;
-    this->_Nfes = 0;
-    this->_Iter_len = 0;
+    _Mnfes += _Nfes;
+    _Nfes = 0;
 }
 
 void Hill::Init(){
-    this->_Sol.resize(this->_Bit);
-    for (int i=0; i<this->_Bit; i++){
-        this->_Sol[i] = rand()%2;
+    _Sol.resize(_Bit);
+    for (int i=0; i<_Bit; i++){
+        _Sol[i] = rand()%2;
     }
-    int count = this->_Iter;
-    do {
-        this->_Iter_len++;
-    } while (count/=10);
 }
 
 #endif

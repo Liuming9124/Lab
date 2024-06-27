@@ -24,22 +24,12 @@ public:
         (*sol)[index] = !(*sol)[index];
     }
 
-    void Print(int iter, vector<bool> show, int iter_len, int bit_size, int run, string folder, string alg){
-        // TODO: Write append without clear
+    void Print( vector<bool> show, int bit_size, int run, string folder, string alg){
         std::string filename = "../result/"+ folder + "/" + alg + "/" + folder + alg + "_" + std::to_string(run) + ".txt";
         std::ofstream file(filename, std::ios_base::app);
 
         if (file.is_open()) {
-            // debug mode
-            
-            file << "Iter " << std::setw(10) << iter << " : ";
-            for (int x : show) {
-                file << x;
-            }
-            file << ", Value : " << OneMaxProblem(show, bit_size) << std::endl;
-
-            // // chart mode
-            // file << OneMaxProblem(show, bit_size) << std::endl;
+            file << OneMaxProblem(show, bit_size) << std::endl;
         }
         else {
             std::cerr << "Unable to open file!\n";
