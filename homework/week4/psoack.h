@@ -73,7 +73,6 @@ void Psoack::Evaluation(){
     // set end situation
     for (int iter=0; iter<this->_Iter; iter++){
         for (int i=0; i<this->_Pop; i++){
-            // TODO figure out how to set alpha1 and alpha2 and omega
             float alpha1 = 2;
             float alpha2 = 2;
             float omega = 0.5;
@@ -94,7 +93,7 @@ void Psoack::Evaluation(){
                 _Gbest = _Swarm[i];
             }
         }
-        cout << "Iter: " << iter << " Best fitness: " << _Gbest._fitness << endl;
+        // cout << "Iter: " << iter << " Best fitness: " << _Gbest._fitness << endl;
     }
     cout << "Best fitness: " << _Gbest._fitness << endl;
 }

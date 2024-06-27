@@ -43,13 +43,31 @@
 ### Week3
 1. GA for OneMax
   `g++ -o gaom main_gaom.cpp`
-  `./gaom.exe [Bit], [Run], [Iter], [Pop], [CR], [MR]`
+  `./gaom.exe [Bit] [Run] [Iter] [Pop] [CR] [MR]`
   `./gaom.exe 50 30 20000 100 0.3 0.3`
 2. Tabu Search for OneMax
   `g++ -o tsom main_tsom.cpp`
-  `./tsom.exe [Bit], [Run], [Iter], [Tweaks], [Tblen]`
+  `./tsom.exe [Bit] [Run] [Iter] [Tweaks] [Tblen]`
   `./tsom.exe 10 30 1000 100 5`
-1. Tabu Search for Deception
+3. Tabu Search for Deception
   `g++ -o tsde main_tsde.cpp`
-  `./tsde.exe [Bit], [Run], [Iter], [Tweaks], [Tblen]`
+  `./tsde.exe [Bit] [Run] [Iter] [Tweaks] [Tblen]`
   `./tsde.exe 10 30 1000 100 5`
+
+### Week4
+1. DE for Ackley
+  `g++ -o deack main_de.cpp`
+  `./deack.exe [Pop] [Run] [Iter] [Dim] [Bounder] [Cr] [Mutation Factor]`
+  `./deack.exe 20 5 100000 10 32 0.6 0.8`
+2. PSO for Ackley
+  `g++ -o psoack main_pso.cpp`
+  `./psoack.exe [Pop] [Run] [Iter] [Dim] [Bounder]`
+  `./psoack.exe 20 5 100000 10 32`
+
+### Week6
+1. Ant for TSP
+  `g++ -o ant main_ant.cpp`
+  `./ant.exe [fileName] [Run] [iteration] [numAnts] [alpha] [beta] [rho] [Q] [pmute]`
+  `./ant.exe map.txt 5 100 50 2 2 1 0.2 0.05 > ./result.txt`
+1.1 Draw Chart
+    - Copy the Route from ./result.txt to ./chart/route.txt which format would be (id, x, y) and use gnuplot to show it.

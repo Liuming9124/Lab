@@ -10,8 +10,6 @@ int main(int argc, char *argv[]){
     int Dim = atoi(argv[4]);
     int Bounder = atoi(argv[5]);
 
-
-        
     Psoack pso;
     pso.RunALG(Pop, Run, Iter, Dim, Bounder);
     return 0;

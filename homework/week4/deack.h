@@ -40,18 +40,18 @@ private:
     void CheckBorder(_Particle);
 };
 
-void Deack::RunALG(int Pop, int Run, int Iter, int Dim, int Bounder,int Cr, float F){
+void Deack::RunALG(int Pop, int Run, int Iter, int Dim, int Bounder, int Cr, float F){
 
-    this->_Pop = Pop;
-    this->_Run = Run;
-    this->_Iter = Iter;
-    this->_Bounder = Bounder;
-    this->_Cr = Cr;
-    this->_F = F;
+    _Pop = Pop;
+    _Run = Run;
+    _Iter = Iter;
+    _Bounder = Bounder;
+    _Cr = Cr;
+    _F = F;
     setArgs(20, 0.2, 2*M_PI, Dim);
 
-    while (this->_Run--){
-        cout << "-------------------Run" << Run - this->_Run << "---------------------" << endl;
+    while (_Run--){
+        cout << "-------------------Run" << Run - _Run << "---------------------" << endl;
         Init();
         Evaluation();
         Reset();
@@ -59,10 +59,10 @@ void Deack::RunALG(int Pop, int Run, int Iter, int Dim, int Bounder,int Cr, floa
 }
 
 void Deack::Init(){
-    _Swarm.resize(this->_Pop);
+    _Swarm.resize(_Pop);
     _Offspring._position.resize(getDim());
     int dim = getDim();
-    for (int i=0; i<this->_Pop; i++){
+    for (int i=0; i<_Pop; i++){
         _Swarm[i]._position.resize(dim);
         for (int j=0; j<dim; j++){
             _Swarm[i]._position[j] = (rand() % _Bounder*2 - _Bounder);
@@ -73,8 +73,7 @@ void Deack::Init(){
 }
 
 void Deack::Evaluation(){
-    // set end situation
-    for (int iter=0; iter<this->_Iter; iter++){
+    for (int iter=0; iter<_Iter; iter++){
         float temp = _Gbest._fitness;
         Mutation();
         Crossover();
@@ -103,7 +102,7 @@ float Deack::Frand(){
 
 void Deack::CheckBorder(_Particle check){
     for (int i = 0; i<getDim(); i++){
-        if (!(check._position[i]<=this->_Bounder&& check._position[i]>=this->_Bounder)){
+        if (!(check._position[i]<=_Bounder&& check._position[i]>=_Bounder)){
             check._position[i] = (rand() % _Bounder*2 - _Bounder);
         }
     }
@@ -113,11 +112,11 @@ void Deack::Mutation(){
     // init rand r1,r2 with different value
     int p, r1, r2;
     do {
-        p  = rand() % this->_Pop;
-        r1 = rand() % this->_Pop;
-        r2 = rand() % this->_Pop;
+        p  = rand() % _Pop;
+        r1 = rand() % _Pop;
+        r2 = rand() % _Pop;
     } while(r1 == r2 || r1 == p || r2 == p);
-    this->_Place = p;
+    _Place = p;
     for (int i=0; i<getDim(); i++){
         _Offspring._position[i] = _Swarm[p]._position[i]
             + _F * ( _Gbest._position[i] - _Swarm[p]._position[i]) 
