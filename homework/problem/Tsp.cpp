@@ -27,10 +27,6 @@ typedef struct Ant{
     Route _path;
 } Ant;
 
-typedef struct Pheromone{
-    double _pheromone;
-    double _newPheromone;
-} Pheromone;
 
 class Tsp
 {
@@ -40,6 +36,6 @@ public:
         for (int i = 0; i < ant._numVisited-1; i++){
             length += DistanceTable[ant._path._tour[i]][ant._path._tour[i+1]];
         }
-        return length;        
+        return length;
     }
 };
