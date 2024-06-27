@@ -2,6 +2,10 @@
 #define TSOM_H
 
 #include "../problem/OneMax.cpp"
+#include "../problem/AlgPrint.h"
+#include <queue>
+
+AlgPrint Show;
 
 class Tsom: OneMax {
 public:
@@ -33,71 +37,87 @@ private:
 };
 
 void Tsom::RunALG (int Bit, int Run, int Iter, int Tweaks, int Tblen){
-    this->_Bit = Bit;
-    this->_Run = Run;
-    this->_Iter = Iter;
-    this->_Tweaks = Tweaks;
-    this->_Tblen = Tblen;
-    this->_Nfes = this->_Mnfes = 0;
+    _Bit = Bit;
+    _Run = Run;
+    _Iter = Iter;
+    _Tweaks = Tweaks;
+    _Tblen = Tblen;
+    _Nfes = _Mnfes = 0;
 
-    while (this->_Run--){
-        cout << "-------------------Run" << Run - this->_Run << "---------------------" << endl;
+
+    Show = AlgPrint(_Run, "onemax", "ts");
+    Show.NewShowDataInt(_Iter);
+    for (int i = 0; i < _Run; i++){
+        Show.clearResult("../result/onemax/ts/onemaxts_" + to_string(i) + ".txt");
+    }
+
+    while (_Run--){
+        cout << "-------------------Run" << Run - _Run << "---------------------" << endl;
         Init();
         Evaluation();
         Reset();
     }
-    cout << "Average NFEs : " << this->_Mnfes/Run << endl;
+    Show.PrintToFile("../result/onemax/ts/onemaxtsAvg.txt");
+    cout << "Average NFEs : " << _Mnfes/Run << endl;
 }
 
 
 void Tsom::Evaluation(){
-    for (int iter=0; iter<this->_Iter && (OneMaxProblem(this->_Best, this->_Bit)!=this->_Bit); iter++){
-        if (this->_Tblist.size() > this->_Tblen){
-            this->_Tblist.pop();
-        }
-        std::vector<bool> R = TweakCp();
-        this->_Nfes++;
-        for (int i=0; i<this->_Tweaks-1; i++){
-            this->_Nfes++;
-            std::vector<bool> W = TweakCp();
-
-            if ( !Inqueue(W) && ( OneMaxCompare(W, R, this->_Bit) || Inqueue(R)) ){
-                R = W;
+    for (int iter=0; iter<_Iter; iter++){
+        if (OneMaxProblem(_Best, _Bit)!=_Bit){
+            if (_Tblist.size() > _Tblen){
+                _Tblist.pop();
             }
+            std::vector<bool> R = TweakCp();
+            _Nfes++;
+            for (int i=0; i<_Tweaks-1; i++){
+                _Nfes++;
+                std::vector<bool> W = TweakCp();
+
+                if ( !Inqueue(W) && ( OneMaxCompare(W, R, _Bit) || Inqueue(R)) ){
+                    R = W;
+                }
+            }
+            if (!Inqueue(R)){
+                _Sol = R;
+                _Tblist.push(R);
+            }
+            if (OneMaxCompare(_Sol, _Best, _Bit)){
+                _Best = _Sol;
+            }
+            Print( _Best, _Bit, _Run, "onemax", "ts");
         }
-        if (!Inqueue(R)){
-            this->_Sol = R;
-            this->_Tblist.push(R);
+        else{
+            for (int j=iter; j<_Iter; j++){
+                Show.SetDataInt(OneMaxProblem( _Best, _Bit), j);
+            }
+            break;
         }
-        if (OneMaxCompare(this->_Sol, this->_Best, this->_Bit)){
-            this->_Best = this->_Sol;
-        }
-        Print(iter, this->_Best, 10, this->_Bit, this->_Run, "onemax", "Ts");
     }
 }
 
 void Tsom::Init(){
-    this->_Best.resize(this->_Bit);
-    this->_Sol.resize(this->_Bit);
-    for (int i=0; i<this->_Bit; i++){
-        this->_Best[i] = rand()%2;
+    _Best.resize(_Bit);
+    _Sol.resize(_Bit);
+    for (int i=0; i<_Bit; i++){
+        _Best[i] = rand()%2;
     }
-    this->_Sol = this->_Best;
-    this->_Tblist.push(this->_Best);
+    _Sol = _Best;
+    _Tblist.push(_Best);
 }
 
 void Tsom::Reset(){
-    this->_Mnfes += this->_Nfes;
-    this->_Nfes = 0;
-    this->_Sol.clear();
-    this->_Best.clear();
-    this->_Tblist = std::queue<std::vector<bool>>();
+    _Mnfes += _Nfes;
+    _Nfes = 0;
+    _Sol.clear();
+    _Best.clear();
+    _Tblist = std::queue<std::vector<bool>>();
 }
 
 std::vector<bool> Tsom::TweakCp(){
-    std::vector<bool> sol(this->_Bit);
-    sol = this->_Sol;
-    Transaction( &sol, this->_Bit);
+    std::vector<bool> sol(_Bit);
+    sol = _Sol;
+    Transaction( &sol, _Bit);
     return sol;
 }
 

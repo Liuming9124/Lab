@@ -3,6 +3,9 @@
 
 #include <algorithm>
 #include "../problem/OneMax.cpp"
+#include "../problem/AlgPrint.h"
+
+AlgPrint Show;
 
 class Gaom: OneMax {
 public:
@@ -16,9 +19,6 @@ private:
     int _Mr;
     int _Cr;
     int _Pop;
-
-    // int _Nfes;
-    // int _Mnfes;
 
     typedef struct Individual{
         std::vector<bool> _InSol;
@@ -39,52 +39,64 @@ private:
 };
 
 void Gaom::RunALG (int Bit, int Run, int Iter, int Pop, int CR, int MR){
-    this->_Bit = Bit;
-    this->_Run = Run;
-    this->_Iter = Iter;
-    this->_Pop = Pop;
-    this->_Cr = CR;
-    this->_Mr = MR;
+    _Bit = Bit;
+    _Run = Run;
+    _Iter = Iter;
+    _Pop = Pop;
+    _Cr = CR;
+    _Mr = MR;
 
-    // this->_Nfes = this->_Mnfes = 0;
+    Show = AlgPrint(_Run, "onemax", "ga");
+    Show.NewShowDataInt(_Iter);
+    for (int i = 0; i < _Run; i++){
+        Show.clearResult("../result/onemax/ga/onemaxga_" + to_string(i) + ".txt");
+    }
 
-    while (this->_Run--){
-        cout << "-------------------Run" << Run - this->_Run << "---------------------" << endl;
+    while (_Run--){
+        cout << "-------------------Run" << Run - _Run << "---------------------" << endl;
         Init();
         Evaluation();
         Reset();
     }
-    // cout << "Average NFEs : " << this->_Mnfes/Run << endl;
+    Show.PrintToFile("../result/onemax/ga/onemaxgaAvg.txt");
 }
 
 void Gaom::Evaluation(){
-    for (int iter=0; iter<this->_Iter && (OneMaxProblem(this->_Best, this->_Bit)!=this->_Bit); iter++){
-        // (iter < this->_Iter/2) ? Selection_Wheel() : Selection_Tournament();
-        Selection();
-        Crossover();
-        Mutation();
+    for (int iter=0; iter<_Iter; iter++){
+        if (OneMaxProblem(_Best, _Bit)!=_Bit){
+            Selection();
+            Crossover();
+            Mutation();
 
-        if (_Offspring[0]._InFit > OneMaxProblem(_Best, this->_Bit)){
-            _Best = _Offspring[0]._InSol;
+            if (_Offspring[0]._InFit > OneMaxProblem(_Best, _Bit)){
+                _Best = _Offspring[0]._InSol;
+            }
+
+            // Update Parents
+            _Parents.resize(_Pop-_Offspring.size());
+            std::copy(_Offspring.begin(), _Offspring.end(), std::back_inserter(_Parents));
+
+            Print(_Best, _Bit, _Run, "onemax", "ga");
+            Show.SetDataInt(OneMaxProblem(_Best, _Bit), iter);
         }
-
-        // Update Parents
-        _Parents.resize(_Pop-_Offspring.size());
-        std::copy(_Offspring.begin(), _Offspring.end(), std::back_inserter(_Parents));
-
-        Print(iter, _Best, OneMaxProblem(_Best, this->_Bit), this->_Bit, this->_Run, "onemax", "ga");
+        else{
+            for (int j=iter; j<_Iter; j++){
+                Show.SetDataInt(OneMaxProblem(_Best, _Bit), j);
+            }
+            break;
+        }
     }
 }
 
 void Gaom::Selection(){
     // Randomly select a number of individuals from the population
-    int offset = rand()%this->_Pop;
+    int offset = rand()%_Pop;
     int found[offset]={0};
     _Offspring.resize(offset);
     for (int i = 0; i < offset; i++){
         bool flag = false;
         while (!flag){
-            int temp = rand() % this->_Pop;
+            int temp = rand() % _Pop;
             for (int j : found){
                 if (j == temp){
                     continue;
@@ -103,9 +115,9 @@ void Gaom::Selection(){
 void Gaom::Crossover(){
     // 單點交配
     for (int i=0; i < _Offspring.size()/2; i++){
-        if (rand()%100 < this->_Cr){
-            int temp = rand() % this->_Bit;
-            for (int j = 0; j < this->_Bit; j++){
+        if (rand()%100 < _Cr){
+            int temp = rand() % _Bit;
+            for (int j = 0; j < _Bit; j++){
                 if (j >= temp){
                     std::swap(_Offspring[i*2]._InSol[j], _Offspring[i*2+1]._InSol[j]);
                 }
@@ -113,15 +125,15 @@ void Gaom::Crossover(){
                     std::swap(_Offspring[i*2]._InSol[j], _Offspring[i*2+1]._InSol[j]);
                 }
             }
-            _Offspring[i*2]._InFit = OneMaxProblem(_Offspring[i*2]._InSol, this->_Bit);
-            _Offspring[i*2+1]._InFit = OneMaxProblem(_Offspring[i*2+1]._InSol, this->_Bit);
+            _Offspring[i*2]._InFit = OneMaxProblem(_Offspring[i*2]._InSol, _Bit);
+            _Offspring[i*2+1]._InFit = OneMaxProblem(_Offspring[i*2+1]._InSol, _Bit);
         }
     }
 }
 void Gaom::Mutation(){
     for (int i=0; i < _Offspring.size(); i++){
-        if (rand()%100 < this->_Mr){
-            int temp = rand() % this->_Bit;
+        if (rand()%100 < _Mr){
+            int temp = rand() % _Bit;
             _Offspring[i]._InSol[temp] = !_Offspring[i]._InSol[temp];
             (_Offspring[i]._InSol[temp] == 0) ? _Offspring[i]._InFit-- : _Offspring[i]._InFit++; 
         }
@@ -130,19 +142,17 @@ void Gaom::Mutation(){
 }
 
 void Gaom::Init(){
-    GenRandSol(&this->_Best, this->_Bit);
-    _Parents.resize(this->_Pop);
-    for (int i=0; i<this->_Pop; i++){
-        GenRandSol(&_Parents[i]._InSol, this->_Bit);
-        _Parents[i]._InFit = OneMaxProblem(_Parents[i]._InSol, this->_Bit);
+    GenRandSol(&_Best, _Bit);
+    _Parents.resize(_Pop);
+    for (int i=0; i<_Pop; i++){
+        GenRandSol(&_Parents[i]._InSol, _Bit);
+        _Parents[i]._InFit = OneMaxProblem(_Parents[i]._InSol, _Bit);
     }
 }
 
 void Gaom::Reset(){
-    // this->_Mnfes += this->_Nfes;
-    // this->_Nfes = 0;
-    this->_Best.clear();
-    this->_Parents.clear();
+    _Best.clear();
+    _Parents.clear();
 }
 
 #endif

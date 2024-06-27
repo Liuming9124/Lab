@@ -73,7 +73,11 @@
     "deque": "cpp",
     "unordered_map": "cpp",
     "memory_resource": "cpp",
-    "string_view": "cpp"
+    "string_view": "cpp",
+    "codecvt": "cpp",
+    "functional": "cpp",
+    "numeric": "cpp",
+    "random": "cpp"
   },
   "C_Cpp_Runner.cCompilerPath": "gcc",
   "C_Cpp_Runner.cppCompilerPath": "g++",

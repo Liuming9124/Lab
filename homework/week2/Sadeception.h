@@ -105,7 +105,6 @@ void Sa::Evaluation(vector<int> sol){
 
 void Sa::Reset(const double Temp){
     _mnfes += _nfes;
-    cout << _nfes << endl;
     _nfes = 0;
     _Temp = Temp;
 }
