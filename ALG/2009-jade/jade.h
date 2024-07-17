@@ -2,42 +2,47 @@
 #define JADE_H
 
 #include "problem.cpp"
+#include "Tool.h"
 #include <queue>
 #include <vector>
 #include <random>
+#include <algorithm>
+
+Tool tool;
+
+typedef struct Particle{
+    vector<float> _position;
+    float _inCR, _inF;
+    float _fitness;
+} _Particle;
 
 class Jade: Problem{
 public:
-    void RunALG( int, int, int, int, int, int, float, int);
+    void RunALG( int, int, int, int, int, int, int);
 
 private:
-    int _NP;
     int _Run;
-    int _Iter;
+    int _NP;
+    int _Gen;
     int _Bounder;
     float _Cr;
     float _F;
-    float _AvgCR;
-    float _AvgF;
-    int _SF;
-    int _SCR;
-    int _Place;
+    float _mCR;
+    float _mF;
+    vector<float> _SF, _SCR;
+    int _Dim;
+    int _P;
+    int _C;
 
-
-    typedef struct Particle{
-        vector<float> _position;
-        vector<float> _CR;
-        vector<float> _F;
-        float _fitness;
-    } _Particle;
-
-    _Particle _Gbest, _Offspring;
-    vector<_Particle> _Swarm, _A;
+    _Particle _U, _V;
+    vector<_Particle> _X, _A;
 
     void Init();
     void Evaluation();
     void Reset();
-    
+
+    bool compareFitness(const _Particle& , const _Particle& );
+    int selectTopPBest(vector<_Particle>& , float);
     void Mutation();
     void Crossover();
     void Selection();
@@ -46,15 +51,14 @@ private:
     void CheckBorder(_Particle);
 };
 
-void Jade::RunALG(int NP, int Run, int Iter, int Dim, int Bounder, int Cr, float F, int Gen){
-
-    _NP = NP;
+void Jade::RunALG(int Run, int NP, int Gen, int Bounder, int Dim, int P, int C){
     _Run = Run;
-    _Iter = Iter;
+    _NP = NP;
+    _Gen = Gen;
     _Bounder = Bounder;
-    _Cr = Cr;
-    _F = F;
-    setArgs(20, 0.2, 2*M_PI, Dim);
+    _Dim = Dim;
+    _P = P;
+    _C = C;
 
     while (_Run--){
         cout << "-------------------Run" << Run - _Run << "---------------------" << endl;
@@ -65,94 +69,111 @@ void Jade::RunALG(int NP, int Run, int Iter, int Dim, int Bounder, int Cr, float
 }
 
 void Jade::Init(){
-    // _Swarm.resize(_NP);
-    // _Offspring._position.resize(getDim());
-    // int dim = getDim();
-    _AvgCR = 0.5;
-    _AvgF = 0.5;
+    _mCR = 0.5;
+    _mF = 0.5;
     _A.resize(0);
+
+    _X.resize(_NP);
+    int dim = _Dim;
     for (int i=0; i<_NP; i++){
-        // _Swarm[i]._position.resize(dim);
-        // for (int j=0; j<dim; j++){
-        //     _Swarm[i]._position[j] = (rand() % _Bounder*2 - _Bounder);
-        // }
-        // _Swarm[i]._fitness = AckleyProblem(_Swarm[i]._position);
-        // (i==0) ? _Gbest = _Swarm[i] : _Gbest = (_Gbest._fitness < _Swarm[i]._fitness) ? _Gbest : _Swarm[i];
+        _X[i]._position.resize(dim);
+        for (int j=0; j<dim; j++){
+            _X[i]._position[j] = tool.rand_int(-1*_Bounder, _Bounder);
+        }
+        _X[i]._fitness = fun1(_X[i]._position, _Dim);
     }
 }
 
 void Jade::Evaluation(){
-    for (int iter=0; iter<_Iter; iter++){
-        float temp = _Gbest._fitness;
-        Mutation();
-        Crossover();
-        Selection();
+    for (int g=0; g<_Gen; g++){
+        _SF.resize(0);
+        _SF.resize(0);
+        for (int i=0; i<_NP; i++){
+            _X[i]._inCR = tool.rand_normal(_mCR, 0.1);
+            _X[i]._inF  = tool.rand_cachy(_mF, 0.1);
 
-        if (temp != _Gbest._fitness){
-            cout << "Iter: " << iter << " Best fitness: " << _Gbest._fitness << endl;
+            int best, r1, r2, flag=0;
+            best = selectTopPBest(_X, _P);
+            do {
+                r1 = tool.rand_int(0,_NP-1);
+            } while (r1!=i);
+            do {
+                r2 = tool.rand_int(0,_NP+_A.size()-1);
+                if (r2>=_NP){
+                    r2 -=_NP;
+                }
+            } while (!flag && (r2!=i && r2!=r1));
+            
+            for (int j=0; j<_Dim; j++){
+                float F = _X[i]._inF;
+                _V._position[j] = _X[i]._position[j]
+                                     + F*(_X[best]._position[j] - _X[i]._position[j]) 
+                                     + F*(_X[r1]._position[j]   - (flag==0)?_X[r2]._position[j]:_A[r2]._position[j]);
+                CheckBorder(_V);
+            }
+            int jrand = tool.rand_int(0,_Dim-1);
+            for (int j=0; j<_Dim; j++){
+                if (j == jrand || tool.rand_float(0,1) < _X[i]._inCR){
+                    _U._position[j] = _V._position[j];
+                }
+                else{
+                    _U._position[j] = _X[i]._position[j];
+                }
+            }
+            _U._fitness = fun1(_U._position, _Dim);
+            if (_X[i]._fitness > _U._fitness){
+                _A.push_back(_X[i]);
+                _X[i]._position = _U._position;
+                _SCR.push_back(_X[i]._inCR);
+                _SF.push_back(_X[i]._inF);
+            }
         }
+        // mean Scr
+        float meanScr = 0;
+        for (int t=0; t<_SCR.size(); t++){
+            meanScr+=_SCR[t];
+        }
+        meanScr/=_SCR.size();
+
+        // Lehmer mean
+        float meanF, numerator, denominator;
+        meanF = numerator = denominator = 0;
+        for (int t=0; t<_SF.size(); t++){
+            numerator += _SF[t]*_SF[t];
+            denominator += _SF[t];
+        }
+        meanF = numerator/denominator;
+
+
+        _mCR = (1-_C)*_mCR + _C*meanScr;
+        _mF = meanF;
     }
-    cout << "Best fitness: " << _Gbest._fitness << endl;
 }
 
 
 void Jade::Reset(){
-    _Swarm.clear();
-    _Offspring._position.clear();
-    _Offspring._fitness = 0;
-    _Gbest._position.clear();
-    _Gbest._fitness = 0;
-}
-
-float Jade::Frand(){
-    int r = rand()%1001;
-    return r / 1000.0;
+    _X.clear();
 }
 
 void Jade::CheckBorder(_Particle check){
-    for (int i = 0; i<getDim(); i++){
+    for (int i = 0; i<_Dim; i++){
         if (!(check._position[i]<=_Bounder&& check._position[i]>=_Bounder)){
             check._position[i] = (rand() % _Bounder*2 - _Bounder);
         }
     }
 }
 
-void Jade::Mutation(){
-    // init rand r1,r2 with different value
-    int p, r1, r2;
-    do {
-        p  = rand() % _NP;
-        r1 = rand() % _NP;
-        r2 = rand() % _NP;
-    } while(r1 == r2 || r1 == p || r2 == p);
-    _Place = p;
-    for (int i=0; i<getDim(); i++){
-        _Offspring._position[i] = _Swarm[p]._position[i]
-            + _F * ( _Gbest._position[i] - _Swarm[p]._position[i]) 
-            + _F * ( _Swarm[r1]._position[i] - _Swarm[r2]._position[i]);
-    }
-    CheckBorder(_Offspring);
+
+bool Jade::compareFitness(const _Particle& a, const _Particle& b) {
+    return a._fitness < b._fitness;
 }
 
-void Jade::Crossover(){
-    int Jrand = rand() % getDim();
-    for (int i=0; i<getDim(); i++){
-        if ( !(rand()%100) < _Cr || i == Jrand){
-            _Offspring._position[i] = _Swarm[_Place]._position[i];
-        }
-    }
+int Jade:: selectTopPBest(vector<_Particle>& X, float p) {
+    sort(X.begin(), X.end(), compareFitness);
+    int place;
+    place = p * _NP;
+    (place==0)?place=1:place=tool.rand_int(0,place);
+    return place;
 }
-
-void Jade::Selection(){
-    _Offspring._fitness = AckleyProblem(_Offspring._position);
-    if (_Offspring._fitness < _Swarm[_Place]._fitness){
-        _Swarm[_Place] = _Offspring;
-        if (_Swarm[_Place]._fitness < _Gbest._fitness){
-            _Gbest = _Offspring;
-        }
-    }
-}
-
-
 
 #endif

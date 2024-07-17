@@ -77,7 +77,8 @@
     "codecvt": "cpp",
     "functional": "cpp",
     "numeric": "cpp",
-    "random": "cpp"
+    "random": "cpp",
+    "map": "cpp"
   },
   "C_Cpp_Runner.cCompilerPath": "gcc",
   "C_Cpp_Runner.cppCompilerPath": "g++",
