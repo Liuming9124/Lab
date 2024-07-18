@@ -57,15 +57,12 @@ void Jade::RunALG(int Run, int NP, int Gen, int Bounder, int Dim, int P, int C){
     _C = C;
 
     while (_Run--){
-        // cout << "-------------------Run" << Run - _Run << "---------------------" << endl;
+        cout << "-------------------Run" << Run - _Run << "---------------------" << endl;
         Init();
         Evaluation();
-        cout << _X.size() << endl;
-        sort(_X.begin(), _X.end(), compareFitness);
-        cout << _X[0]._fitness << " " << _X[1]._fitness << " " << _X[2]._fitness << endl;
         Reset();
     }
-        cout << "end" << endl;
+    cout << "end" << endl;
 }
 
 void Jade::Init(){
@@ -102,22 +99,29 @@ void Jade::Evaluation(){
             best = selectTopPBest(_X, _P);
             do {
                 r1 = tool.rand_int(0,_NP-1);
-            } while (r1!=i);
+            } while (r1==i);
             do {
-                r2 = tool.rand_int(0,_NP+_A.size()-1);
+                r2 = tool.rand_int(0,(_NP-1)+(_A.size()-1));
                 if (r2>=_NP){
                     r2 -=_NP;
                     flag = 1;
+                    break;
                 }
-            } while (!flag && (r2!=i && r2!=r1));
-            
+            } while (r2==i || r2==r1);
+
             for (int j=0; j<_Dim; j++){
-                // cout << "test in " << endl;
                 float F = _X[i]._inF;
-                _V._position[j] = _X[i]._position[j]
+                if (flag==0){
+                    _V._position[j] = _X[i]._position[j]
                                      + F*(_X[best]._position[j] - _X[i]._position[j]) 
-                                     + F*(_X[r1]._position[j]   - (flag==0)?_X[r2]._position[j]:_A[r2]._position[j]);
-                // cout << "test out " << i << endl;
+                                     + F*(_X[r1]._position[j]   - _X[r2]._position[j]);
+
+                }else {
+                    _V._position[j] = _X[i]._position[j]
+                                     + F*(_X[best]._position[j] - _X[i]._position[j]) 
+                                     + F*(_X[r1]._position[j]   - _A[r2]._position[j]);
+
+                }
                 CheckBorder(_V);
             }
             int jrand = tool.rand_int(0,_Dim-1);
@@ -163,7 +167,10 @@ void Jade::Evaluation(){
 
         _mCR = (1-_C)*_mCR + _C*meanScr;
         _mF = (1-_C)*_mF + _C*meanF;
+        sort(_X.begin(), _X.end(), compareFitness);
+        cout << _X[0]._fitness << " " << _X[1]._fitness << " " << _X[2]._fitness << endl;
     }
+
 }
 
 
