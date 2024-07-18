@@ -2,9 +2,9 @@
 #include <iostream>
 
 int main(){
-    double m_dist = 1;
-    double s_dist = 1;
 
     Tool test;
-    cout << test.rand_int(3, 2);
+    for (int i = 0; i < 10; i++){
+        cout << test.rand_int(0, 10) << endl;
+    }
 }

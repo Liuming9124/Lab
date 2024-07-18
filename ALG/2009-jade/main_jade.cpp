@@ -4,8 +4,8 @@
 using namespace std;
 
 int main(int argc, char *argv[]){
-    int Run = atoi(argv[2]);
-    int NP = atoi(argv[1]);
+    int Run = atoi(argv[1]);
+    int NP = atoi(argv[2]);
     int G = atoi(argv[3]);
     int Bounder = atoi(argv[4]);
     int Dim = atoi(argv[5]);
