@@ -3,12 +3,8 @@
 
 #include <vector>
 #include <iostream>
-#include <iomanip>
-#include <fstream>
-#include <string>
 #include <random>
 using namespace std;
-using std::setw;
 #pragma once
 
 class Tool{

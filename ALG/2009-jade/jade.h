@@ -1,12 +1,13 @@
 #ifndef JADE_H
 #define JADE_H
 
-#include "problem.cpp"
-#include "Tool.h"
+#include "./problem.cpp"
+#include "../Tool.h"
 #include <queue>
 #include <vector>
 #include <random>
 #include <algorithm>
+#pragma once
 
 Tool tool;
 
@@ -19,6 +20,7 @@ typedef struct Particle{
 class Jade: Problem{
 public:
     void RunALG( int, int, int, int, int, int, int);
+    static bool compareFitness(const _Particle& , const _Particle& );
 
 private:
     int _Run;
@@ -41,7 +43,6 @@ private:
     void Evaluation();
     void Reset();
 
-    bool compareFitness(const _Particle& , const _Particle& );
     int selectTopPBest(vector<_Particle>& , float);
     void Mutation();
     void Crossover();
