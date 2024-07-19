@@ -108,9 +108,27 @@ void Jade::Evaluation(){
             do {
                 r2 = tool.rand_int(0,(_NP-1)+(_A.size()-1));
                 if (r2>=_NP){
-                    r2 -=_NP;
-                    flag = 1;
-                    break;
+                    int checkFlag = 0;
+                    for (int j=0; j<_Dim; j++){
+                        if (_A[r2-(_NP-1)]._position[j]!=_X[i]._position[j]){
+                            checkFlag = 1;
+                            break;
+                        }
+                    }
+                    for (int j=0; j<_Dim; j++){
+                        if (_A[r2-(_NP-1)]._position[j]!=_X[r1]._position[j]){
+                            checkFlag = 1;
+                            break;
+                        }
+                    }
+                    if (checkFlag==0){
+                        continue;
+                    }
+                    else{
+                        r2 -= (_NP-1);
+                        flag = 1;
+                        break;
+                    }
                 }
             } while (r2==i || r2==r1);
 
