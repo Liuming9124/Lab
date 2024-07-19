@@ -49,7 +49,7 @@ private:
     Problem problem;
 };
 
-void Jade::RunALG(int Run, int NP, int Gen, float Bounder, int Dim, float P, float C, int Fun){
+void Jade::RunALG(int Run, int NP, int Gen, float Bounder, int Dim, float P, float C, int Func){
     _Run = Run;
     _NP = NP;
     _Gen = Gen;
@@ -60,45 +60,45 @@ void Jade::RunALG(int Run, int NP, int Gen, float Bounder, int Dim, float P, flo
     show = AlgPrint(_Run, "./result", "jade");
     show.NewShowDataFloat(_Gen);
 
-    switch(Fun){
+    switch(Func){
         case 1:
-            problem.setStrategy(make_unique<Fun1>());
+            problem.setStrategy(make_unique<Func1>());
             break;
         case 2:
-            problem.setStrategy(make_unique<Fun2>());
+            problem.setStrategy(make_unique<Func2>());
             break;
         case 3:
-            problem.setStrategy(make_unique<Fun3>());
+            problem.setStrategy(make_unique<Func3>());
             break;
         case 4:
-            problem.setStrategy(make_unique<Fun4>());
+            problem.setStrategy(make_unique<Func4>());
             break;
         case 5:
-            problem.setStrategy(make_unique<Fun5>());
+            problem.setStrategy(make_unique<Func5>());
             break;
         case 6:
-            problem.setStrategy(make_unique<Fun6>());
+            problem.setStrategy(make_unique<Func6>());
             break;
         case 7:
-            problem.setStrategy(make_unique<Fun7>());
+            problem.setStrategy(make_unique<Func7>());
             break;
         case 8:
-            problem.setStrategy(make_unique<Fun8>());
+            problem.setStrategy(make_unique<Func8>());
             break;
         case 9:
-            problem.setStrategy(make_unique<Fun9>());
+            problem.setStrategy(make_unique<Func9>());
             break;
         case 10:
-            problem.setStrategy(make_unique<Fun10>());
+            problem.setStrategy(make_unique<Func10>());
             break;
         case 11:
-            problem.setStrategy(make_unique<Fun11>());
+            problem.setStrategy(make_unique<Func11>());
             break;
         // case 12:
-        //     problem.setStrategy(make_unique<Fun12>());
+        //     problem.setStrategy(make_unique<Func12>());
         //     break;
         default:
-            cout << "Error: No such function" << endl;
+            cout << "Error: No such Funcction" << endl;
             return;
     }
 
@@ -108,7 +108,7 @@ void Jade::RunALG(int Run, int NP, int Gen, float Bounder, int Dim, float P, flo
         Evaluation();
         Reset();
     }
-    show.PrintToFileFloat("./result/result" + to_string(Fun) + ".txt", _Gen);
+    show.PrintToFileFloat("./result/result" + to_string(Func) + ".txt", _Gen);
     cout << "end" << endl;
 }
 
@@ -250,11 +250,14 @@ void Jade::Reset(){
 
 void Jade::CheckBorder(_Particle& check){
     for (int i = 0; i<_Dim; i++){
-        while (check._position[i]<-1*_Bounder){
-            check._position[i] = -1*_Bounder;
-        }
-        while (check._position[i]>_Bounder){
-            check._position[i] = _Bounder/2;
+        // while (check._position[i]<-1*_Bounder){
+        //     check._position[i] = -1*_Bounder;
+        // }
+        // while (check._position[i]>_Bounder){
+        //     check._position[i] = _Bounder/2;
+        // }
+        if (check._position[i]<-1*_Bounder || check._position[i]>_Bounder){
+            check._position[i] = tool.rand_float(-1*_Bounder, _Bounder);
         }
     }
 }

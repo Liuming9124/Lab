@@ -10,11 +10,10 @@ using namespace std;
 
 class Strategy {
 public:
-    virtual ~Strategy() = default;
     virtual long double execute(const vector<long double>& xx, int dim) const = 0;
 };
 
-class Fun1 : public Strategy {
+class Func1 : public Strategy {
 public:
     long double execute(const vector<long double>& xx, int dim) const override {
         long double num=0;
@@ -25,7 +24,7 @@ public:
     }
 };
 
-class Fun2 : public Strategy {
+class Func2 : public Strategy {
 public:
     long double execute(const vector<long double>& xx, int dim) const override {
         long double num=0;
@@ -60,7 +59,7 @@ public:
 
 
 
-class Fun3 : public Strategy {
+class Func3 : public Strategy {
 public:
     long double execute(const vector<long double>& xx, int dim) const override {
         long double num=0;
@@ -75,7 +74,7 @@ public:
     }
 };
 
-class Fun4 : public Strategy {
+class Func4 : public Strategy {
 public:
     long double execute(const vector<long double>& xx, int dim) const override {
         long double num = abs(xx[0]);
@@ -88,7 +87,7 @@ public:
     }
 };
 
-class Fun5 : public Strategy {
+class Func5 : public Strategy {
 public:
     long double execute(const vector<long double>& xx, int dim) const override {
         long double num = 0;
@@ -104,7 +103,7 @@ public:
     }
 };
 
-class Fun6 : public Strategy {
+class Func6 : public Strategy {
 public:
     long double execute(const vector<long double>& xx, int dim) const override {
         long double num = 0;
@@ -115,7 +114,7 @@ public:
     }
 };
 
-class Fun7 : public Strategy {
+class Func7 : public Strategy {
 public:
     long double execute(const vector<long double>& xx, int dim) const override {
         Tool tool;
@@ -131,7 +130,7 @@ public:
     }
 };
 
-class Fun8 : public Strategy {
+class Func8 : public Strategy {
 public:
     long double execute(const vector<long double>& xx, int dim) const override {
         long double num = 0;
@@ -143,7 +142,7 @@ public:
     }
 };
 
-class Fun9 : public Strategy {
+class Func9 : public Strategy {
 public:
     long double execute(const vector<long double>& xx, int dim) const override {
         long double num = 0;
@@ -154,7 +153,7 @@ public:
     }
 };
 
-class Fun10 : public Strategy {
+class Func10 : public Strategy {
 public:
     long double execute(const vector<long double>& xx, int dim) const override {
         long double num = 0;
@@ -169,7 +168,7 @@ public:
     }
 };
 
-class Fun11 : public Strategy {
+class Func11 : public Strategy {
 public:
     long double execute(const vector<long double>& xx, int dim) const override {
         long double num = 0;
@@ -189,7 +188,7 @@ public:
     }
 };
 
-class Fun12 : public Strategy {
+class Func12 : public Strategy {
 public:
     long double execute(const vector<long double>& xx, int dim) const override {
         long double num = 0;
