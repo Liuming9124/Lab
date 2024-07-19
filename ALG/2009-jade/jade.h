@@ -13,27 +13,27 @@
 class Jade: Problem{
 public:
     typedef struct Particle{
-        vector<float> _position;
+        vector<long double> _position;
         float _inCR, _inF;
         long double _fitness;
     } _Particle;
 
-    void RunALG( int, int, int, int, int, int, int);
+    void RunALG( int, int, int, float, int, float, float, int);
     static bool compareFitness(const _Particle& , const _Particle& );
 
 private:
     int _Run;
     int _NP;
     int _Gen;
-    int _Bounder;
+    float _Bounder;
     float _Cr;
     float _F;
     float _mCR;
     float _mF;
     vector<float> _SF, _SCR;
     int _Dim;
-    int _P;
-    int _C;
+    float _P;
+    float _C;
 
     _Particle _U, _V;
     vector<_Particle> _X, _A;
@@ -46,9 +46,10 @@ private:
     void CheckBorder(_Particle&);
     AlgPrint show;
     Tool tool;
+    Problem problem;
 };
 
-void Jade::RunALG(int Run, int NP, int Gen, int Bounder, int Dim, int P, int C){
+void Jade::RunALG(int Run, int NP, int Gen, float Bounder, int Dim, float P, float C, int Fun){
     _Run = Run;
     _NP = NP;
     _Gen = Gen;
@@ -59,6 +60,47 @@ void Jade::RunALG(int Run, int NP, int Gen, int Bounder, int Dim, int P, int C){
     show = AlgPrint(_Run, "./result", "jade");
     show.NewShowDataFloat(_Gen);
 
+    switch(Fun){
+        case 1:
+            problem.setStrategy(make_unique<Fun1>());
+            break;
+        case 2:
+            problem.setStrategy(make_unique<Fun2>());
+            break;
+        case 3:
+            problem.setStrategy(make_unique<Fun3>());
+            break;
+        case 4:
+            problem.setStrategy(make_unique<Fun4>());
+            break;
+        case 5:
+            problem.setStrategy(make_unique<Fun5>());
+            break;
+        case 6:
+            problem.setStrategy(make_unique<Fun6>());
+            break;
+        case 7:
+            problem.setStrategy(make_unique<Fun7>());
+            break;
+        case 8:
+            problem.setStrategy(make_unique<Fun8>());
+            break;
+        case 9:
+            problem.setStrategy(make_unique<Fun9>());
+            break;
+        case 10:
+            problem.setStrategy(make_unique<Fun10>());
+            break;
+        case 11:
+            problem.setStrategy(make_unique<Fun11>());
+            break;
+        // case 12:
+        //     problem.setStrategy(make_unique<Fun12>());
+        //     break;
+        default:
+            cout << "Error: No such function" << endl;
+            return;
+    }
 
     while (_Run--){
         cout << "-------------------Run" << Run - _Run << "---------------------" << endl;
@@ -66,7 +108,7 @@ void Jade::RunALG(int Run, int NP, int Gen, int Bounder, int Dim, int P, int C){
         Evaluation();
         Reset();
     }
-    show.PrintToFileFloat("./result" + to_string(_Run) + ".txt", _Gen);
+    show.PrintToFileFloat("./result/result" + to_string(Fun) + ".txt", _Gen);
     cout << "end" << endl;
 }
 
@@ -82,7 +124,7 @@ void Jade::Init(){
         for (int j=0; j<dim; j++){
             _X[i]._position[j] = tool.rand_int(-1*_Bounder, _Bounder);
         }
-        _X[i]._fitness = fun1(_X[i]._position, _Dim);
+        _X[i]._fitness = problem.executeStrategy(_X[i]._position, _Dim);
     }
     // init var
     _U._position.resize(dim);
@@ -156,7 +198,7 @@ void Jade::Evaluation(){
                     _U._position[j] = _X[i]._position[j];
                 }
             }
-            _U._fitness = fun1(_U._position, _Dim);
+            _U._fitness = problem.executeStrategy(_U._position, _Dim);
             if (_X[i]._fitness > _U._fitness){
                 _A.push_back(_X[i]);
                 _X[i]._position = _U._position;
@@ -200,6 +242,10 @@ void Jade::Evaluation(){
 
 void Jade::Reset(){
     _X.clear();
+    _A.clear();
+    _U._position.clear();
+    _V._position.clear();
+    
 }
 
 void Jade::CheckBorder(_Particle& check){
