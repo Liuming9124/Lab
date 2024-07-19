@@ -18,31 +18,68 @@ public:
         ofs.close();
     }
 
-    void NewShowDataInt(int amount){
-        _iter = amount;
-        _dataInt.resize(amount);
-        for(int i: _dataInt){
-            _dataInt[i] = 0;
+
+    template<typename T>
+    void NewShowData(vector<vector<T>>& data, int amount){
+        data.resize(_run);
+        for (auto& elem : data) {
+            elem.resize(amount); 
+            std::fill(elem.begin(), elem.end(), T());
         }
     }
 
-    void SetDataInt(long int num, int place){
-        _dataInt[place] += num;
+    template<typename T>
+    void SetData(int run, vector<vector<T>>& data, T num, int iter){
+        data[run][iter] += num;
     }
 
-    void PrintToFile(string fileName){
+    template<typename T>
+    void PrintToFile(string fileName, vector<vector<T>>& data, int iter){
         // clear old file
         clearResult(fileName);
         // write to file
-        std::ofstream file(fileName, std::ios_base::app);
+        ofstream file(fileName, ios_base::app);
         if (file.is_open()) {
-            for(int i: _dataInt){
-                file << (double)i/_run << std::endl;
+            vector<T> AvgData(iter, 0);
+
+            for (int i = 0; i < _run; i++){
+                for (int j = 0; j < iter; j++){
+                    AvgData[j] += data[i][j];
+                }
+            }
+            for(const auto& elem : AvgData){
+                file << elem/_run << endl;
             }
         }
         else {
-            std::cerr << "Unable to open file!\n";
+            cerr << "Unable to open file!\n";
         }
+    }
+
+    void NewShowDataInt(int amount){
+        _iter = amount;
+        NewShowData(_dataInt, amount);
+    }
+
+    void NewShowDataFloat(int amount){
+        _iter = amount;
+        NewShowData(_dataFloat, amount);
+    }
+
+    void SetDataInt(int run, long int num, int iter){
+        SetData(run, _dataInt, num, iter);
+    }
+
+    void SetDataFloat(int run, long double num, int iter){
+        SetData(run, _dataFloat, num, iter);
+    }
+
+    void PrintToFileInt(string fileName, int iter){
+        PrintToFile(fileName, _dataInt, iter);
+    }
+
+    void PrintToFileFloat(string fileName, int iter){
+        PrintToFile(fileName, _dataFloat, iter);
     }
 
 
@@ -51,5 +88,6 @@ private:
     string _alg;
     int _run;
     int _iter;
-    vector<long int> _dataInt;
+    vector<vector<long int>> _dataInt;
+    vector<vector<long double>> _dataFloat;
 };

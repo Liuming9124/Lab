@@ -16,19 +16,17 @@ public:
         return (distr(gen));
     }
 
-    double rand_cachy(const double a, const double b){
+    double rand_cauchy(const double a, const double b){
         std::cauchy_distribution<> distr(a, b);
         return distr(gen);
     }
     
     float rand_float(float min, float max){
-        std::random_device rd;
         std::uniform_real_distribution<float> dis(min, max);
         return dis(gen);
     }
 
     int rand_int(int min, int max){
-        std::random_device rd;
         std::uniform_int_distribution<int> dis(min, max);
         return dis(gen);
     }

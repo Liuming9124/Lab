@@ -2,14 +2,13 @@
 #define JADE_H
 
 #include "./problem.cpp"
+#include "../AlgPrint.h"
 #include "../Tool.h"
 #include <queue>
 #include <vector>
 #include <random>
 #include <algorithm>
 #pragma once
-
-Tool tool;
 
 class Jade: Problem{
 public:
@@ -45,6 +44,8 @@ private:
 
     int selectTopPBest(vector<_Particle>& , float);
     void CheckBorder(_Particle&);
+    AlgPrint show;
+    Tool tool;
 };
 
 void Jade::RunALG(int Run, int NP, int Gen, int Bounder, int Dim, int P, int C){
@@ -55,6 +56,9 @@ void Jade::RunALG(int Run, int NP, int Gen, int Bounder, int Dim, int P, int C){
     _Dim = Dim;
     _P = P;
     _C = C;
+    show = AlgPrint(_Run, "./result", "jade");
+    show.NewShowDataFloat(_Gen);
+
 
     while (_Run--){
         cout << "-------------------Run" << Run - _Run << "---------------------" << endl;
@@ -62,6 +66,7 @@ void Jade::RunALG(int Run, int NP, int Gen, int Bounder, int Dim, int P, int C){
         Evaluation();
         Reset();
     }
+    show.PrintToFileFloat("./result" + to_string(_Run) + ".txt", _Gen);
     cout << "end" << endl;
 }
 
@@ -93,7 +98,7 @@ void Jade::Evaluation(){
         _SF.clear();
         for (int i=0; i<_NP; i++){
             _X[i]._inCR = tool.rand_normal(_mCR, 0.1);
-            _X[i]._inF  = tool.rand_cachy(_mF, 0.1);
+            _X[i]._inF  = tool.rand_cauchy(_mF, 0.1);
 
             int best, r1, r2, flag=0;
             best = selectTopPBest(_X, _P);
@@ -167,10 +172,11 @@ void Jade::Evaluation(){
 
         _mCR = (1-_C)*_mCR + _C*meanScr;
         _mF = (1-_C)*_mF + _C*meanF;
-        sort(_X.begin(), _X.end(), compareFitness);
-        cout << _X[0]._fitness << " " << _X[1]._fitness << " " << _X[2]._fitness << endl;
-    }
 
+        // show data
+        sort(_X.begin(), _X.end(), compareFitness);
+        show.SetDataFloat(_Run, _X[0]._fitness, g);
+    }
 }
 
 
@@ -193,7 +199,7 @@ bool Jade::compareFitness(const _Particle& a, const _Particle& b) {
     return a._fitness < b._fitness;
 }
 
-int Jade:: selectTopPBest(vector<_Particle>& X, float p) {
+int Jade::selectTopPBest(vector<_Particle>& X, float p) {
     sort(X.begin(), X.end(), compareFitness);
     int place;
     place = p * _NP;
