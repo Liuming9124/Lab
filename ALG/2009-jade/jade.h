@@ -251,10 +251,10 @@ void Jade::Reset(){
 void Jade::CheckBorder(_Particle& check){
     for (int i = 0; i<_Dim; i++){
         while (check._position[i]<-1*_Bounder){
-            check._position[i] = (-1*_Bounder + check._position[i])/2;
+            check._position[i] = -1*_Bounder;
         }
         while (check._position[i]>_Bounder){
-            check._position[i] = (_Bounder + check._position[i])/2;
+            check._position[i] = _Bounder/2;
         }
     }
 }
