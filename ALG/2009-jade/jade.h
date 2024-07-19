@@ -26,8 +26,6 @@ private:
     int _NP;
     int _Gen;
     float _Bounder;
-    float _Cr;
-    float _F;
     float _mCR;
     float _mF;
     vector<float> _SF, _SCR;
@@ -43,7 +41,7 @@ private:
     void Reset();
 
     int selectTopPBest(vector<_Particle>& , float);
-    void CheckBorder(_Particle&);
+    void CheckBorder(_Particle&, _Particle&);
     AlgPrint show;
     Tool tool;
     Problem problem;
@@ -116,13 +114,13 @@ void Jade::Init(){
     _mCR = 0.5;
     _mF = 0.5;
     _A.resize(0);
-
     _X.resize(_NP);
+    
     int dim = _Dim;
     for (int i=0; i<_NP; i++){
         _X[i]._position.resize(dim);
         for (int j=0; j<dim; j++){
-            _X[i]._position[j] = tool.rand_int(-1*_Bounder, _Bounder);
+            _X[i]._position[j] = tool.rand_double(-1*_Bounder, _Bounder);
         }
         _X[i]._fitness = problem.executeStrategy(_X[i]._position, _Dim);
     }
@@ -187,11 +185,11 @@ void Jade::Evaluation(){
                                      + F*(_X[r1]._position[j]   - _A[r2]._position[j]);
 
                 }
-                CheckBorder(_V);
+                CheckBorder(_V, _X[i]);
             }
             int jrand = tool.rand_int(0,_Dim-1);
             for (int j=0; j<_Dim; j++){
-                if (j == jrand || tool.rand_float(0,1) < _X[i]._inCR){
+                if (j == jrand || tool.rand_double(0,1) < _X[i]._inCR){
                     _U._position[j] = _V._position[j];
                 }
                 else{
@@ -248,16 +246,13 @@ void Jade::Reset(){
     
 }
 
-void Jade::CheckBorder(_Particle& check){
+void Jade::CheckBorder(_Particle& check, _Particle& old){
     for (int i = 0; i<_Dim; i++){
-        // while (check._position[i]<-1*_Bounder){
-        //     check._position[i] = -1*_Bounder;
-        // }
-        // while (check._position[i]>_Bounder){
-        //     check._position[i] = _Bounder/2;
-        // }
-        if (check._position[i]<-1*_Bounder || check._position[i]>_Bounder){
-            check._position[i] = tool.rand_float(-1*_Bounder, _Bounder);
+        if (check._position[i]<-1*_Bounder){
+            check._position[i] = (-1*_Bounder + old._position[i])/2;
+        }
+        if (check._position[i]>_Bounder){
+            check._position[i] = (_Bounder + old._position[i])/2;
         }
     }
 }

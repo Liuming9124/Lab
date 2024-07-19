@@ -21,8 +21,8 @@ public:
         return distr(gen);
     }
     
-    float rand_float(float min, float max){
-        uniform_real_distribution<float> dis(min, max);
+    float rand_double(double min, double max){
+        uniform_real_distribution<double> dis(min, max);
         return dis(gen);
     }
 

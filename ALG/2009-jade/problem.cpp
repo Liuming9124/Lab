@@ -122,7 +122,7 @@ public:
         for(int i=0; i<dim; i++){
             double tmp=0;
             do {
-                tmp = tool.rand_float(0,1);
+                tmp = tool.rand_double(0,1);
             } while (tmp==1);
             num += i*(xx[i]*xx[i]*xx[i]*xx[i]) + tmp;
         }
