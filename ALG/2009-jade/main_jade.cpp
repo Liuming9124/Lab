@@ -7,7 +7,7 @@ using namespace std;
 int main(int argc, char *argv[])
 {
     int Run, NP, G, Dim, Fun;
-    float Bounder, P, C;
+    double Bounder, P, C;
 
     stringstream ss;
     for (int i = 1; i < argc; i++)

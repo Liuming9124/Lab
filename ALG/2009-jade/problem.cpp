@@ -6,7 +6,6 @@
 #include <memory>
 #include "../Tool.h"
 using namespace std;
-#pragma once
 
 class Strategy {
 public:

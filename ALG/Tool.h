@@ -5,7 +5,6 @@
 #include <iostream>
 #include <random>
 using namespace std;
-#pragma once
 
 class Tool{
 public:

@@ -5,7 +5,6 @@
 #include <string>
 using namespace std;
 using std::setw;
-#pragma once
 
 class AlgPrint{
 public:
