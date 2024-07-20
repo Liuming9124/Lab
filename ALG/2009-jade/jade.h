@@ -155,11 +155,9 @@ void Jade::Evaluation()
             if (_X[i]._inCR>1){
                 _X[i]._inCR = 1;
             }
-
             else if (_X[i]._inCR<0){
                 _X[i]._inCR = 0;
             }
-            
             do
             {
                 _X[i]._inF = tool.rand_cauchy(_mF, 0.1);
