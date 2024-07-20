@@ -16,6 +16,7 @@ public:
         vector<long double> _position;
         float _inCR, _inF;
         long double _fitness;
+        int _index;
     } _Particle;
 
     void RunALG( int, int, int, float, int, float, float, int);
@@ -40,7 +41,7 @@ private:
     void Evaluation();
     void Reset();
 
-    int selectTopPBest(vector<_Particle>& , float);
+    int selectTopPBest(vector<_Particle> , float);
     void CheckBorder(_Particle&, _Particle&);
     AlgPrint show;
     Tool tool;
@@ -123,6 +124,7 @@ void Jade::Init(){
             _X[i]._position[j] = tool.rand_double(-1*_Bounder, _Bounder);
         }
         _X[i]._fitness = problem.executeStrategy(_X[i]._position, _Dim);
+        _X[i]._index = i;
     }
     // init var
     _U._position.resize(dim);
@@ -148,15 +150,15 @@ void Jade::Evaluation(){
             do {
                 r2 = tool.rand_int(0,(_NP-1)+(_A.size()-1));
                 if (r2>=_NP){
-                    int checkFlag = 0;
+                    bool checkFlag = 0;
                     for (int j=0; j<_Dim; j++){
-                        if (_A[r2-(_NP-1)]._position[j]!=_X[i]._position[j]){
+                        if (_A[r2-_NP-1]._position[j]!=_X[i]._position[j]){
                             checkFlag = 1;
                             break;
                         }
                     }
                     for (int j=0; j<_Dim; j++){
-                        if (_A[r2-(_NP-1)]._position[j]!=_X[r1]._position[j]){
+                        if (_A[r2-_NP-1]._position[j]!=_X[r1]._position[j]){
                             checkFlag = 1;
                             break;
                         }
@@ -165,7 +167,7 @@ void Jade::Evaluation(){
                         continue;
                     }
                     else{
-                        r2 -= (_NP-1);
+                        r2 -= (_NP+1);
                         flag = 1;
                         break;
                     }
@@ -173,7 +175,7 @@ void Jade::Evaluation(){
             } while (r2==i || r2==r1);
 
             for (int j=0; j<_Dim; j++){
-                float F = _X[i]._inF;
+                double F = _X[i]._inF;
                 if (flag==0){
                     _V._position[j] = _X[i]._position[j]
                                      + F*(_X[best]._position[j] - _X[i]._position[j]) 
@@ -185,7 +187,7 @@ void Jade::Evaluation(){
                                      + F*(_X[r1]._position[j]   - _A[r2]._position[j]);
 
                 }
-                CheckBorder(_V, _X[i]);
+                // CheckBorder(_V, _X[i]);
             }
             int jrand = tool.rand_int(0,_Dim-1);
             for (int j=0; j<_Dim; j++){
@@ -232,8 +234,9 @@ void Jade::Evaluation(){
         _mF = (1-_C)*_mF + _C*meanF;
 
         // show data
-        sort(_X.begin(), _X.end(), compareFitness);
-        show.SetDataFloat(_Run, _X[0]._fitness, g);
+        vector <_Particle> tmp = _X;
+        sort(tmp.begin(), tmp.end(), compareFitness);
+        show.SetDataFloat(_Run, tmp[0]._fitness, g);
     }
 }
 
@@ -261,12 +264,13 @@ bool Jade::compareFitness(const _Particle& a, const _Particle& b) {
     return a._fitness < b._fitness;
 }
 
-int Jade::selectTopPBest(vector<_Particle>& X, float p) {
+int Jade::selectTopPBest(vector<_Particle> X, float p) {
+    vector <_Particle> tmp = X;
     sort(X.begin(), X.end(), compareFitness);
     int place;
     place = p * _NP;
     place=tool.rand_int(0,place);
-    return place;
+    return tmp[place]._index;
 }
 
 #endif
