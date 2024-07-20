@@ -60,9 +60,9 @@ public:
         NewShowData(_dataInt, amount);
     }
 
-    void NewShowDataFloat(int amount){
+    void NewShowDataDouble(int amount){
         _iter = amount;
-        NewShowData(_dataFloat, amount);
+        NewShowData(_dataDouble, amount);
     }
 
     void SetDataInt(int run, long int num, int iter){
@@ -70,7 +70,7 @@ public:
     }
 
     void SetDataFloat(int run, long double num, int iter){
-        SetData(run, _dataFloat, num, iter);
+        SetData(run, _dataDouble, num, iter);
     }
 
     void PrintToFileInt(string fileName, int iter){
@@ -78,7 +78,7 @@ public:
     }
 
     void PrintToFileFloat(string fileName, int iter){
-        PrintToFile(fileName, _dataFloat, iter);
+        PrintToFile(fileName, _dataDouble, iter);
     }
 
 
@@ -88,5 +88,5 @@ private:
     int _run;
     int _iter;
     vector<vector<long int>> _dataInt;
-    vector<vector<long double>> _dataFloat;
+    vector<vector<long double>> _dataDouble;
 };

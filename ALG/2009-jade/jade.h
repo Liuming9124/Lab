@@ -21,8 +21,6 @@ public:
         int _index;
     } _Particle;
 
-    void testFunc();
-
     void RunALG(int, int, int, double, int, double, double, int);
     static bool compareFitness(const _Particle &, const _Particle &);
 
@@ -52,12 +50,6 @@ private:
     Problem problem;
 };
 
-void Jade::testFunc()
-{
-    Init();
-    cout << tool.rand_normal(_mCR, 0.5);
-}
-
 void Jade::RunALG(int Run, int NP, int Gen, double Bounder, int Dim, double P, double C, int Func)
 {
     _Run = Run;
@@ -68,7 +60,7 @@ void Jade::RunALG(int Run, int NP, int Gen, double Bounder, int Dim, double P, d
     _P = P;
     _C = C;
     show = AlgPrint(_Run, "./result", "jade");
-    show.NewShowDataFloat(_Gen);
+    show.NewShowDataDouble(_Gen);
 
     switch (Func)
     {
@@ -126,10 +118,10 @@ void Jade::RunALG(int Run, int NP, int Gen, double Bounder, int Dim, double P, d
 
 void Jade::Init()
 {
-    this->_mCR = 0.5;
-    this->_mF = 0.5;
-    this->_A.resize(0);
-    this->_X.resize(_NP);
+    _mCR = 0.5;
+    _mF = 0.5;
+    _A.resize(0);
+    _X.resize(_NP);
 
     int dim = _Dim;
     for (int i = 0; i < _NP; i++)
@@ -160,11 +152,23 @@ void Jade::Evaluation()
         for (int i = 0; i < _NP; i++)
         {
             _X[i]._inCR = tool.rand_normal(_mCR, 0.1);
-            _X[i]._inF = tool.rand_cauchy(_mF, 0.1);
+            if (_X[i]._inCR>1){
+                _X[i]._inCR = 1;
+            }
 
-            // cout << tool.rand_normal(0.5, 0.1) << endl;
-            // cout << tool.rand_normal(_mCR, 0.1) << endl;
-
+            else if (_X[i]._inCR<0){
+                _X[i]._inCR = 0;
+            }
+            
+            do
+            {
+                _X[i]._inF = tool.rand_cauchy(_mF, 0.1);
+                if (_X[i]._inF >=1)
+                {
+                    _X[i]._inF = 1;
+                }
+            } while (_X[i]._inF <= 0);
+            
             int best, r1, r2, flag = 0;
             best = selectTopPBest(_X, _P);
             do
@@ -267,8 +271,9 @@ void Jade::Evaluation()
             for (int t = 0; t < _SF.size(); t++) {
                 numerator += _SF[t] * _SF[t];
                 denominator += _SF[t];
-                cout << _SF[t] << " ";
-            } cout << endl;
+                // cout << _SF[t] << " ";
+            }
+            // cout << endl;
             meanF = numerator / denominator;
         }
 
