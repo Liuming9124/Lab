@@ -13,21 +13,14 @@ using namespace std;
 class Jade : Problem
 {
 public:
-    typedef struct Particle
-    {
-        vector<long double> _position;
-        double _inCR, _inF;
-        long double _fitness;
-        int _index;
-    } _Particle;
 
-    void RunALG(int, int, int, double, int, double, double, int);
-    static bool compareFitness(const _Particle &, const _Particle &);
+    void RunALG(int, int, int, double, int, double, double, int, int);
 
 private:
     int _Run;
     int _NP;
     int _Gen;
+    int _Arch;
     double _Bounder;
     double _mCR;
     double _mF;
@@ -36,6 +29,13 @@ private:
     double _P;
     double _C;
 
+    typedef struct Particle
+    {
+        vector<double> _position;
+        double _inCR, _inF;
+        double _fitness;
+        int _index;
+    } _Particle;
     _Particle _U, _V;
     vector<_Particle> _X, _A;
 
@@ -45,12 +45,14 @@ private:
 
     int selectTopPBest(vector<_Particle>, double);
     void CheckBorder(_Particle &, _Particle &);
+    static bool compareFitness(const _Particle &, const _Particle &);
+
     AlgPrint show;
     Tool tool;
     Problem problem;
 };
 
-void Jade::RunALG(int Run, int NP, int Gen, double Bounder, int Dim, double P, double C, int Func)
+void Jade::RunALG(int Run, int NP, int Gen, double Bounder, int Dim, double P, double C, int Arch, int Func)
 {
     _Run = Run;
     _NP = NP;
@@ -59,11 +61,18 @@ void Jade::RunALG(int Run, int NP, int Gen, double Bounder, int Dim, double P, d
     _Dim = Dim;
     _P = P;
     _C = C;
+    _Arch = 0;
+    if (Arch!=0){
+        _Arch = _NP;
+    }
     show = AlgPrint(_Run, "./result", "jade");
     show.NewShowDataDouble(_Gen);
 
     switch (Func)
     {
+    case 0:
+        problem.setStrategy(make_unique<FuncAckley>());
+        break;
     case 1:
         problem.setStrategy(make_unique<Func1>());
         break;
@@ -112,7 +121,7 @@ void Jade::RunALG(int Run, int NP, int Gen, double Bounder, int Dim, double P, d
         Evaluation();
         Reset();
     }
-    show.PrintToFileFloat("./result/result" + to_string(Func) + ".txt", _Gen);
+    show.PrintToFileDouble("./result/result" + to_string(Func) + ".txt", _Gen);
     cout << "end" << endl;
 }
 
@@ -219,7 +228,7 @@ void Jade::Evaluation()
                 {
                     _V._position[j] = _X[i]._position[j] + F * (_X[best]._position[j] - _X[i]._position[j]) + F * (_X[r1]._position[j] - _A[r2]._position[j]);
                 }
-                // CheckBorder(_V, _X[i]);
+                CheckBorder(_V, _X[i]);
             }
             int jrand = tool.rand_int(0, _Dim - 1);
             for (int j = 0; j < _Dim; j++)
@@ -244,7 +253,7 @@ void Jade::Evaluation()
             }
         }
 
-        while (_A.size() > _NP)
+        while (_A.size() > _Arch)
         {
             // randomly remove one element from A
             int remove = tool.rand_int(0, _A.size() - 1);
@@ -278,17 +287,21 @@ void Jade::Evaluation()
         _mCR = (1 - _C) * _mCR + _C * meanScr;
         _mF = (1 - _C) * _mF + _C * meanF;
 
-        // cout << _mCR << " " << _mF << endl;
+        cout << _mCR << " " << _mF << endl;
         
         // show data
-        vector<_Particle> tmp = _X;
-        sort(tmp.begin(), tmp.end(), compareFitness);
-        show.SetDataFloat(_Run, tmp[0]._fitness, g);
+        double tmp = _X[0]._fitness;
+        for (int p=1; p<_NP; p++){
+            if (tmp > _X[p]._fitness)
+                tmp = _X[p]._fitness;
+        }
+        show.SetDataDouble(_Run, tmp, g);
     }
 }
 
 void Jade::Reset()
 {
+    // todo clear must cause the function ends
     _X.clear();
     _A.clear();
     _U._position.clear();

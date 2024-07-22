@@ -6,7 +6,7 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
-    int Run, NP, G, Dim, Fun;
+    int Run, NP, G, Dim, Func, Arch;
     double Bounder, P, C;
 
     stringstream ss;
@@ -19,9 +19,10 @@ int main(int argc, char *argv[])
     ss >> Dim;
     ss >> P;
     ss >> C;
-    ss >> Fun;
+    ss >> Arch;
+    ss >> Func;
 
     Jade jade;
-    jade.RunALG(Run, NP, G, Bounder, Dim, P, C, Fun);
+    jade.RunALG(Run, NP, G, Bounder, Dim, P, C, Arch, Func);
     return 0;
 }
