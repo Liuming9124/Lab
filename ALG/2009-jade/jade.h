@@ -13,16 +13,8 @@ using namespace std;
 class Jade : Problem
 {
 public:
-    typedef struct Particle
-    {
-        vector<long double> _position;
-        double _inCR, _inF;
-        long double _fitness;
-        int _index;
-    } _Particle;
 
     void RunALG(int, int, int, double, int, double, double, int);
-    static bool compareFitness(const _Particle &, const _Particle &);
 
 private:
     int _Run;
@@ -36,6 +28,13 @@ private:
     double _P;
     double _C;
 
+    typedef struct Particle
+    {
+        vector<double> _position;
+        double _inCR, _inF;
+        double _fitness;
+        int _index;
+    } _Particle;
     _Particle _U, _V;
     vector<_Particle> _X, _A;
 
@@ -45,6 +44,8 @@ private:
 
     int selectTopPBest(vector<_Particle>, double);
     void CheckBorder(_Particle &, _Particle &);
+    static bool compareFitness(const _Particle &, const _Particle &);
+
     AlgPrint show;
     Tool tool;
     Problem problem;
@@ -64,6 +65,9 @@ void Jade::RunALG(int Run, int NP, int Gen, double Bounder, int Dim, double P, d
 
     switch (Func)
     {
+    case 0:
+        problem.setStrategy(make_unique<FuncAckley>());
+        break;
     case 1:
         problem.setStrategy(make_unique<Func1>());
         break;
@@ -112,7 +116,7 @@ void Jade::RunALG(int Run, int NP, int Gen, double Bounder, int Dim, double P, d
         Evaluation();
         Reset();
     }
-    show.PrintToFileFloat("./result/result" + to_string(Func) + ".txt", _Gen);
+    show.PrintToFileDouble("./result/result" + to_string(Func) + ".txt", _Gen);
     cout << "end" << endl;
 }
 
@@ -281,14 +285,18 @@ void Jade::Evaluation()
         // cout << _mCR << " " << _mF << endl;
         
         // show data
-        vector<_Particle> tmp = _X;
-        sort(tmp.begin(), tmp.end(), compareFitness);
-        show.SetDataFloat(_Run, tmp[0]._fitness, g);
+        double tmp = _X[0]._fitness;
+        for (int p=1; p<_NP; p++){
+            if (tmp > _X[p]._fitness)
+                tmp = _X[p]._fitness;
+        }
+        show.SetDataDouble(_Run, tmp, g);
     }
 }
 
 void Jade::Reset()
 {
+    // todo clear must cause the function ends
     _X.clear();
     _A.clear();
     _U._position.clear();

@@ -9,14 +9,14 @@ using namespace std;
 
 class Strategy {
 public:
-    virtual long double execute(const vector<long double>& xx, int dim) const = 0;
+    virtual double execute(const vector<double>& xx, int dim) const = 0;
 };
 
 
 class FuncAckley : public Strategy {
     
 public:
-    long double execute (const vector<long double>& xx, int _Dim) const override {
+    double execute (const vector<double>& xx, int _Dim) const override {
         double A = 20;
         double B = 0.2;
         double C = 2*M_PI;
@@ -34,8 +34,8 @@ public:
 
 class Func1 : public Strategy {
 public:
-    long double execute(const vector<long double>& xx, int dim) const override {
-        long double num=0;
+    double execute(const vector<double>& xx, int dim) const override {
+        double num=0;
         for (int i=0; i<dim; i++){
             num += xx[i]*xx[i];
         }
@@ -45,8 +45,8 @@ public:
 
 class Func2 : public Strategy {
 public:
-    long double execute(const vector<long double>& xx, int dim) const override {
-        long double num=0;
+    double execute(const vector<double>& xx, int dim) const override {
+        double num=0;
         for (int i=0; i<dim; i++){
             if (i==0) {
                 if (xx[i]>=0){
@@ -80,10 +80,10 @@ public:
 
 class Func3 : public Strategy {
 public:
-    long double execute(const vector<long double>& xx, int dim) const override {
-        long double num=0;
+    double execute(const vector<double>& xx, int dim) const override {
+        double num=0;
         for (int i=0; i<dim; i++){
-            long double temp = 0;
+            double temp = 0;
             for (int j=0; j<=i; j++){
                 temp += xx[j];
             }
@@ -95,8 +95,8 @@ public:
 
 class Func4 : public Strategy {
 public:
-    long double execute(const vector<long double>& xx, int dim) const override {
-        long double num = abs(xx[0]);
+    double execute(const vector<double>& xx, int dim) const override {
+        double num = abs(xx[0]);
         for (int i=1; i<dim; i++){
             if (abs(xx[i])>num){
                 num = abs(xx[i]);
@@ -108,10 +108,10 @@ public:
 
 class Func5 : public Strategy {
 public:
-    long double execute(const vector<long double>& xx, int dim) const override {
-        long double num = 0;
+    double execute(const vector<double>& xx, int dim) const override {
+        double num = 0;
         for (int i=0; i<dim-1; i++){
-            long double t1, t2;
+            double t1, t2;
             t1=t2=0;
             t1 = xx[i+1]-xx[i]*xx[i];
             t1 = 100*(t1*t1);
@@ -124,8 +124,8 @@ public:
 
 class Func6 : public Strategy {
 public:
-    long double execute(const vector<long double>& xx, int dim) const override {
-        long double num = 0;
+    double execute(const vector<double>& xx, int dim) const override {
+        double num = 0;
         for(int i=0; i<dim; i++){
             num += floor(xx[i]+0.5) * floor(xx[i]+0.5);
         }
@@ -135,9 +135,9 @@ public:
 
 class Func7 : public Strategy {
 public:
-    long double execute(const vector<long double>& xx, int dim) const override {
+    double execute(const vector<double>& xx, int dim) const override {
         Tool tool;
-        long double num = 0;
+        double num = 0;
         for(int i=0; i<dim; i++){
             double tmp=0;
             do {
@@ -151,8 +151,8 @@ public:
 
 class Func8 : public Strategy {
 public:
-    long double execute(const vector<long double>& xx, int dim) const override {
-        long double num = 0;
+    double execute(const vector<double>& xx, int dim) const override {
+        double num = 0;
         for (int i=0; i<dim; i++){
             num += -xx[i]*sin(sqrt(abs(xx[i])));
         }
@@ -163,8 +163,8 @@ public:
 
 class Func9 : public Strategy {
 public:
-    long double execute(const vector<long double>& xx, int dim) const override {
-        long double num = 0;
+    double execute(const vector<double>& xx, int dim) const override {
+        double num = 0;
         for (int i=0; i<dim; i++){
             num += xx[i]*xx[i]-10*cos(2*M_PI*xx[i])+10;
         }
@@ -174,9 +174,9 @@ public:
 
 class Func10 : public Strategy {
 public:
-    long double execute(const vector<long double>& xx, int dim) const override {
-        long double num = 0;
-        long double t1, t2;
+    double execute(const vector<double>& xx, int dim) const override {
+        double num = 0;
+        double t1, t2;
         t1 = t2 = 0;
         for (int i=0; i<dim; i++){
             t1 += xx[i]*xx[i];
@@ -189,9 +189,9 @@ public:
 
 class Func11 : public Strategy {
 public:
-    long double execute(const vector<long double>& xx, int dim) const override {
-        long double num = 0;
-        long double t1, t2;
+    double execute(const vector<double>& xx, int dim) const override {
+        double num = 0;
+        double t1, t2;
         t1 = t2 = 0;
         for (int i=0; i<dim; i++){
             t1 += xx[i]*xx[i];
@@ -209,8 +209,8 @@ public:
 
 class Func12 : public Strategy {
 public:
-    long double execute(const vector<long double>& xx, int dim) const override {
-        long double num = 0;
+    double execute(const vector<double>& xx, int dim) const override {
+        double num = 0;
         
         return num;
     }
@@ -224,7 +224,7 @@ public:
         strategy = move(strat);
     }
 
-    long double executeStrategy(const vector<long double>& xx, int dim) const {
+    double executeStrategy(const vector<double>& xx, int dim) const {
         return strategy->execute(xx, dim);
     }
 
