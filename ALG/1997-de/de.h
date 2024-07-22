@@ -13,6 +13,14 @@ using namespace std;
 
 class De: Problem {
 public:
+
+    typedef struct Particle{
+        vector<double> _position;
+        double _fitness;
+    } _Particle;
+    
+    static bool compareFitness(const _Particle &, const _Particle &);
+
     void RunALG( int, int, int, int, double, double, double);
 
 private:
@@ -24,11 +32,6 @@ private:
     double _Cr;
     double _F;
 
-    typedef struct Particle{
-        vector<double> _position;
-        double _fitness;
-    } _Particle;
-
     _Particle _Offspring;
     vector<_Particle> _Swarm;
 
@@ -37,7 +40,6 @@ private:
     void Reset();
     
     void CheckBorder(_Particle);
-    static bool compareFitness(const _Particle &, const _Particle &);
 
     Problem problem;
     AlgPrint show;
@@ -57,14 +59,14 @@ void De::RunALG(int Pop, int Run, int Iter, int Dim, double Bounder, double Cr, 
     show = AlgPrint(_Run, "./result", "de");
     show.NewShowDataDouble(_Iter);
 
-    problem.setStrategy(make_unique<FuncAckley>());
+    problem.setStrategy(make_unique<Func1>());
     while (_Run--){
         cout << "-------------------Run" << Run - _Run << "---------------------" << endl;
         Init();
         Evaluation();
         Reset();
     }
-    show.PrintToFileFloat("./result/result.txt", _Iter);
+    show.PrintToFileDouble("./result/result.txt", _Iter);
     cout << "end" << endl;
 }
 
@@ -82,45 +84,47 @@ void De::Init(){
 }
 
 void De::Evaluation(){
-    for (int i=0; i<_Pop; i++){
-        // init rand r1,r2 with different value
-        int a, b, c;
-        do {
-            a = tool.rand_int(0, _Pop-1);
-        } while (a==i);
-        do {
-            b = tool.rand_int(0, _Pop-1);
-        } while( b==i || b==a);
-        do {
-            c = tool.rand_int(0, _Pop-1);
-        } while ( c==b || c==a || c==i);
+    for (int iter=0; iter<_Iter; iter++) {
+        for (int i=0; i<_Pop; i++){
+            // init rand r1,r2 with different value
+            int a, b, c;
+            do {
+                a = tool.rand_int(0, _Pop-1);
+            } while (a==i);
+            do {
+                b = tool.rand_int(0, _Pop-1);
+            } while( b==i || b==a);
+            do {
+                c = tool.rand_int(0, _Pop-1);
+            } while ( c==b || c==a || c==i);
 
-        int Jrand = tool.rand_int(0, _Dim-1);
-        for (int j=0; j<_Dim; j++){
-            if ( tool.rand_double(0,1) < _Cr || j == Jrand){
-                _Offspring._position[i] =  _Swarm[c]._position[j] + _F * ( _Swarm[a]._position[j] - _Swarm[b]._position[j]);
-                CheckBorder(_Offspring);
+            int Jrand = tool.rand_int(0, _Dim-1);
+            for (int j=0; j<_Dim; j++){
+                if ( tool.rand_double(0,1) < _Cr || j == Jrand){
+                    _Offspring._position[i] =  _Swarm[c]._position[j] + _F * ( _Swarm[a]._position[j] - _Swarm[b]._position[j]);
+                    CheckBorder(_Offspring);
+                }
+                else {
+                    _Offspring = _Swarm[i];
+                }  
             }
-            else {
-                _Offspring = _Swarm[i];
-            }  
+            _Offspring._fitness = problem.executeStrategy(_Offspring._position, _Dim);
+            if (_Offspring._fitness < _Swarm[i]._fitness){
+                _Swarm[i] = _Offspring;
+            }
         }
-        _Offspring._fitness = problem.executeStrategy(_Offspring._position, _Dim);
-        if (_Offspring._fitness < _Swarm[i]._fitness){
-            _Swarm[i] = _Offspring;
-        }
-
         // show data
-        vector<_Particle> tmp = _Swarm;
-        sort(tmp.begin(), tmp.end(), compareFitness);
-        show.SetDataFloat(_Run, tmp[0]._fitness, i);
-    };
+        double best = _Swarm[0]._fitness;
+        for (int p=1; p<_Pop; p++){
+            if (best>_Swarm[p]._fitness)
+                best = _Swarm[p]._fitness;
+        }
+        show.SetDataDouble(_Run, best, iter);
+    }
 }
 
 
 void De::Reset(){
-    _Swarm.clear();
-    _Offspring._position.clear();
     _Offspring._fitness = 0;
 }
 

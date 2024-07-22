@@ -69,7 +69,7 @@ public:
         SetData(run, _dataInt, num, iter);
     }
 
-    void SetDataFloat(int run, long double num, int iter){
+    void SetDataDouble(int run, long double num, int iter){
         SetData(run, _dataDouble, num, iter);
     }
 
@@ -77,7 +77,7 @@ public:
         PrintToFile(fileName, _dataInt, iter);
     }
 
-    void PrintToFileFloat(string fileName, int iter){
+    void PrintToFileDouble(string fileName, int iter){
         PrintToFile(fileName, _dataDouble, iter);
     }
 
