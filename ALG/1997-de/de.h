@@ -59,7 +59,7 @@ void De::RunALG(int Pop, int Run, int Iter, int Dim, double Bounder, double Cr, 
     show = AlgPrint(_Run, "./result", "de");
     show.NewShowDataDouble(_Iter);
 
-    problem.setStrategy(make_unique<Func1>());
+    problem.setStrategy(make_unique<FuncAckley>());
     while (_Run--){
         cout << "-------------------Run" << Run - _Run << "---------------------" << endl;
         Init();

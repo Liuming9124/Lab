@@ -6,8 +6,8 @@ set key bmargin
 
 set xlabel 'iteration'
 set ylabel 'value'
-set output 'jade.png'
+set output 'de.png'
 
-plot './result/result.txt' pt 1 lw 1 ps 1 lc rgb "blue" title 'jade'
+plot './result/result.txt' pt 1 lw 1 ps 1 lc rgb "blue" title 'de'
 
 set output
