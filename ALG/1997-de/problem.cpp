@@ -12,7 +12,6 @@ public:
     virtual double execute(const vector<double>& xx, int dim) const = 0;
 };
 
-
 class FuncAckley : public Strategy {
     
 public:

@@ -1,19 +1,28 @@
 #include "jade.h"
 #include <iostream>
+#include <sstream>
 
 using namespace std;
 
-int main(int argc, char *argv[]){
-    int Run = atoi(argv[1]);
-    int NP = atoi(argv[2]);
-    int G = atoi(argv[3]);
-    float Bounder = atoi(argv[4]);
-    int Dim = atoi(argv[5]);
-    float P = atoi(argv[6]);
-    float C = atoi(argv[7]);
-    int Fun = atoi(argv[8]);
+int main(int argc, char *argv[])
+{
+    int Run, NP, G, Dim, Func, Arch;
+    double Bounder, P, C;
+
+    stringstream ss;
+    for (int i = 1; i < argc; i++)
+        ss << argv[i] << " ";
+    ss >> Run;
+    ss >> NP;
+    ss >> G;
+    ss >> Bounder;
+    ss >> Dim;
+    ss >> P;
+    ss >> C;
+    ss >> Arch;
+    ss >> Func;
 
     Jade jade;
-    jade.RunALG( Run, NP,  G, Bounder, Dim, P, C, Fun);
+    jade.RunALG(Run, NP, G, Bounder, Dim, P, C, Arch, Func);
     return 0;
 }
