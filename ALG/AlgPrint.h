@@ -5,6 +5,7 @@
 #include <string>
 using namespace std;
 using std::setw;
+#pragma once
 
 class AlgPrint{
 public:
@@ -60,25 +61,25 @@ public:
         NewShowData(_dataInt, amount);
     }
 
-    void NewShowDataDouble(int amount){
+    void NewShowDataFloat(int amount){
         _iter = amount;
-        NewShowData(_dataDouble, amount);
+        NewShowData(_dataFloat, amount);
     }
 
     void SetDataInt(int run, long int num, int iter){
         SetData(run, _dataInt, num, iter);
     }
 
-    void SetDataDouble(int run, long double num, int iter){
-        SetData(run, _dataDouble, num, iter);
+    void SetDataFloat(int run, long double num, int iter){
+        SetData(run, _dataFloat, num, iter);
     }
 
     void PrintToFileInt(string fileName, int iter){
         PrintToFile(fileName, _dataInt, iter);
     }
 
-    void PrintToFileDouble(string fileName, int iter){
-        PrintToFile(fileName, _dataDouble, iter);
+    void PrintToFileFloat(string fileName, int iter){
+        PrintToFile(fileName, _dataFloat, iter);
     }
 
 
@@ -88,5 +89,5 @@ private:
     int _run;
     int _iter;
     vector<vector<long int>> _dataInt;
-    vector<vector<long double>> _dataDouble;
+    vector<vector<long double>> _dataFloat;
 };
