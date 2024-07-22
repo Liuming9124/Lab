@@ -4,34 +4,51 @@
 #include <vector>
 #include <iostream>
 #include <random>
+#include <chrono>
 using namespace std;
-#pragma once
 
-class Tool{
+class Tool
+{
 public:
-    Tool() : gen(random_device{}()) {} 
+    Tool()
+    {
+        unsigned int seed = generateSeedFromTimestamp();
+        mt19937 init(seed);
+        this->gen = init;
+    }
 
-    double rand_normal(const double mean, const double stddev){ // normal_distribution
-        normal_distribution<> distr(mean, stddev);
+    double rand_normal(const double mean, const double stddev)
+    { // normal_distribution
+        normal_distribution<double> distr(mean, stddev);
         return (distr(gen));
     }
 
-    double rand_cauchy(const double a, const double b){
-        std::cauchy_distribution<> distr(a, b);
+    double rand_cauchy(const double a, const double b)
+    {
+        cauchy_distribution<double> distr(a, b);
         return distr(gen);
     }
-    
-    float rand_float(float min, float max){
-        std::uniform_real_distribution<float> dis(min, max);
+
+    double rand_double(double min, double max)
+    {
+        uniform_real_distribution<double> dis(min, max);
         return dis(gen);
     }
 
-    int rand_int(int min, int max){
-        std::uniform_int_distribution<int> dis(min, max);
+    int rand_int(int min, int max)
+    {
+        uniform_int_distribution<int> dis(min, max);
         return dis(gen);
     }
 
 private:
+    unsigned int generateSeedFromTimestamp()
+    {
+        auto now = std::chrono::system_clock::now();
+        auto timestamp = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch());
+        return static_cast<unsigned int>(timestamp.count());
+    }
+
     mt19937 gen;
 };
 
