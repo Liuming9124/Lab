@@ -133,6 +133,7 @@ void Jade::Init()
     _X.resize(_NP);
 
     int dim = _Dim;
+    // random init _X
     for (int i = 0; i < _NP; i++)
     {
         _X[i]._position.resize(dim);
@@ -160,6 +161,7 @@ void Jade::Evaluation()
         _SF.clear();
         for (int i = 0; i < _NP; i++)
         {
+            // init CR & F
             _X[i]._inCR = tool.rand_normal(_mCR, 0.1);
             if (_X[i]._inCR>1){
                 _X[i]._inCR = 1;
@@ -176,6 +178,7 @@ void Jade::Evaluation()
                 }
             } while (_X[i]._inF <= 0);
             
+            // Random choose three place to mutation
             int best, r1, r2, flag = 0;
             best = selectTopPBest(_X, _P);
             do
@@ -217,6 +220,7 @@ void Jade::Evaluation()
                 }
             } while (r2 == i || r2 == r1);
 
+            // mutation & check boundary
             for (int j = 0; j < _Dim; j++)
             {
                 double F = _X[i]._inF;
@@ -230,6 +234,7 @@ void Jade::Evaluation()
                 }
                 CheckBorder(_V, _X[i]);
             }
+            // crossover
             int jrand = tool.rand_int(0, _Dim - 1);
             for (int j = 0; j < _Dim; j++)
             {
@@ -242,6 +247,7 @@ void Jade::Evaluation()
                     _U._position[j] = _X[i]._position[j];
                 }
             }
+            // Selection
             _U._fitness = problem.executeStrategy(_U._position, _Dim);
             if (_X[i]._fitness > _U._fitness)
             {
@@ -278,16 +284,14 @@ void Jade::Evaluation()
             for (int t = 0; t < _SF.size(); t++) {
                 numerator += _SF[t] * _SF[t];
                 denominator += _SF[t];
-                // cout << _SF[t] << " ";
             }
-            // cout << endl;
             meanF = numerator / denominator;
         }
 
+        // update mCR & mF
         _mCR = (1 - _C) * _mCR + _C * meanScr;
         _mF = (1 - _C) * _mF + _C * meanF;
-
-        cout << _mCR << " " << _mF << endl;
+        // cout << _mCR << " " << _mF << endl;
         
         // show data
         double tmp = _X[0]._fitness;
@@ -301,7 +305,6 @@ void Jade::Evaluation()
 
 void Jade::Reset()
 {
-    // todo clear must cause the function ends
     _X.clear();
     _A.clear();
     _U._position.clear();

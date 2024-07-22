@@ -86,7 +86,7 @@ void De::Init(){
 void De::Evaluation(){
     for (int iter=0; iter<_Iter; iter++) {
         for (int i=0; i<_Pop; i++){
-            // init rand r1,r2 with different value
+            // get random three place to mutaion
             int a, b, c;
             do {
                 a = tool.rand_int(0, _Pop-1);
@@ -98,6 +98,7 @@ void De::Evaluation(){
                 c = tool.rand_int(0, _Pop-1);
             } while ( c==b || c==a || c==i);
 
+            // mutation & check boundary & crossover
             int Jrand = tool.rand_int(0, _Dim-1);
             for (int j=0; j<_Dim; j++){
                 if ( tool.rand_double(0,1) < _Cr || j == Jrand){
@@ -108,6 +109,7 @@ void De::Evaluation(){
                     _Offspring = _Swarm[i];
                 }  
             }
+            // selection
             _Offspring._fitness = problem.executeStrategy(_Offspring._position, _Dim);
             if (_Offspring._fitness < _Swarm[i]._fitness){
                 _Swarm[i] = _Offspring;
