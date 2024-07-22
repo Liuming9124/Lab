@@ -14,12 +14,13 @@ class Jade : Problem
 {
 public:
 
-    void RunALG(int, int, int, double, int, double, double, int);
+    void RunALG(int, int, int, double, int, double, double, int, int);
 
 private:
     int _Run;
     int _NP;
     int _Gen;
+    int _Arch;
     double _Bounder;
     double _mCR;
     double _mF;
@@ -51,7 +52,7 @@ private:
     Problem problem;
 };
 
-void Jade::RunALG(int Run, int NP, int Gen, double Bounder, int Dim, double P, double C, int Func)
+void Jade::RunALG(int Run, int NP, int Gen, double Bounder, int Dim, double P, double C, int Arch, int Func)
 {
     _Run = Run;
     _NP = NP;
@@ -60,6 +61,10 @@ void Jade::RunALG(int Run, int NP, int Gen, double Bounder, int Dim, double P, d
     _Dim = Dim;
     _P = P;
     _C = C;
+    _Arch = 0;
+    if (Arch!=0){
+        _Arch = _NP;
+    }
     show = AlgPrint(_Run, "./result", "jade");
     show.NewShowDataDouble(_Gen);
 
@@ -223,7 +228,7 @@ void Jade::Evaluation()
                 {
                     _V._position[j] = _X[i]._position[j] + F * (_X[best]._position[j] - _X[i]._position[j]) + F * (_X[r1]._position[j] - _A[r2]._position[j]);
                 }
-                // CheckBorder(_V, _X[i]);
+                CheckBorder(_V, _X[i]);
             }
             int jrand = tool.rand_int(0, _Dim - 1);
             for (int j = 0; j < _Dim; j++)
@@ -248,7 +253,7 @@ void Jade::Evaluation()
             }
         }
 
-        while (_A.size() > _NP)
+        while (_A.size() > _Arch)
         {
             // randomly remove one element from A
             int remove = tool.rand_int(0, _A.size() - 1);
@@ -282,7 +287,7 @@ void Jade::Evaluation()
         _mCR = (1 - _C) * _mCR + _C * meanScr;
         _mF = (1 - _C) * _mF + _C * meanF;
 
-        // cout << _mCR << " " << _mF << endl;
+        cout << _mCR << " " << _mF << endl;
         
         // show data
         double tmp = _X[0]._fitness;
