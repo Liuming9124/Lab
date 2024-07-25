@@ -334,7 +334,7 @@ bool Jade::compareFitness(const _Particle &a, const _Particle &b)
 int Jade::selectTopPBest(vector<_Particle> X, double p)
 {
     vector<_Particle> tmp = X;
-    sort(X.begin(), X.end(), compareFitness);
+    sort(tmp.begin(), tmp.end(), compareFitness);
     int place;
     place = p * _NP;
     place = tool.rand_int(0, place);
