@@ -14,20 +14,20 @@ class Jade : Problem
 {
 public:
 
-    void RunALG(int, int, int, double, int, double, double, int, int);
+    void RunALG(int, int, int, int, double, double, int, int);
 
 private:
     int _Run;
     int _NP;
     int _Gen;
     int _Arch;
-    double _Bounder;
     double _mCR;
     double _mF;
     vector<double> _SF, _SCR;
     int _Dim;
     double _P;
     double _C;
+    int _FESS; // TODO
 
     typedef struct Particle
     {
@@ -52,12 +52,11 @@ private:
     Problem problem;
 };
 
-void Jade::RunALG(int Run, int NP, int Gen, double Bounder, int Dim, double P, double C, int Arch, int Func)
+void Jade::RunALG(int Run, int NP, int Gen, int Dim, double P, double C, int Arch, int Func)
 {
     _Run = Run;
     _NP = NP;
     _Gen = Gen;
-    _Bounder = Bounder;
     _Dim = Dim;
     _P = P;
     _C = C;
@@ -106,9 +105,6 @@ void Jade::RunALG(int Run, int NP, int Gen, double Bounder, int Dim, double P, d
     case 11:
         problem.setStrategy(make_unique<Func11>());
         break;
-    // case 12:
-    //     problem.setStrategy(make_unique<Func12>());
-    //     break;
     default:
         cout << "Error: No such Funcction" << endl;
         return;
@@ -139,7 +135,7 @@ void Jade::Init()
         _X[i]._position.resize(dim);
         for (int j = 0; j < dim; j++)
         {
-            _X[i]._position[j] = tool.rand_double(-1 * _Bounder, _Bounder);
+            _X[i]._position[j] = tool.rand_double(problem.getBounderMin(), problem.getBounderMax());
         }
         _X[i]._fitness = problem.executeStrategy(_X[i]._position, _Dim);
         _X[i]._index = i;
@@ -266,32 +262,28 @@ void Jade::Evaluation()
             _A.erase(_A.begin() + remove);
         }
 
-        // mean Scr
-        double meanScr = 0;
-        if (_SCR.size() != 0){
+        if (_SCR.size() != 0 && _SF.size() != 0){
+            // mean Scr
+            double meanScr = 0;
             for (int t = 0; t < _SCR.size(); t++)
             {
                 meanScr += _SCR[t];
             }
             meanScr /= _SCR.size();
-        }
 
-        // Lehmer mean
-        double meanF, numerator, denominator;
-        meanF = numerator = denominator = 0;
-        if (_SF.size() != 0)
-        {
+            // Lehmer mean
+            double meanF, numerator, denominator;
+            meanF = numerator = denominator = 0;
             for (int t = 0; t < _SF.size(); t++) {
                 numerator += _SF[t] * _SF[t];
                 denominator += _SF[t];
             }
             meanF = numerator / denominator;
-        }
 
-        // update mCR & mF
-        _mCR = (1 - _C) * _mCR + _C * meanScr;
-        _mF = (1 - _C) * _mF + _C * meanF;
-        // cout << _mCR << " " << _mF << endl;
+            // update mCR & mF
+            _mCR = (1 - _C) * _mCR + _C * meanScr;
+            _mF = (1 - _C) * _mF + _C * meanF;
+        }
         
         // show data
         double tmp = _X[0]._fitness;
@@ -315,13 +307,13 @@ void Jade::CheckBorder(_Particle &check, _Particle &old)
 {
     for (int i = 0; i < _Dim; i++)
     {
-        if (check._position[i] < -1 * _Bounder)
+        if (check._position[i] < problem.getBounderMin())
         {
-            check._position[i] = (-1 * _Bounder + old._position[i]) / 2;
+            check._position[i] = (problem.getBounderMin() + old._position[i]) / 2;
         }
-        if (check._position[i] > _Bounder)
+        if (check._position[i] > problem.getBounderMax())
         {
-            check._position[i] = (_Bounder + old._position[i]) / 2;
+            check._position[i] = (problem.getBounderMax() + old._position[i]) / 2;
         }
     }
 }
