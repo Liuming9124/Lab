@@ -21,8 +21,6 @@ private:
     int _NP;
     int _Gen;
     int _Arch;
-    // double _mCR; // TODO remove
-    // double _mF;
     int _Dim;
     int _FESS;
     int _H;
@@ -129,8 +127,6 @@ void Shade::RunALG(int Run, int NP, int FESS, int Dim, int Arch, int H, int Func
 
 void Shade::Init()
 {
-    // _mCR = 0.5; TODO remove
-    // _mF = 0.5;
     _A.resize(0);
     _X.resize(_NP);
     _k = 0;
@@ -166,6 +162,9 @@ void Shade::Evaluation()
 {
     for (int g = 0; g < _Gen; g++)
     {
+        vector<double> oldF, newF; // to store fitness to calculate mean
+        oldF.resize(0);
+        newF.resize(0);
         _SCR.clear();
         _SF.clear();
         for (int i = 0; i < _NP; i++)
@@ -268,6 +267,8 @@ void Shade::Evaluation()
                     _A.push_back(_X[i]);
                     _SCR.push_back(_X[i]._inCR);
                     _SF.push_back(_X[i]._inF);
+                    newF.push_back(_U._fitness);
+                    oldF.push_back(_X[i]._fitness);
                 }
                 _X[i]._position = _U._position;
                 _X[i]._fitness = _U._fitness;
@@ -282,41 +283,56 @@ void Shade::Evaluation()
         }
 
         if (_SCR.size() != 0 && _SF.size() != 0){
-            // mean weight Scr
-            double meanwScr = 0, wk = 0;
-            double tmp = 0;
+            // prepare param
+            double WKdenominator = 0;
             for (int t = 0; t < _SCR.size(); t++)
             {
-                tmp += _SCR[t];
+                if (oldF[t]-newF[t] > 0){
+                    WKdenominator += oldF[t]-newF[t];
+                }
+                else {
+                    WKdenominator += newF[t]-oldF[t];
+                }
             }
-            wk = 
+
+            double mCR, mF, numerator, denominator;
+            mCR = mF = numerator = denominator = 0;
             for (int t = 0; t < _SCR.size(); t++)
             {
-                meanwScr += _SCR[t];
+                // deltaf
+                double deltaf = 0;
+                if (oldF[t]-newF[t]>0){
+                    deltaf = oldF[t]-newF[t];
+                }
+                else {
+                    deltaf = newF[t]-oldF[t];
+                }
+                // mean weight Scr
+                mCR += (deltaf / WKdenominator) * _SCR[t];
+                // Lehmer mean
+                numerator += (deltaf / WKdenominator) * _SF[t] * _SF[t];
+                denominator += (deltaf / WKdenominator) * _SF[t];
             }
-            meanwScr /= _SCR.size();
+            mF = numerator / denominator;
+            
+            _HS[_k]._MCR = mCR;
+            _HS[_k]._MF = mF;
 
-            // // Lehmer mean
-            // double meanF, numerator, denominator;
-            // meanF = numerator = denominator = 0;
-            // for (int t = 0; t < _SF.size(); t++) {
-            //     numerator += _SF[t] * _SF[t];
-            //     denominator += _SF[t];
-            // }
-            // meanF = numerator / denominator;
+            _k++;
+            if (_k == _H)
+            {
+                _k = 0;
+            }
 
-            // // update mCR & mF
-            // _mCR = (1 - _C) * _mCR + _C * meanScr;
-            // _mF = (1 - _C) * _mF + _C * meanF;
         }
         
-//         // show data
-//         double tmp = _X[0]._fitness;
-//         for (int p=1; p<_NP; p++){
-//             if (tmp > _X[p]._fitness)
-//                 tmp = _X[p]._fitness;
-//        }
-//         show.SetDataDouble(_Run, tmp, g);
+        // show data
+        double tmp = _X[0]._fitness;
+        for (int p=1; p<_NP; p++){
+            if (tmp > _X[p]._fitness)
+                tmp = _X[p]._fitness;
+        }
+        show.SetDataDouble(_Run, tmp, g);
     }
 }
 
