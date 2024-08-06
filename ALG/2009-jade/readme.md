@@ -4,7 +4,6 @@
 
 ```./a.exe [Run] [NP] [Generation] [Dim] [P] [C] [Archieve] [Func]```
 - NP: To be 30, 100, and 400 in the case of D ≤ 10, = 30, and = 100, respectively
-- Bounder: key in positive number, it'll between [-Bounder, Bounder]
 - C: rate of parameter adaptation (0.1)
 - P: greediness of the mutation strategy (0.05)
 - Archieve : 1->_A.size=NP; 0->_A.size=0

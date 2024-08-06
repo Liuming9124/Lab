@@ -31,12 +31,22 @@ public:
 
     double rand_double(double min, double max)
     {
+        if (min > max)
+        {
+            // return error
+            cerr << "Error: min > max" << endl;
+        }
         uniform_real_distribution<double> dis(min, max);
         return dis(gen);
     }
 
     int rand_int(int min, int max)
     {
+        if (min > max)
+        {
+            // return error
+            cerr << "Error: min > max" << endl;
+        }
         uniform_int_distribution<int> dis(min, max);
         return dis(gen);
     }

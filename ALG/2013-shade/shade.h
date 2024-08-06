@@ -10,7 +10,7 @@
 #include <algorithm>
 using namespace std;
 
-class Shade : Problem
+class Shade
 {
 public:
 
@@ -162,9 +162,8 @@ void Shade::Evaluation()
 {
     for (int g = 0; g < _Gen; g++)
     {
-        vector<double> oldF, newF; // to store fitness to calculate mean
-        oldF.resize(0);
-        newF.resize(0);
+        vector<double> deltaF; // to store fitness to calculate mean
+        deltaF.clear();
         _SCR.clear();
         _SF.clear();
         for (int i = 0; i < _NP; i++)
@@ -267,8 +266,7 @@ void Shade::Evaluation()
                     _A.push_back(_X[i]);
                     _SCR.push_back(_X[i]._inCR);
                     _SF.push_back(_X[i]._inF);
-                    newF.push_back(_U._fitness);
-                    oldF.push_back(_X[i]._fitness);
+                    deltaF.push_back(_X[i]._fitness - _U._fitness);
                 }
                 _X[i]._position = _U._position;
                 _X[i]._fitness = _U._fitness;
@@ -287,31 +285,18 @@ void Shade::Evaluation()
             double WKdenominator = 0;
             for (int t = 0; t < _SCR.size(); t++)
             {
-                if (oldF[t]-newF[t] > 0){
-                    WKdenominator += oldF[t]-newF[t];
-                }
-                else {
-                    WKdenominator += newF[t]-oldF[t];
-                }
+                WKdenominator += deltaF[t];
             }
 
             double mCR, mF, numerator, denominator;
             mCR = mF = numerator = denominator = 0;
             for (int t = 0; t < _SCR.size(); t++)
             {
-                // deltaf
-                double deltaf = 0;
-                if (oldF[t]-newF[t]>0){
-                    deltaf = oldF[t]-newF[t];
-                }
-                else {
-                    deltaf = newF[t]-oldF[t];
-                }
                 // mean weight Scr
-                mCR += (deltaf / WKdenominator) * _SCR[t];
+                mCR += (deltaF[t] / WKdenominator) * _SCR[t];
                 // Lehmer mean
-                numerator += (deltaf / WKdenominator) * _SF[t] * _SF[t];
-                denominator += (deltaf / WKdenominator) * _SF[t];
+                numerator += (deltaF[t] / WKdenominator) * _SF[t] * _SF[t];
+                denominator += (deltaF[t] / WKdenominator) * _SF[t];
             }
             mF = numerator / denominator;
             
@@ -320,9 +305,7 @@ void Shade::Evaluation()
 
             _k++;
             if (_k == _H)
-            {
                 _k = 0;
-            }
 
         }
         
