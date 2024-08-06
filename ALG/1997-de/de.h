@@ -11,7 +11,7 @@
 using namespace std;
 
 
-class De: Problem {
+class De {
 public:
 
     typedef struct Particle{
@@ -21,14 +21,14 @@ public:
     
     static bool compareFitness(const _Particle &, const _Particle &);
 
-    void RunALG( int, int, int, int, double, double, double);
+    void RunALG( int, int, int, int, int, double, double);
 
 private:
     int _Pop;
+    int _Fess;
     int _Run;
     int _Iter;
     int _Dim;
-    double _Bounder;
     double _Cr;
     double _F;
 
@@ -46,20 +46,20 @@ private:
     Tool tool;
 };
 
-void De::RunALG(int Pop, int Run, int Iter, int Dim, double Bounder, double Cr, double F){
+void De::RunALG(int Run, int Func, int Pop, int Fess, int Dim, double Cr, double F){
 
-    _Pop = Pop;
     _Run = Run;
-    _Iter = Iter;
+    _Pop = Pop;
+    _Fess = Fess;
+    _Iter = _Fess/_Pop;
     _Dim = Dim;
-    _Bounder = Bounder;
     _Cr = Cr;
     _F = F;
     
     show = AlgPrint(_Run, "./result", "de");
     show.NewShowDataDouble(_Iter);
 
-    problem.setStrategy(make_unique<FuncAckley>());
+    problem.setStrategy(make_unique<Func1>());
     while (_Run--){
         cout << "-------------------Run" << Run - _Run << "---------------------" << endl;
         Init();
@@ -77,7 +77,7 @@ void De::Init(){
     for (int i=0; i<_Pop; i++){
         _Swarm[i]._position.resize(dim);
         for (int j=0; j<dim; j++){
-            _Swarm[i]._position[j] = tool.rand_double(-1 * _Bounder, _Bounder);
+            _Swarm[i]._position[j] = tool.rand_double( problem.getBounderMin(), problem.getBounderMax());
         }
         _Swarm[i]._fitness = problem.executeStrategy(_Swarm[i]._position, _Dim);
     }
@@ -102,11 +102,11 @@ void De::Evaluation(){
             int Jrand = tool.rand_int(0, _Dim-1);
             for (int j=0; j<_Dim; j++){
                 if ( tool.rand_double(0,1) < _Cr || j == Jrand){
-                    _Offspring._position[i] =  _Swarm[c]._position[j] + _F * ( _Swarm[a]._position[j] - _Swarm[b]._position[j]);
+                    _Offspring._position[j] =  _Swarm[c]._position[j] + _F * ( _Swarm[a]._position[j] - _Swarm[b]._position[j]);
                     CheckBorder(_Offspring);
                 }
                 else {
-                    _Offspring = _Swarm[i];
+                    _Offspring._position[j] = _Swarm[i]._position[j];
                 }  
             }
             // selection
@@ -132,9 +132,9 @@ void De::Reset(){
 
 void De::CheckBorder(_Particle check){
     for (int i = 0; i<_Dim; i++){
-        if (check._position[i] < -1 * _Bounder || check._position[i] > _Bounder)
+        if (check._position[i] < problem.getBounderMin() || check._position[i] > problem.getBounderMax())
         {
-            check._position[i] = tool.rand_double(-_Bounder, _Bounder);
+            check._position[i] = tool.rand_double(problem.getBounderMin(), problem.getBounderMax());
         }
     }
 }

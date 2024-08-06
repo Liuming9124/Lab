@@ -5,22 +5,22 @@
 using namespace std;
 
 int main(int argc, char *argv[]){
-    int Pop , Run, Iter, Dim;
-    double Bounder, Cr, F;
+    int Run, Func, Pop, Fess, Dim;
+    double Cr, F;
 
-    
+    // [Run] [Func] [Pop] [FESS] [Dim] [Cr] [Mutation Factor]
     stringstream ss;
     for (int i = 1; i < argc; i++)
         ss << argv[i] << " ";
-    ss >> Pop;
     ss >> Run;
-    ss >> Iter;
+    ss >> Func;
+    ss >> Pop;
+    ss >> Fess;
     ss >> Dim;
-    ss >> Bounder;
     ss >> Cr;
     ss >> F;
 
     De de;
-    de.RunALG( Pop,  Run,  Iter,  Dim,  Bounder, Cr,  F);
+    de.RunALG( Run, Func, Pop, Fess, Dim, Cr,  F);
     return 0;
 }

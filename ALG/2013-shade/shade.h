@@ -110,7 +110,7 @@ void Shade::RunALG(int Run, int NP, int FESS, int Dim, int Arch, int H, int Func
         problem.setStrategy(make_unique<Func11>());
         break;
     default:
-        cout << "Error: No such Funcction" << endl;
+        cout << "Error: No such Function" << endl;
         return;
     }
 

@@ -10,11 +10,31 @@ using namespace std;
 class Strategy {
 public:
     virtual double execute(const vector<double>& xx, int dim) const = 0;
+
+    virtual void setBounds(double min, double max) {
+        _BounderMin = min;
+        _BounderMax = max;
+    }
+    virtual double getBounderMin() const {
+        return _BounderMin;
+    }
+    virtual double getBounderMax() const {
+        return _BounderMax;
+    }
+
+protected:
+    double _BounderMin;
+    double _BounderMax;
 };
 
 class FuncAckley : public Strategy {
     
 public:
+    FuncAckley() {
+        _BounderMin = -32;
+        _BounderMax = 32;
+    }
+
     double execute (const vector<double>& xx, int _Dim) const override {
         double A = 20;
         double B = 0.2;
@@ -33,6 +53,10 @@ public:
 
 class Func1 : public Strategy {
 public:
+    Func1() {
+        _BounderMin = -100.0;
+        _BounderMax = 100.0;
+    }
     double execute(const vector<double>& xx, int dim) const override {
         double num=0;
         for (int i=0; i<dim; i++){
@@ -44,6 +68,10 @@ public:
 
 class Func2 : public Strategy {
 public:
+    Func2() {
+        _BounderMin = -10.0;
+        _BounderMax = 10.0;
+    }
     double execute(const vector<double>& xx, int dim) const override {
         double num=0;
         for (int i=0; i<dim; i++){
@@ -79,6 +107,10 @@ public:
 
 class Func3 : public Strategy {
 public:
+    Func3() {
+        _BounderMin = -100.0;
+        _BounderMax = 100.0;
+    }
     double execute(const vector<double>& xx, int dim) const override {
         double num=0;
         for (int i=0; i<dim; i++){
@@ -94,6 +126,10 @@ public:
 
 class Func4 : public Strategy {
 public:
+    Func4() {
+        _BounderMin = -100.0;
+        _BounderMax = 100.0;
+    }
     double execute(const vector<double>& xx, int dim) const override {
         double num = abs(xx[0]);
         for (int i=1; i<dim; i++){
@@ -107,6 +143,10 @@ public:
 
 class Func5 : public Strategy {
 public:
+    Func5() {
+        _BounderMin = -30.0;
+        _BounderMax = 30.0;
+    }
     double execute(const vector<double>& xx, int dim) const override {
         double num = 0;
         for (int i=0; i<dim-1; i++){
@@ -123,6 +163,10 @@ public:
 
 class Func6 : public Strategy {
 public:
+    Func6() {
+        _BounderMin = -100.0;
+        _BounderMax = 100.0;
+    }
     double execute(const vector<double>& xx, int dim) const override {
         double num = 0;
         for(int i=0; i<dim; i++){
@@ -134,6 +178,10 @@ public:
 
 class Func7 : public Strategy {
 public:
+    Func7() {
+        _BounderMin = -1.28;
+        _BounderMax = 1.28;
+    }
     double execute(const vector<double>& xx, int dim) const override {
         Tool tool;
         double num = 0;
@@ -150,6 +198,10 @@ public:
 
 class Func8 : public Strategy {
 public:
+    Func8() {
+        _BounderMin = -500.0;
+        _BounderMax = 500.0;
+    }
     double execute(const vector<double>& xx, int dim) const override {
         double num = 0;
         for (int i=0; i<dim; i++){
@@ -162,6 +214,10 @@ public:
 
 class Func9 : public Strategy {
 public:
+    Func9() {
+        _BounderMin = -5.12;
+        _BounderMax = 5.12;
+    }
     double execute(const vector<double>& xx, int dim) const override {
         double num = 0;
         for (int i=0; i<dim; i++){
@@ -173,6 +229,10 @@ public:
 
 class Func10 : public Strategy {
 public:
+    Func10() {
+        _BounderMin = -32.0;
+        _BounderMax = 32.0;
+    }
     double execute(const vector<double>& xx, int dim) const override {
         double num = 0;
         double t1, t2;
@@ -188,6 +248,10 @@ public:
 
 class Func11 : public Strategy {
 public:
+    Func11() {
+        _BounderMin = -600.0;
+        _BounderMax = 600.0;
+    }
     double execute(const vector<double>& xx, int dim) const override {
         double num = 0;
         double t1, t2;
@@ -227,6 +291,22 @@ public:
         return strategy->execute(xx, dim);
     }
 
+
+    void setBounds(double min, double max) {
+        if (strategy) {
+            strategy->setBounds(min, max);
+        }
+    }
+
+    double getBounderMin() const {
+        return strategy ? strategy->getBounderMin() : 0.0;
+    }
+
+    double getBounderMax() const {
+        return strategy ? strategy->getBounderMax() : 0.0;
+    }
+
 private:
     unique_ptr<Strategy> strategy;
+
 };
