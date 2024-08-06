@@ -3,6 +3,7 @@ set key bmargin
 
 #set xrange [0:10000]
 #set yrange [-1:10]
+set logscale y
 
 set xlabel 'iteration'
 set ylabel 'value'
