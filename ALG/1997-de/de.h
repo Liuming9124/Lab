@@ -1,10 +1,7 @@
 #ifndef DE_H
 #define DE_H
 
-
-#include <queue>
 #include <vector>
-#include <algorithm>
 #include "./problem.cpp"
 #include "../AlgPrint.h"
 #include "../Tool.h"
@@ -59,14 +56,56 @@ void De::RunALG(int Run, int Func, int Pop, int Fess, int Dim, double Cr, double
     show = AlgPrint(_Run, "./result", "de");
     show.NewShowDataDouble(_Iter);
 
-    problem.setStrategy(make_unique<Func1>());
+    switch (Func)
+    {
+    case 0:
+        problem.setStrategy(make_unique<FuncAckley>());
+        break;
+    case 1:
+        problem.setStrategy(make_unique<Func1>());
+        break;
+    case 2:
+        problem.setStrategy(make_unique<Func2>());
+        break;
+    case 3:
+        problem.setStrategy(make_unique<Func3>());
+        break;
+    case 4:
+        problem.setStrategy(make_unique<Func4>());
+        break;
+    case 5:
+        problem.setStrategy(make_unique<Func5>());
+        break;
+    case 6:
+        problem.setStrategy(make_unique<Func6>());
+        break;
+    case 7:
+        problem.setStrategy(make_unique<Func7>());
+        break;
+    case 8:
+        problem.setStrategy(make_unique<Func8>());
+        break;
+    case 9:
+        problem.setStrategy(make_unique<Func9>());
+        break;
+    case 10:
+        problem.setStrategy(make_unique<Func10>());
+        break;
+    case 11:
+        problem.setStrategy(make_unique<Func11>());
+        break;
+    default:
+        cout << "Error: No such Funcction" << endl;
+        return;
+    }
+
     while (_Run--){
         cout << "-------------------Run" << Run - _Run << "---------------------" << endl;
         Init();
         Evaluation();
         Reset();
     }
-    show.PrintToFileDouble("./result/result.txt", _Iter);
+    show.PrintToFileDouble("./result/result" + to_string(Func) + ".txt", _Iter);
     cout << "end" << endl;
 }
 

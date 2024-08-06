@@ -9,6 +9,6 @@ set xlabel 'iteration'
 set ylabel 'value'
 set output 'de.png'
 
-plot './result/result.txt' pt 1 lw 1 ps 1 lc rgb "blue" title 'de'
+plot './result/result.txt' pt 1 lw 1 ps 1 lc rgb "blue" title 'de' with dots
 
 set output
