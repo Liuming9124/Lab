@@ -27,30 +27,6 @@ protected:
     double _BounderMax;
 };
 
-class FuncAckley : public Strategy {
-    
-public:
-    FuncAckley() {
-        _BounderMin = -32;
-        _BounderMax = 32;
-    }
-
-    double execute (const vector<double>& xx, int _Dim) const override {
-        double A = 20;
-        double B = 0.2;
-        double C = 2*M_PI;
-        double sum1, sum2;
-        for (int i=1; i<=_Dim; i++){
-            sum1 += pow(xx[i], 2);
-            sum2 += cos(C*xx[i]);
-        }
-        double term1 = (-A)*exp(-B*sqrt( sum1/_Dim));
-        double term2 = -exp( sum2/_Dim );
-
-        return term1 + term2 + A + exp(1);
-    }
-};
-
 class Func1 : public Strategy {
 public:
     Func1() {

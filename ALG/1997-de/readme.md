@@ -1,4 +1,9 @@
 # DE for Ackley
-  `g++ -o deack main_de.cpp` \
-  `./deack.exe [Pop] [Run] [Iter] [Dim] [Bounder] [Cr] [Mutation Factor]` \
-  `./a.exe 20 5 100000 10 32 0.6 0.8`
+  `g++ main_de.cpp` \
+  `./de.exe [Run] [Func] [Pop] [FESS] [Dim] [Cr] [Mutation Factor]` \
+
+EX:
+
+`10 1 100 150000 30 0.6 0.8`
+`10 2 100 100000 30 0.6 0.8`
+

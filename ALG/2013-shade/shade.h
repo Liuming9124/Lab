@@ -1,5 +1,5 @@
-#ifndef JADE_H
-#define JADE_H
+#ifndef SHADE_H
+#define SHADE_H
 
 #include "./problem.cpp"
 #include "../AlgPrint.h"
@@ -10,29 +10,33 @@
 #include <algorithm>
 using namespace std;
 
-class Jade : Problem
+class Shade
 {
 public:
 
-    void RunALG(int, int, int, int, double, double, int, int);
+    void RunALG(int, int, int, int, int, int, int);
 
 private:
     int _Run;
     int _NP;
     int _Gen;
     int _Arch;
-    double _mCR;
-    double _mF;
-    vector<double> _SF, _SCR;
     int _Dim;
-    double _P;
-    double _C;
-    int _FESS; // TODO
+    int _FESS;
+    int _H;
+    int _k;
+    vector<double> _SF, _SCR;
+
+    typedef struct History
+    {
+        double _MCR, _MF;
+    } _History;
+    vector<_History> _HS;
 
     typedef struct Particle
     {
         vector<double> _position;
-        double _inCR, _inF;
+        double _inCR, _inF, _inP;
         double _fitness;
         int _index;
     } _Particle;
@@ -52,19 +56,19 @@ private:
     Problem problem;
 };
 
-void Jade::RunALG(int Run, int NP, int Gen, int Dim, double P, double C, int Arch, int Func)
+void Shade::RunALG(int Run, int NP, int FESS, int Dim, int Arch, int H, int Func)
 {
     _Run = Run;
     _NP = NP;
-    _Gen = Gen;
+    _Gen = FESS / NP;
     _Dim = Dim;
-    _P = P;
-    _C = C;
     _Arch = 0;
+    _FESS = FESS;
+    _H = H;
     if (Arch!=0){
         _Arch = _NP;
     }
-    show = AlgPrint(_Run, "./result", "jade");
+    show = AlgPrint(_Run, "./result", "Shade");
     show.NewShowDataDouble(_Gen);
 
     switch (Func)
@@ -106,7 +110,7 @@ void Jade::RunALG(int Run, int NP, int Gen, int Dim, double P, double C, int Arc
         problem.setStrategy(make_unique<Func11>());
         break;
     default:
-        cout << "Error: No such Funcction" << endl;
+        cout << "Error: No such Function" << endl;
         return;
     }
 
@@ -121,12 +125,17 @@ void Jade::RunALG(int Run, int NP, int Gen, int Dim, double P, double C, int Arc
     cout << "end" << endl;
 }
 
-void Jade::Init()
+void Shade::Init()
 {
-    _mCR = 0.5;
-    _mF = 0.5;
     _A.resize(0);
     _X.resize(_NP);
+    _k = 0;
+    _HS.resize(_H);
+    for (int i = 0; i < _H; i++)
+    {
+        _HS[i]._MCR = 0.5;
+        _HS[i]._MF = 0.5;
+    }
 
     int dim = _Dim;
     // random init _X
@@ -149,16 +158,20 @@ void Jade::Init()
     _SF.resize(_NP);
 }
 
-void Jade::Evaluation()
+void Shade::Evaluation()
 {
     for (int g = 0; g < _Gen; g++)
     {
+        vector<double> deltaF; // to store fitness to calculate mean
+        deltaF.clear();
         _SCR.clear();
         _SF.clear();
         for (int i = 0; i < _NP; i++)
         {
-            // init CR & F
-            _X[i]._inCR = tool.rand_normal(_mCR, 0.1);
+            // init CR & F & P
+            int index = tool.rand_int(0, _H - 1);
+
+            _X[i]._inCR = tool.rand_normal(_HS[index]._MCR, 0.1);
             if (_X[i]._inCR>1){
                 _X[i]._inCR = 1;
             }
@@ -167,16 +180,18 @@ void Jade::Evaluation()
             }
             do
             {
-                _X[i]._inF = tool.rand_cauchy(_mF, 0.1);
+                _X[i]._inF = tool.rand_cauchy(_HS[index]._MF, 0.1);
                 if (_X[i]._inF >=1)
                 {
                     _X[i]._inF = 1;
                 }
             } while (_X[i]._inF <= 0);
+
+            _X[i]._inP = tool.rand_double(2/_NP, 0.2);
             
             // Random choose three place to mutation
             int best, r1, r2, flag = 0;
-            best = selectTopPBest(_X, _P);
+            best = selectTopPBest(_X, _X[i]._inP);
             do
             {
                 r1 = tool.rand_int(0, _NP - 1);
@@ -245,13 +260,16 @@ void Jade::Evaluation()
             }
             // Selection
             _U._fitness = problem.executeStrategy(_U._position, _Dim);
-            if (_X[i]._fitness > _U._fitness)
+            if (_X[i]._fitness >= _U._fitness)
             {
-                _A.push_back(_X[i]);
+                if (_X[i]._fitness > _U._fitness){
+                    _A.push_back(_X[i]);
+                    _SCR.push_back(_X[i]._inCR);
+                    _SF.push_back(_X[i]._inF);
+                    deltaF.push_back(_X[i]._fitness - _U._fitness);
+                }
                 _X[i]._position = _U._position;
                 _X[i]._fitness = _U._fitness;
-                _SCR.push_back(_X[i]._inCR);
-                _SF.push_back(_X[i]._inF);
             }
         }
 
@@ -263,26 +281,32 @@ void Jade::Evaluation()
         }
 
         if (_SCR.size() != 0 && _SF.size() != 0){
-            // mean Scr
-            double meanScr = 0;
+            // prepare param
+            double WKdenominator = 0;
             for (int t = 0; t < _SCR.size(); t++)
             {
-                meanScr += _SCR[t];
+                WKdenominator += deltaF[t];
             }
-            meanScr /= _SCR.size();
 
-            // Lehmer mean
-            double meanF, numerator, denominator;
-            meanF = numerator = denominator = 0;
-            for (int t = 0; t < _SF.size(); t++) {
-                numerator += _SF[t] * _SF[t];
-                denominator += _SF[t];
+            double mCR, mF, numerator, denominator;
+            mCR = mF = numerator = denominator = 0;
+            for (int t = 0; t < _SCR.size(); t++)
+            {
+                // mean weight Scr
+                mCR += (deltaF[t] / WKdenominator) * _SCR[t];
+                // Lehmer mean
+                numerator += (deltaF[t] / WKdenominator) * _SF[t] * _SF[t];
+                denominator += (deltaF[t] / WKdenominator) * _SF[t];
             }
-            meanF = numerator / denominator;
+            mF = numerator / denominator;
+            
+            _HS[_k]._MCR = mCR;
+            _HS[_k]._MF = mF;
 
-            // update mCR & mF
-            _mCR = (1 - _C) * _mCR + _C * meanScr;
-            _mF = (1 - _C) * _mF + _C * meanF;
+            _k++;
+            if (_k == _H)
+                _k = 0;
+
         }
         
         // show data
@@ -295,7 +319,7 @@ void Jade::Evaluation()
     }
 }
 
-void Jade::Reset()
+void Shade::Reset()
 {
     _X.clear();
     _A.clear();
@@ -303,7 +327,7 @@ void Jade::Reset()
     _V._position.clear();
 }
 
-void Jade::CheckBorder(_Particle &check, _Particle &old)
+void Shade::CheckBorder(_Particle &check, _Particle &old)
 {
     for (int i = 0; i < _Dim; i++)
     {
@@ -318,12 +342,12 @@ void Jade::CheckBorder(_Particle &check, _Particle &old)
     }
 }
 
-bool Jade::compareFitness(const _Particle &a, const _Particle &b)
+bool Shade::compareFitness(const _Particle &a, const _Particle &b)
 {
     return a._fitness < b._fitness;
 }
 
-int Jade::selectTopPBest(vector<_Particle> X, double p)
+int Shade::selectTopPBest(vector<_Particle> X, double p)
 {
     vector<_Particle> tmp = X;
     sort(tmp.begin(), tmp.end(), compareFitness);

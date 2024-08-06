@@ -1,4 +1,4 @@
-#include "jade.h"
+#include "shade.h"
 #include <iostream>
 #include <sstream>
 
@@ -6,22 +6,20 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
-    int Run, NP, G, Dim, Func, Arch;
-    double P, C;
+    int Run, NP, FESS, Dim, Func, Arch, H;
 
     stringstream ss;
     for (int i = 1; i < argc; i++)
         ss << argv[i] << " ";
     ss >> Run;
     ss >> NP;
-    ss >> G;
+    ss >> FESS;
     ss >> Dim;
-    ss >> P;
-    ss >> C;
     ss >> Arch;
+    ss >> H;
     ss >> Func;
 
-    Jade jade;
-    jade.RunALG(Run, NP, G, Dim, P, C, Arch, Func);
+    Shade shade;
+    shade.RunALG(Run, NP, FESS, Dim, Arch, H, Func);
     return 0;
 }
