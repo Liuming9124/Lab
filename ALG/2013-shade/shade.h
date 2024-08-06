@@ -55,8 +55,7 @@ private:
     Tool tool;
     Problem problem;
 };
-
-void Shade::RunALG(int Run, int NP, int FESS, int Dim, int Arch, int H, int Func)
+void Shade::RunALG(int Run, int Func, int NP, int FESS, int Dim, int Arch, int H)
 {
     _Run = Run;
     _NP = NP;

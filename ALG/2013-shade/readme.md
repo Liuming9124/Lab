@@ -11,13 +11,15 @@
 ## How to Run
 ```g++ main_shade.cpp```
 
-```./a.exe [Run] [NP] [FESS] [Dim] [Arch] [H] [Func]```
-- NP : 100
+```./a.exe [Run] [Func] [NP] [FESS] [Dim] [Arch] [H]```
+- NP : 100(paper recommended)
 - FESS : NP*GEN
 - Arch : 1->size with NP , 0-> size with 0
 - H : size of success history
 
 EX:
 
-```.\a.exe 1 100 150000 30 1 100 1```
-```.\a.exe 1 100 
+```R 1 30 150000 30 1 100```
+```R 2 30 60000 30 1 100```
+```R 3 30 150000 30 1 100```
+```R 4 30 150000 30 1 100```
