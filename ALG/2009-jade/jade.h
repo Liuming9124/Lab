@@ -14,7 +14,7 @@ class Jade : Problem
 {
 public:
 
-    void RunALG(int, int, int, int, double, double, int, int);
+    void RunALG(int, int, int, int, int, int, double, double);
 
 private:
     int _Run;
@@ -27,7 +27,7 @@ private:
     int _Dim;
     double _P;
     double _C;
-    int _FESS; // TODO
+    int _Fess;
 
     typedef struct Particle
     {
@@ -52,11 +52,12 @@ private:
     Problem problem;
 };
 
-void Jade::RunALG(int Run, int NP, int Gen, int Dim, double P, double C, int Arch, int Func)
+void Jade::RunALG(int Run, int Func, int NP, int Fess, int Dim, int Arch, double P, double C)
 {
     _Run = Run;
     _NP = NP;
-    _Gen = Gen;
+    _Fess = Fess;
+    _Gen = _Fess/_NP;
     _Dim = Dim;
     _P = P;
     _C = C;
