@@ -34,7 +34,7 @@ public:
         if (min > max)
         {
             // return error
-            cerr << "Error: min > max" << endl;
+            cerr << "Error: rand_double min > max" << endl;
         }
         uniform_real_distribution<double> dis(min, max);
         return dis(gen);
@@ -45,7 +45,7 @@ public:
         if (min > max)
         {
             // return error
-            cerr << "Error: min > max" << endl;
+            cerr << "Error: rand_int min > max" << endl;
         }
         uniform_int_distribution<int> dis(min, max);
         return dis(gen);
