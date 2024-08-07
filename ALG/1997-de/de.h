@@ -55,49 +55,8 @@ void De::RunALG(int Run, int Func, int Pop, int Fess, int Dim, double Cr, double
     
     show = AlgPrint(_Run, "./result", "de");
     show.NewShowDataDouble(_Iter);
-
-    switch (Func)
-    {
-    case 0:
-        problem.setStrategy(make_unique<FuncAckley>());
-        break;
-    case 1:
-        problem.setStrategy(make_unique<Func1>());
-        break;
-    case 2:
-        problem.setStrategy(make_unique<Func2>());
-        break;
-    case 3:
-        problem.setStrategy(make_unique<Func3>());
-        break;
-    case 4:
-        problem.setStrategy(make_unique<Func4>());
-        break;
-    case 5:
-        problem.setStrategy(make_unique<Func5>());
-        break;
-    case 6:
-        problem.setStrategy(make_unique<Func6>());
-        break;
-    case 7:
-        problem.setStrategy(make_unique<Func7>());
-        break;
-    case 8:
-        problem.setStrategy(make_unique<Func8>());
-        break;
-    case 9:
-        problem.setStrategy(make_unique<Func9>());
-        break;
-    case 10:
-        problem.setStrategy(make_unique<Func10>());
-        break;
-    case 11:
-        problem.setStrategy(make_unique<Func11>());
-        break;
-    default:
-        cout << "Error: No such Funcction" << endl;
-        return;
-    }
+    
+    problem.setStrategy(Func);
 
     while (_Run--){
         cout << "-------------------Run" << Run - _Run << "---------------------" << endl;

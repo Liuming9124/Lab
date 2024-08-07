@@ -284,10 +284,51 @@ public:
 class Problem
 {
 public:
-    void setStrategy(unique_ptr<Strategy> strat) {
-        strategy = move(strat);
+    void setStrategy(int func) {
+        switch (func)
+        {
+        case 0:
+            strategy = make_unique<FuncAckley>();
+            break;
+        case 1:
+            strategy = make_unique<Func1>();
+            break;
+        case 2:
+            strategy = make_unique<Func2>();
+            break;
+        case 3:
+            strategy = make_unique<Func3>();
+            break;
+        case 4:
+            strategy = make_unique<Func4>();
+            break;
+        case 5:
+            strategy = make_unique<Func5>();
+            break;
+        case 6:
+            strategy = make_unique<Func6>();
+            break;
+        case 7:
+            strategy = make_unique<Func7>();
+            break;
+        case 8:
+            strategy = make_unique<Func8>();
+            break;
+        case 9:
+            strategy = make_unique<Func9>();
+            break;
+        case 10:
+            strategy = make_unique<Func10>();
+            break;
+        case 11:
+            strategy = make_unique<Func11>();
+            break;
+        default:
+            cout << "Error: No such Function" << endl;
+            break;    
+        }
     }
-
+    
     double executeStrategy(const vector<double>& xx, int dim) const {
         return strategy->execute(xx, dim);
     }
