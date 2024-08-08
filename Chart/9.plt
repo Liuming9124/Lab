@@ -11,6 +11,7 @@ set output 'f9.png'
 
 plot  '..\ALG\1997-de\result\result9.txt' pt 1 lw 3 ps 1 lc rgb "blue" title 'de' with lines ,\
     '..\ALG\2009-jade\result\result9.txt' pt 1 lw 3 ps 1 lc rgb "red" title 'jade' with lines ,\
-   '..\ALG\2013-shade\result\result9.txt' pt 1 lw 2 ps 1 lc rgb "green" title 'shade' with lines,
+   '..\ALG\2013-shade\result\result9.txt' pt 1 lw 2 ps 1 lc rgb "green" title 'shade' with lines,\
+   '..\ALG\2014-lshade\result\result9.txt' pt 1 lw 3 ps 1 lc rgb "black" title 'lshade' with lines,
 
 set output
