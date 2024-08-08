@@ -2,7 +2,7 @@ set terminal png font arial 14 size 800,600
 set key bmargin
 
 #set xrange [0:10000]
-#set yrange [-1:10]
+#set yrange [-200:10]
 set logscale y
 
 set xlabel 'iteration'
