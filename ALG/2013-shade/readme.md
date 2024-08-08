@@ -8,6 +8,7 @@
 - Randomly select MCR&MF from History Memory
 - SHADE does not have an explicit learning rate parameter – instead, the memory size H plays a similar role.
 - the rate of control parameter convergence is expected to slow down because older parameters will continue to have influence for a longer time.
+- 增加容錯率(Compare to Jade)
 ## How to Run
 ```g++ main_shade.cpp```
 

@@ -8,6 +8,6 @@ set xlabel 'iteration'
 set ylabel 'value'
 set output 'jade.png'
 
-plot './result/result1.txt' pt 1 lw 1 ps 1 lc rgb "blue" title 'jade' with dots
+plot './result/result0.txt' pt 1 lw 1 ps 1 lc rgb "blue" title 'shade' with dots
 
 set output
