@@ -11,7 +11,7 @@ using namespace std;
 class Lshade
 {
 public:
-    void RunALG(int, int, int, int, int, int, int, int);
+    void RunALG(int, int, int, int, int, int, int, int, int);
 
 private:
     int _Run;
@@ -25,6 +25,7 @@ private:
     int _NPnow;
     int _k;
     int _FessNow;
+    int _MAX_NFE;
     vector<double> _SF, _SCR;
 
     typedef struct History
@@ -56,23 +57,24 @@ private:
     Tool tool;
     Problem problem;
 };
-void Lshade::RunALG(int Run, int Func, int NP, int FESS, int Dim, int Arch, int H, int NPmin)
+void Lshade::RunALG(int Run, int Func, int NP, int FESS, int Dim, int Arch, int H, int NPmin, int MAX_NFE)
 {
     _Run = Run;
     _NP = NP;
-    _Gen = FESS / NP;
+    _Gen = 0;
     _Dim = Dim;
     _Arch = 0;
     _FESS = FESS;
     _H = H;
     _NPmin = NPmin;
     _NPnow = _NP;
+    _MAX_NFE = MAX_NFE;
     if (Arch != 0)
     {
         _Arch = _NP;
     }
     show = AlgPrint(_Run, "./result", "Lshade");
-    show.NewShowDataDouble(_Gen);
+    show.NewShowDataDouble(_FESS);
 
     problem.setStrategy(Func);
 
@@ -124,8 +126,13 @@ void Lshade::Init()
 
 void Lshade::Evaluation()
 {
-    for (int g = 0; g < _Gen; g++)
+    _Gen=0;
+    while (_FessNow < _FESS)
     {
+        // check in Evaluation times
+        if (_FessNow+_NPnow > _FESS)
+            break;
+
         vector<double> deltaF; // to store fitness to calculate mean
         deltaF.clear();
         _SCR.clear();
@@ -291,8 +298,12 @@ void Lshade::Evaluation()
 
         // Update NPnow
         _FessNow += _NPnow;
-        int _NPnext = (int)round(((_NPmin - _NP) / _FESS) * _FessNow + _NP);
-        if (_NPnow > _NPnext) {
+        int _NPnext = round(((_NPmin - _NP) / _MAX_NFE) * _FessNow + _NP);
+        // cout << _FessNow << endl;
+        // if (_NPnext != _NPnow)
+        //     cout << "NPnow: " << _NPnow << " NPnext: " << _NPnext << endl;
+        if (_NPnow < _NPnext) {
+            // cout << "NPnow: " << _NPnow << " NPnext: " << _NPnext << endl;
             _NPnow = _NPnext;
             _Arch = _NPnext;
             sort(_X.begin(), _X.end(), compareFitness);
@@ -314,7 +325,8 @@ void Lshade::Evaluation()
             if (tmp > _X[p]._fitness)
                 tmp = _X[p]._fitness;
         }
-        show.SetDataDouble(_Run, tmp, g);
+        show.SetDataDouble(_Run, tmp, _Gen);
+        _Gen++;
     }
 }
 

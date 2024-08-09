@@ -21,15 +21,14 @@ public:
     template<typename T>
     void NewShowData(vector<vector<T>>& data, int amount){
         data.resize(_run);
-        for (auto& elem : data) {
-            elem.resize(amount); 
-            std::fill(elem.begin(), elem.end(), T());
+        for (int i = 0; i < _run; i++){
+            data[i].resize(amount);
         }
     }
 
     template<typename T>
     void SetData(int run, vector<vector<T>>& data, T num, int iter){
-        data[run][iter] += num;
+        data[run][iter] = num;
     }
 
     template<typename T>
@@ -56,12 +55,10 @@ public:
     }
 
     void NewShowDataInt(int amount){
-        _iter = amount;
         NewShowData(_dataInt, amount);
     }
 
     void NewShowDataDouble(int amount){
-        _iter = amount;
         NewShowData(_dataDouble, amount);
     }
 
@@ -86,7 +83,6 @@ private:
     string _folder;
     string _alg;
     int _run;
-    int _iter;
     vector<vector<long int>> _dataInt;
     vector<vector<long double>> _dataDouble;
 };

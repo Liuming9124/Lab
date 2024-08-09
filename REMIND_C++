@@ -1,0 +1,1 @@
+1. When resize a specific vector, the size will not be change by push_back or resize again.

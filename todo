@@ -1,2 +1,1 @@
-Modify powershell script to add run file
-check lshade for running average times devide
+- sometimes Use powershell to run parallel command would appear problem. ex: lshade-fun5 will accidently stop.
