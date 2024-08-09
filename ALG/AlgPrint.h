@@ -21,35 +21,14 @@ public:
     template<typename T>
     void NewShowData(vector<vector<T>>& data, int amount){
         data.resize(_run);
-        for (auto& elem : data) {
-            elem.resize(amount); 
-            std::fill(elem.begin(), elem.end(), T());
+        for (int i = 0; i < _run; i++){
+            data[i].resize(amount);
         }
     }
 
     template<typename T>
     void SetData(int run, vector<vector<T>>& data, T num, int iter){
-        if (this->_iter < iter){
-            cout << data[run].size() << endl;
-            cout << "test in" << endl;
-            data[run].resize(iter+1);
-            for (auto& elem : data[run]){
-                std::fill(elem.begin() + _iter, elem.end(), T());
-            }
-            cout << "test out" << endl;
-            this->_iter = iter;
-            cout << data[run].size() << endl;
-            data[run][iter] = num;
-        }
-        else {
-            // check if index is out of range
-            if (run < data.size() && iter < data[run].size()) {
-                data[run][iter] += num;
-            } else {
-                cout << "run: " << run << " iter: " << iter << " num: " << num << endl;
-                throw out_of_range("Index out of range");
-            }
-        }
+        data[run][iter] = num;
     }
 
     template<typename T>
@@ -76,12 +55,10 @@ public:
     }
 
     void NewShowDataInt(int amount){
-        _iter = amount;
         NewShowData(_dataInt, amount);
     }
 
     void NewShowDataDouble(int amount){
-        _iter = amount;
         NewShowData(_dataDouble, amount);
     }
 
@@ -106,7 +83,6 @@ private:
     string _folder;
     string _alg;
     int _run;
-    int _iter;
     vector<vector<long int>> _dataInt;
     vector<vector<long double>> _dataDouble;
 };
