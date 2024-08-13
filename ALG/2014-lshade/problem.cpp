@@ -150,13 +150,10 @@ public:
     }
     double execute(const vector<double>& xx, int dim) const override {
         double num = 0;
-        for (int i=0; i<dim-1; i++){
-            double t1, t2;
-            t1=t2=0;
-            t1 = xx[i+1]-xx[i]*xx[i];
-            t1 = 100*(t1*t1);
-            t2 = (xx[i]-1)*(xx[i]-1);
-            num += t1+t2;
+        for (int i = 0; i < dim - 1; i++) {
+            double t1 = 100 * std::pow(xx[i+1] - xx[i] * xx[i], 2);
+            double t2 = std::pow(xx[i] - 1, 2);
+            num += t1 + t2;
         }
         return num;
     }

@@ -298,7 +298,7 @@ void Lshade::Evaluation()
         _FessNow += _NPnow;
         int _NPnext = (int) round((((_NPmin - _NP) / (double)_FESS) *  (double)_FessNow) + _NP );
         
-        if (_NPnow < _NPnext) {
+        if (_NPnow > _NPnext) {
             _NPnow = _NPnext;
             _Arch = _NPnext;
             sort(_X.begin(), _X.end(), compareFitness);
@@ -322,6 +322,7 @@ void Lshade::Evaluation()
         }
         show.SetDataDouble(_Run, tmp, _Gen);
         _Gen++;
+        // cout << _FessNow << " " << _FESS << " " << _Gen << endl;
     }
 }
 
