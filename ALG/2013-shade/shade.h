@@ -145,8 +145,15 @@ void Shade::Evaluation()
                 }
             } while (_X[i]._inF <= 0);
 
-            _X[i]._inP = tool.rand_double(2/_NP, 0.2);
-            
+            if (2.0 / _NP > 0.2)
+            {
+                _X[i]._inP = 0.2;
+            }
+            else
+            {
+                _X[i]._inP = tool.rand_double(2.0 / _NP, 0.2);
+            }
+
             // Random choose three place to mutation
             int best, r1, r2, flag = 0;
             best = selectTopPBest(_X, _X[i]._inP);
