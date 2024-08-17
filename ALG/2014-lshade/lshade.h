@@ -163,18 +163,26 @@ void Lshade::Evaluation()
                     _X[i]._inF = 1;
                 }
             } while (_X[i]._inF <= 0);
-
-            _X[i]._inP = tool.rand_double(2 / _NPnow, 0.2);
-
+            
+            if (2.0/_NPnow > 0.2){
+                _X[i]._inP = 0.2;
+            }
+            else {
+                _X[i]._inP = tool.rand_double(2.0/_NPnow, 0.2);
+            }
+            
             // Random choose three place to mutation
             int best, r1, r2, flag = 0;
             best = selectTopPBest(_X, _X[i]._inP);
             do
             {
+                // TODO : stuck at here
+                cout << i << " " << _NPnow-1 << endl;
                 r1 = tool.rand_int(0, _NPnow - 1);
             } while (r1 == i);
             do
             {
+                // cout << "2 : " << _NPnow + _A.size() - 1 << endl;
                 r2 = tool.rand_int(0, _NPnow + _A.size() - 1);
                 if (r2 >= _NPnow)
                 {
@@ -298,11 +306,13 @@ void Lshade::Evaluation()
         _FessNow += _NPnow;
         int _NPnext = (int) round((((_NPmin - _NP) / (double)_FESS) *  (double)_FessNow) + _NP );
         
-        if (_NPnow > _NPnext) {
-            _NPnow = _NPnext;
-            _Arch = _NPnext;
-            sort(_X.begin(), _X.end(), compareFitness);
-            _X.resize(_NPnext);
+        if (_NPnext > _NPmin){
+            if (_NPnow > _NPnext) {
+                _NPnow = _NPnext;
+                _Arch = _NPnext;
+                sort(_X.begin(), _X.end(), compareFitness);
+                _X.resize(_NPnext);
+            }
         }
 
         // Resize Archive size
@@ -322,7 +332,6 @@ void Lshade::Evaluation()
         }
         show.SetDataDouble(_Run, tmp, _Gen);
         _Gen++;
-        // cout << _FessNow << " " << _FESS << " " << _Gen << endl;
     }
 }
 
