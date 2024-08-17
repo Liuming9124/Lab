@@ -177,7 +177,7 @@ void Lshade::Evaluation()
             do
             {
                 // TODO : stuck at here
-                cout << i << " " << _NPnow-1 << endl;
+                // cout << i << " " << _NPnow-1 << endl;
                 r1 = tool.rand_int(0, _NPnow - 1);
             } while (r1 == i);
             do
@@ -308,6 +308,7 @@ void Lshade::Evaluation()
         
         if (_NPnext > _NPmin){
             if (_NPnow > _NPnext) {
+                // cout << "NPnow > NPnext" << _NPnow << " > " << _NPnext << " > " << _NPmin << endl;
                 _NPnow = _NPnext;
                 _Arch = _NPnext;
                 sort(_X.begin(), _X.end(), compareFitness);
