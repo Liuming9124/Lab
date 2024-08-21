@@ -1,7 +1,7 @@
 #ifndef LSHADE_H
 #define LSHADE_H
 
-#include "./problem.cpp"
+#include "../CEC/cec2005.cpp"
 #include "../AlgPrint.h"
 #include "../Tool.h"
 #include <vector>
@@ -139,7 +139,7 @@ void Lshade::Evaluation()
         {
             // init CR & F & P
             int index = tool.rand_int(0, _H - 1);
-            if (_HS[index].EndFlag)
+            if (_HS[index].EndFlag) // new: EndFlag For CRi
             {
                 _X[i]._inCR = 0;
             }
@@ -176,13 +176,10 @@ void Lshade::Evaluation()
             best = selectTopPBest(_X, _X[i]._inP);
             do
             {
-                // TODO : stuck at here
-                // cout << i << " " << _NPnow-1 << endl;
                 r1 = tool.rand_int(0, _NPnow - 1);
             } while (r1 == i);
             do
             {
-                // cout << "2 : " << _NPnow + _A.size() - 1 << endl;
                 r2 = tool.rand_int(0, _NPnow + _A.size() - 1);
                 if (r2 >= _NPnow)
                 {
@@ -302,13 +299,12 @@ void Lshade::Evaluation()
                 _k = 0;
         }
 
-        // Update NPnow
+        // new: Population Reduction, Update NPnow
         _FessNow += _NPnow;
         int _NPnext = (int) round((((_NPmin - _NP) / (double)_FESS) *  (double)_FessNow) + _NP );
         
         if (_NPnext > _NPmin){
             if (_NPnow > _NPnext) {
-                // cout << "NPnow > NPnext" << _NPnow << " > " << _NPnext << " > " << _NPmin << endl;
                 _NPnow = _NPnext;
                 _Arch = _NPnext;
                 sort(_X.begin(), _X.end(), compareFitness);
