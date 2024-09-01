@@ -1,32 +1,51 @@
 #include <vector>
 #include <stdlib.h>
 #include <iostream>
-#include <fstream>
-#include <iomanip>
+#include <cmath>
 #include <string>
+#include <memory>
+#include "../Tool.h"
 using namespace std;
-using std::setw;
-#pragma once
 
-class OneMax
+class Strategy {
+public:
+    virtual double execute(const vector<double>& xx, int dim) const = 0;
+
+};
+
+
+class FuncOnemax : public Strategy {
+public:
+    FuncOnemax() {}
+    double execute(const vector<double>& xx, int dim) const override {
+        double num=0;
+        for (int i=0; i<dim; i++){
+            num += xx[i];
+        }
+        return num;
+    }
+};
+
+
+class Problem
 {
 public:
-    int OneMaxProblem(std::vector<bool> sol, int bit_size){
-        int sum = 0;
-        for (int i = 0; i < bit_size; i++){
-            sum += sol[i];
+    void setStrategy(int func) {
+        switch (func)
+        {
+        case 0:
+            strategy = make_unique<FuncOnemax>();
+            break;
+        default:
+            cout << "Error: No such Function" << endl;
+            break;    
         }
-        return sum;
-    }
-    
-    bool OneMaxCompare(std::vector<bool> sol, std::vector<bool> best, int bit_size){
-        return OneMaxProblem(sol, bit_size) > OneMaxProblem(best, bit_size);
     }
 
-    void GenRandSol(std::vector<bool>* sol, int bit_size){
-        sol->resize(bit_size);
-        for (int i=0; i<bit_size; i++){
-            (*sol)[i] = rand()%2;
-        }
+    double executeStrategy(const vector<double>& xx, int dim) const {
+        return strategy->execute(xx, dim);
     }
+
+private:
+    unique_ptr<Strategy> strategy;
 };
