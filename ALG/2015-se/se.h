@@ -4,8 +4,11 @@
 #include "../AlgPrint.h"
 #include "../Tool.h"
 #include "./OneMax.cpp"
+#include "./OneMax.cpp"
 #include <vector>
 #include <algorithm>
+#include <cmath>
+
 #include <cmath>
 
 using namespace std;
@@ -13,6 +16,10 @@ using namespace std;
 class SE
 {
 public:
+    typedef vector<int> i1d;
+    typedef vector<i1d> i2d;
+    typedef vector<i2d> i3d;
+    typedef vector<i3d> i4d;
     typedef vector<int> i1d;
     typedef vector<i1d> i2d;
     typedef vector<i2d> i3d;
