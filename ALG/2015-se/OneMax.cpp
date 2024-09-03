@@ -9,7 +9,7 @@ using namespace std;
 
 class Strategy {
 public:
-    virtual double execute(const vector<double>& xx, int dim) const = 0;
+    virtual double execute(const vector<int>& xx, int dim) const = 0;
 
 };
 
@@ -17,7 +17,7 @@ public:
 class FuncOnemax : public Strategy {
 public:
     FuncOnemax() {}
-    double execute(const vector<double>& xx, int dim) const override {
+    double execute(const vector<int>& xx, int dim) const override {
         double num=0;
         for (int i=0; i<dim; i++){
             num += xx[i];
@@ -42,7 +42,7 @@ public:
         }
     }
 
-    double executeStrategy(const vector<double>& xx, int dim) const {
+    double executeStrategy(const vector<int>& xx, int dim) const { // TODO add evaulation times
         return strategy->execute(xx, dim);
     }
 
