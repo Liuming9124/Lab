@@ -178,7 +178,8 @@ void SE::resource_arrangement()
     tb.assign(num_Regions, 1.0);
 
     for (int i=0; i<num_Searchers; i++){
-        int r = searcher_region_id[i];
+        // int r = searcher_region_id[i];
+        int r = searcher_region_id[i%num_Regions];
         ta[r]++;
         tb[r] = 1.0;
     }
