@@ -103,11 +103,14 @@ void SE::RunALG(int Run, int Func, int Evals, int Bits, int Searchers, int Regio
             int eval_cc = eval_count;
             vision_search(eval_cc);
             marketing_search(Best);
-            show.SetDataInt(num_Run, Best, eval_count);
-            cout << "Run: " << num_Run << " eval_count: " << eval_count << " Best: " << Best << endl;
+            if (eval_count <= num_Fess){
+                show.SetDataInt(num_Run, Best, eval_count);
+                cout << "Run: " << num_Run << " eval_count: " << eval_count << " Best: " << Best << endl;
+            }
         }
+        cout << "------------------------------" << endl;
     }
-    show.PrintToFileDouble("./result/result" + to_string(Func) + ".txt", num_Fess);
+    show.PrintToFileInt("./result/result" + to_string(Func) + ".txt", num_Fess);
 }
 
 void SE::init()
@@ -120,7 +123,7 @@ void SE::init()
     searcher_sol_fit.assign(num_Searchers, 0.0);
     sample_sol_fit.assign(num_Regions, d1d(num_Samples, 0.0));
     sample_best_fit.assign(num_Regions, 0.0);
-    sampleV_sol_fit.assign(num_Searchers, d2d(num_Regions, d1d(num_Samples, 0.0)));
+    sampleV_sol_fit.assign(num_Searchers, d2d(num_Regions, d1d(num_Samples*2, 0.0)));
 
     Best_sol.assign(num_Dim, 0);
     Best = 0;

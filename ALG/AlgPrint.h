@@ -9,7 +9,9 @@ using std::setw;
 class AlgPrint{
 public:
     AlgPrint(){}
-    AlgPrint( int run, const string& folder, const string& alg) : _run(run), _folder(folder), _alg(alg){}
+    AlgPrint( int run, const string& folder, const string& alg) : _run(run), _folder(folder), _alg(alg){
+        _lastPrint = 0;
+    }
     
     void clearResult(const string& filename) {
         ofstream ofs;
@@ -24,11 +26,24 @@ public:
         for (int i = 0; i < _run; i++){
             data[i].resize(amount);
         }
+        cout << "Data size: " << data.size() << " " << data[0].size() << endl;
     }
 
     template<typename T>
     void SetData(int run, vector<vector<T>>& data, T num, int iter){
-        data[run][iter] = num;
+        if (_lastPrint==iter){
+            data[run][iter] = num;
+            // cout << "Run" << run << " iter: " << iter << " num: " << num << endl;
+        }
+        else{
+            for (int i = _lastPrint+1; i <= iter; i++){
+                data[run][i] = num;
+                // cout << "Run" << run << " iter: " << i << " num: " << num << endl;
+            }
+            _lastPrint = iter;
+        }
+        if (_lastPrint != _maxPrint)
+            _maxPrint = _lastPrint;
     }
 
     template<typename T>
@@ -38,10 +53,10 @@ public:
         // write to file
         ofstream file(fileName, ios_base::app);
         if (file.is_open()) {
-            vector<T> AvgData(iter, 0);
+            vector<T> AvgData(_maxPrint, 0);
 
             for (int i = 0; i < _run; i++){
-                for (int j = 0; j < iter; j++){
+                for (int j = 0; j < _maxPrint; j++){
                     AvgData[j] += data[i][j];
                 }
             }
@@ -83,6 +98,8 @@ private:
     string _folder;
     string _alg;
     int _run;
+    int _lastPrint;
+    int _maxPrint;
     vector<vector<long int>> _dataInt;
     vector<vector<long double>> _dataDouble;
 };
