@@ -47,7 +47,6 @@ public:
         for (int i = 0; i < _run; i++){
             data[i].resize(amount);
         }
-        cout << "Data size: " << data.size() << " " << data[0].size() << endl;
     }
 
     template<typename T>
