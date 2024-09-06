@@ -3,6 +3,7 @@
 #include <iomanip>
 #include <fstream>
 #include <string>
+#include <cmath>
 using namespace std;
 using std::setw;
 
@@ -17,6 +18,26 @@ public:
         ofstream ofs;
         ofs.open(filename, ofstream::out | ofstream::trunc);
         ofs.close();
+    }
+
+    double calculateMean(const std::vector<double>& numbers) {
+        double sum = 0.0;
+        for(double num : numbers) {
+            sum += num;
+        }
+        return sum / numbers.size();
+    }
+
+    double calculateStandardDeviation(const std::vector<double>& numbers) {
+        double mean = calculateMean(numbers);
+        double variance = 0.0;
+        
+        for(double num : numbers) {
+            variance += (num - mean) * (num - mean);
+        }
+        
+        variance /= numbers.size();
+        return std::sqrt(variance);
     }
 
 
@@ -52,15 +73,25 @@ public:
         // write to file
         ofstream file(fileName, ios_base::app);
         if (file.is_open()) {
-            vector<T> AvgData(_maxPrint, 0);
+            vector<double> AvgData(_maxPrint, 0);
 
+            // mean avg
             for (int i = 0; i < _run; i++){
                 for (int j = 0; j < _maxPrint; j++){
                     AvgData[j] += data[i][j];
                 }
             }
-            for(const auto& elem : AvgData){
+            for(const double& elem : AvgData){
                 file << (double)elem/_run << endl;
+            }
+
+            // std dev
+            if (_run!=1){
+                vector <double> StdDev(_run, 0);
+                for (int i=0; i<_run; i++){
+                    StdDev[i] = (double)data[i][_maxPrint-1];
+                }
+                file << "Run " << _run << ", std dev: " << (double)calculateStandardDeviation(StdDev) << endl;
             }
         }
         else {

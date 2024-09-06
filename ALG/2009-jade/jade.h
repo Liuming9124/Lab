@@ -1,7 +1,7 @@
 #ifndef JADE_H
 #define JADE_H
 
-#include "./problem.cpp"
+#include "../CEC/test13.cpp"
 #include "../AlgPrint.h"
 #include "../Tool.h"
 #include <queue>
@@ -66,7 +66,7 @@ void Jade::RunALG(int Run, int Func, int NP, int Fess, int Dim, int Arch, double
         _Arch = _NP;
     }
     show = AlgPrint(_Run, "./result", "jade");
-    show.NewShowDataDouble(_Gen);
+    show.NewShowDataDouble(Fess);
 
     problem.setStrategy(Func);
 
@@ -251,7 +251,7 @@ void Jade::Evaluation()
             if (tmp > _X[p]._fitness)
                 tmp = _X[p]._fitness;
         }
-        show.SetDataDouble(_Run, tmp, g);
+        show.SetDataDouble(_Run, tmp, g*_NP);
     }
 }
 

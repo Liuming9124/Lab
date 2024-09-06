@@ -1,7 +1,7 @@
 #ifndef SHADE_H
 #define SHADE_H
 
-#include "./problem.cpp"
+#include "../CEC/test13.cpp"
 #include "../AlgPrint.h"
 #include "../Tool.h"
 #include <queue>
@@ -68,7 +68,7 @@ void Shade::RunALG(int Run, int Func, int NP, int FESS, int Dim, int Arch, int H
         _Arch = _NP;
     }
     show = AlgPrint(_Run, "./result", "Shade");
-    show.NewShowDataDouble(_Gen);
+    show.NewShowDataDouble(FESS);
 
     problem.setStrategy(Func);
 
@@ -79,7 +79,7 @@ void Shade::RunALG(int Run, int Func, int NP, int FESS, int Dim, int Arch, int H
         Evaluation();
         Reset();
     }
-    show.PrintToFileDouble("./result/result" + to_string(Func) + ".txt", _Gen);
+    show.PrintToFileDouble("./result/result" + to_string(Func) + "_DIM" + to_string(_Dim) + "_FESS" + to_string(_FESS) + ".txt", _Gen);
     cout << "end" << endl;
 }
 
@@ -241,8 +241,10 @@ void Shade::Evaluation()
         while (_A.size() > _Arch)
         {
             // randomly remove one element from A
-            int remove = tool.rand_int(0, _A.size() - 1);
-            _A.erase(_A.begin() + remove);
+            if (_A.size()>=1) {
+                int remove = tool.rand_int(0, _A.size() - 1);
+                _A.erase(_A.begin() + remove);
+            }
         }
 
         if (_SCR.size() != 0 && _SF.size() != 0){
@@ -280,7 +282,7 @@ void Shade::Evaluation()
             if (tmp > _X[p]._fitness)
                 tmp = _X[p]._fitness;
         }
-        show.SetDataDouble(_Run, tmp, g);
+        show.SetDataDouble(_Run, tmp, g*_NP);
     }
 }
 

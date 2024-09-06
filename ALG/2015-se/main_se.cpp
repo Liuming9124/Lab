@@ -5,7 +5,7 @@
 using namespace std;
 
 int main(int argc, char *argv[]){
-    int Run, Func, Evals, Bits, Searchers, Regions, Samples, Players;
+    int Run, Func, Evals, Bits, Searchers, Regions, Samples, Players, Iter;
 
     stringstream ss;
     for (int i = 1; i < argc; i++)
@@ -18,8 +18,9 @@ int main(int argc, char *argv[]){
     ss >> Regions;
     ss >> Samples;
     ss >> Players;
+    ss >> Iter;
 
     SE se;
-    se.RunALG(Run, Func, Evals, Bits, Searchers, Regions, Samples, Players);
+    se.RunALG(Run, Func, Evals, Bits, Searchers, Regions, Samples, Players, Iter);
     return 0;
 }

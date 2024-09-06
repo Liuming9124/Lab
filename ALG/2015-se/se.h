@@ -22,7 +22,7 @@ public:
     typedef vector<d2d> d3d;
 
 public:
-    void RunALG(int, int, int, int, int, int, int, int);
+    void RunALG(int, int, int, int, int, int, int, int, int);
 
 private:
     // env
@@ -78,7 +78,7 @@ private:
 };
 
 
-void SE::RunALG(int Run, int Func, int Evals, int Bits, int Searchers, int Regions, int Samples, int Players)
+void SE::RunALG(int Run, int Func, int Evals, int Bits, int Searchers, int Regions, int Samples, int Players, int Iter)
 {
     num_Run = Run;
     num_Fess = Evals;
@@ -98,19 +98,22 @@ void SE::RunALG(int Run, int Func, int Evals, int Bits, int Searchers, int Regio
     {
         init();
         resource_arrangement();
-        while (eval_count < num_Fess)
+        int num_Iter = 0;
+        while (num_Iter < Iter)
         {
+            eval_count < num_Fess;
             int eval_cc = eval_count;
             vision_search(eval_cc);
             marketing_search(Best);
-            if (eval_count <= num_Fess){
+            // if (eval_count <= num_Fess){
                 show.SetDataInt(num_Run, Best, eval_count);
                 cout << "Run: " << num_Run << " eval_count: " << eval_count << " Best: " << Best << endl;
-            }
+            // }
+            num_Iter++;
         }
         cout << "------------------------------" << endl;
     }
-    show.PrintToFileInt("./result/result" + to_string(Func) + "_dim_" + to_string(num_Dim) + ".txt", num_Fess);
+    show.PrintToFileInt("./result/result" + to_string(Func) + "_dim" + to_string(num_Dim) + "_iter" + to_string(Iter)  + ".txt", num_Fess);
 }
 
 void SE::init()

@@ -1,3 +1,8 @@
 Show result
 - result type: times, value
 - best_so_far
+- (std Dev)
+
+
+Modify Show type
+- use fitness to evaluate
