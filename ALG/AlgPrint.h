@@ -60,7 +60,7 @@ public:
                 }
             }
             for(const auto& elem : AvgData){
-                file << elem/_run << endl;
+                file << (double)elem/_run << endl;
             }
         }
         else {

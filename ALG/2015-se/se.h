@@ -110,7 +110,7 @@ void SE::RunALG(int Run, int Func, int Evals, int Bits, int Searchers, int Regio
         }
         cout << "------------------------------" << endl;
     }
-    show.PrintToFileInt("./result/result" + to_string(Func) + ".txt", num_Fess);
+    show.PrintToFileInt("./result/result" + to_string(Func) + "_dim_" + to_string(num_Dim) + ".txt", num_Fess);
 }
 
 void SE::init()
@@ -166,7 +166,7 @@ void SE::resource_arrangement()
     // init sample solutions
     for (int i=0; i<num_Regions; i++){
         for (int j=0; j<num_Samples; j++){
-            for (int k=0; k<num_Dim; k++)
+            for (int k=0; k<num_id_bits; k++)
                 sample_sol[i][j][k] = id_bits[i][k];
             for (int k=num_id_bits; k<num_Dim; k++)
                 sample_sol[i][j][k] = tool.rand_int(0, 1);
@@ -208,7 +208,7 @@ void SE::transit() {
     for (int i = 0; i < num_Searchers; i++) {
         for (int j = 0; j < num_Regions; j++) {
             for (int k = 0; k < num_Samples; k++) {
-                const int x = tool.rand_int(0, num_Dim+1); // divide place, from start to end(must add 1)
+                const int x = tool.rand_int(0, num_Dim); // divide place, from start to end(must add 1)
                 const int m = k << 1; // m = 2k
 
                 // 設定每個searcher的sampleV_sol的區域id
@@ -223,8 +223,8 @@ void SE::transit() {
                         sampleV_sol[i][j][m][l]   = searcher_sol[i][l];
                         sampleV_sol[i][j][m+1][l] = sample_sol[j][k][l];
                     } else {
-                        sampleV_sol[i][j][m][l]   = searcher_sol[i][l];
-                        sampleV_sol[i][j][m+1][l] = sample_sol[j][k][l];
+                        sampleV_sol[i][j][m][l]   = sample_sol[j][k][l];
+                        sampleV_sol[i][j][m+1][l] = searcher_sol[i][l];
                     }
                 }
             }
@@ -235,7 +235,7 @@ void SE::transit() {
     for (int i = 0; i < num_Searchers; i++) {
         for (int j = 0; j < num_Regions; j++) {
             for (int k = 0; k < 2*num_Samples; k++) {
-                int t = tool.rand_int(0, num_Dim);
+                int t = tool.rand_int(0, num_Dim-1);
                 if (t>=num_id_bits) {
                     sampleV_sol[i][j][k][t] = !sampleV_sol[i][j][k][t];
                 }
@@ -346,7 +346,7 @@ void SE::vision_selection(int player,int eval){
 void SE::marketing_search(int &Best){
     for (int j = 0; j < num_Regions; j++)
         if (tb[j] > 1)
-            ta[j] = 0;
+            ta[j] = 1.0;
     for (int i = 0; i < num_Searchers; i++){
         if (searcher_sol_fit[i] > Best){
             Best = searcher_sol_fit[i];
