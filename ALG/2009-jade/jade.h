@@ -77,7 +77,7 @@ void Jade::RunALG(int Run, int Func, int NP, int Fess, int Dim, int Arch, double
         Evaluation();
         Reset();
     }
-    show.PrintToFileDouble("./result/result" + to_string(Func) + "_DIM_" + to_string(_Dim) + "_FESS_" + to_string(_Fess) + ".txt", _Gen);
+    show.PrintToFileDouble("./result/result" + to_string(Func) + "_GEN" + to_string(_Gen) + "_DIM" + to_string(_Dim) + "_NP" + to_string(_NP) + "_FESS" + to_string(_Fess) + ".txt", _Gen);
     cout << "end" << endl;
 }
 

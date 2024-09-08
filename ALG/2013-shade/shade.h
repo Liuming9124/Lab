@@ -79,7 +79,7 @@ void Shade::RunALG(int Run, int Func, int NP, int FESS, int Dim, int Arch, int H
         Evaluation();
         Reset();
     }
-    show.PrintToFileDouble("./result/result" + to_string(Func) + "_DIM" + to_string(_Dim) + "_FESS" + to_string(_FESS) + ".txt", _Gen);
+    show.PrintToFileDouble("./result/result" + to_string(Func) + "_GEN" + to_string(_Gen) + "_DIM" + to_string(_Dim) + "_NP" + to_string(_NP) + "_FESS" + to_string(_FESS) + ".txt", _Gen);
     cout << "end" << endl;
 }
 
