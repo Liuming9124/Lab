@@ -10,7 +10,7 @@
 #include <algorithm>
 using namespace std;
 
-class Jade : Problem
+class Jade
 {
 public:
 
@@ -77,7 +77,7 @@ void Jade::RunALG(int Run, int Func, int NP, int Fess, int Dim, int Arch, double
         Evaluation();
         Reset();
     }
-    show.PrintToFileDouble("./result/result" + to_string(Func) + "_GEN" + to_string(_Gen) + "_DIM" + to_string(_Dim) + "_NP" + to_string(_NP) + "_FESS" + to_string(_Fess) + ".txt", _Gen);
+    show.PrintToFileDouble("./crcmp/crcmp2_" + to_string(Func) + "_GEN" + to_string(_Gen) + "_DIM" + to_string(_Dim) + "_NP" + to_string(_NP) + "_FESS" + to_string(_Fess) + ".txt", _Gen);
     cout << "end" << endl;
 }
 
@@ -191,10 +191,48 @@ void Jade::Evaluation()
                 CheckBorder(_V, _X[i]);
             }
             // crossover
+
+            // my method
+            vector<int> m;
+            int typeCR = 2;
+            double alpha = 0.1;
+            int num_m = 0;
+            if (typeCR==0)
+                num_m = alpha*_Dim;
+
+            else if (typeCR==1)
+                num_m =  alpha *  (_Gen - g) / _Gen ;
+
+            else if (typeCR==2)
+                num_m = (int)(alpha * _Dim * (double)(_Gen - g / (double)_Gen));
+
+            if ( num_m < 0.05*_Dim || num_m < 1){
+                num_m = 1;
+                if (0.05*_Dim > 1){
+                    num_m = (int)(0.05*_Dim);
+                }
+            }
+
+            for (int j = 0; j < num_m; j++)
+            {
+                cout << "j=" << to_string(j) << " , num_m= " << to_string(num_m) << endl;
+                // put non repeat random number in m vector
+                int tmp = tool.rand_int(0, _Dim - 1);
+                while (find(m.begin(), m.end(), tmp) != m.end())
+                {
+                    tmp = tool.rand_int(0, _Dim - 1);
+                }
+                cout << endl;
+                m.push_back(tmp);
+            }
+
+
             int jrand = tool.rand_int(0, _Dim - 1);
             for (int j = 0; j < _Dim; j++)
             {
-                if (j == jrand || tool.rand_double(0, 1) < _X[i]._inCR)
+                
+                // 找出j有沒有在m vector裡面
+                if (tool.rand_double(0, 1) < _X[i]._inCR || find(m.begin(), m.end(), j) != m.end())
                 {
                     _U._position[j] = _V._position[j];
                 }
@@ -203,6 +241,22 @@ void Jade::Evaluation()
                     _U._position[j] = _X[i]._position[j];
                 }
             }
+
+            // // paper method
+            // int jrand = tool.rand_int(0, _Dim - 1);
+            // for (int j = 0; j < _Dim; j++)
+            // {
+            //     if (j == jrand || tool.rand_double(0, 1) < _X[i]._inCR)
+            //     {
+            //         _U._position[j] = _V._position[j];
+            //     }
+            //     else
+            //     {
+            //         _U._position[j] = _X[i]._position[j];
+            //     }
+            // }
+
+
             // Selection
             _U._fitness = problem.executeStrategy(_U._position, _Dim);
             if (_X[i]._fitness > _U._fitness)
