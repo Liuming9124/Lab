@@ -1,0 +1,53 @@
+
+// my method
+int typeCR = 2;
+double alpha = 0.1;
+int num_m = 0;
+if (typeCR==0)
+    num_m = alpha*_Dim;
+
+else if (typeCR==1)
+    num_m =  alpha *  (_Gen - g) / _Gen ;
+
+else if (typeCR==2)
+    num_m = (int)(alpha * _Dim * (double)(_Gen - g / (double)_Gen));
+
+if ( num_m < 0.05*_Dim || num_m < 1){
+    num_m = 1;
+    if (0.05*_Dim > 1){
+        num_m = (int)(0.05*_Dim);
+    }
+}
+
+for (int j = 0; j < num_m; j++)
+{
+    // put non repeat random number in m vector
+    int tmp = tool.rand_int(0, _Dim - 1);
+    bool flag = 0;
+    while (!flag){
+        if (m.size()==0)    break;
+        for (int k = 0; k<m.size(); k++){
+            if (tmp == m[k])
+                flag = 1;
+            else
+                tmp = tool.rand_int(0, _Dim - 1);
+        }
+    }
+    m.push_back(tmp);
+}
+
+
+int jrand = tool.rand_int(0, _Dim - 1);
+for (int j = 0; j < _Dim; j++)
+{
+    
+    // 找出j有沒有在m vector裡面
+    if (tool.rand_double(0, 1) < _X[i]._inCR || find(m.begin(), m.end(), j) != m.end())
+    {
+        _U._position[j] = _V._position[j];
+    }
+    else
+    {
+        _U._position[j] = _X[i]._position[j];
+    }
+}

@@ -190,49 +190,12 @@ void Jade::Evaluation()
                 }
                 CheckBorder(_V, _X[i]);
             }
+            
             // crossover
-
-            // my method
-            vector<int> m;
-            int typeCR = 2;
-            double alpha = 0.1;
-            int num_m = 0;
-            if (typeCR==0)
-                num_m = alpha*_Dim;
-
-            else if (typeCR==1)
-                num_m =  alpha *  (_Gen - g) / _Gen ;
-
-            else if (typeCR==2)
-                num_m = (int)(alpha * _Dim * (double)(_Gen - g / (double)_Gen));
-
-            if ( num_m < 0.05*_Dim || num_m < 1){
-                num_m = 1;
-                if (0.05*_Dim > 1){
-                    num_m = (int)(0.05*_Dim);
-                }
-            }
-
-            for (int j = 0; j < num_m; j++)
-            {
-                cout << "j=" << to_string(j) << " , num_m= " << to_string(num_m) << endl;
-                // put non repeat random number in m vector
-                int tmp = tool.rand_int(0, _Dim - 1);
-                while (find(m.begin(), m.end(), tmp) != m.end())
-                {
-                    tmp = tool.rand_int(0, _Dim - 1);
-                }
-                cout << endl;
-                m.push_back(tmp);
-            }
-
-
             int jrand = tool.rand_int(0, _Dim - 1);
             for (int j = 0; j < _Dim; j++)
             {
-                
-                // 找出j有沒有在m vector裡面
-                if (tool.rand_double(0, 1) < _X[i]._inCR || find(m.begin(), m.end(), j) != m.end())
+                if (j == jrand || tool.rand_double(0, 1) < _X[i]._inCR)
                 {
                     _U._position[j] = _V._position[j];
                 }
@@ -241,21 +204,6 @@ void Jade::Evaluation()
                     _U._position[j] = _X[i]._position[j];
                 }
             }
-
-            // // paper method
-            // int jrand = tool.rand_int(0, _Dim - 1);
-            // for (int j = 0; j < _Dim; j++)
-            // {
-            //     if (j == jrand || tool.rand_double(0, 1) < _X[i]._inCR)
-            //     {
-            //         _U._position[j] = _V._position[j];
-            //     }
-            //     else
-            //     {
-            //         _U._position[j] = _X[i]._position[j];
-            //     }
-            // }
-
 
             // Selection
             _U._fitness = problem.executeStrategy(_U._position, _Dim);
