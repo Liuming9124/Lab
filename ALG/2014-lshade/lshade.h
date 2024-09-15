@@ -1,7 +1,7 @@
 #ifndef LSHADE_H
 #define LSHADE_H
 
-#include "../CEC/cec2005.cpp"
+#include "../CEC/test13.cpp"
 #include "../AlgPrint.h"
 #include "../Tool.h"
 #include <vector>
@@ -19,7 +19,7 @@ private:
     int _Gen;
     int _Arch;
     int _Dim;
-    int _FESS;
+    int _Fess;
     int _H;
     int _NPmin;
     int _NPnow;
@@ -56,14 +56,14 @@ private:
     Tool tool;
     Problem problem;
 };
-void Lshade::RunALG(int Run, int Func, int NP, int FESS, int Dim, int Arch, int H, int NPmin)
+void Lshade::RunALG(int Run, int Func, int NP, int Fess, int Dim, int Arch, int H, int NPmin)
 {
     _Run = Run;
     _NP = NP;
     _Gen = 0;
     _Dim = Dim;
     _Arch = 0;
-    _FESS = FESS;
+    _Fess = Fess;
     _H = H;
     _NPmin = NPmin;
     _NPnow = _NP;
@@ -72,7 +72,7 @@ void Lshade::RunALG(int Run, int Func, int NP, int FESS, int Dim, int Arch, int 
         _Arch = _NP;
     }
     show = AlgPrint(_Run, "./result", "Lshade");
-    show.NewShowDataDouble(_FESS);
+    show.NewShowDataDouble(_Fess);
 
     problem.setStrategy(Func);
 
@@ -83,12 +83,13 @@ void Lshade::RunALG(int Run, int Func, int NP, int FESS, int Dim, int Arch, int 
         Evaluation();
         Reset();
     }
-    show.PrintToFileDouble("./result/result" + to_string(Func) + ".txt", _Gen);
+    show.PrintToFileDouble("./result/result" + to_string(Func) + "_DIM" + to_string(_Dim) + "_NP" + to_string(_NP) + "_Fess" + to_string(_Fess) + ".txt", _Gen);
     cout << "end" << endl;
 }
 
 void Lshade::Init()
 {
+    show.init();
     _A.resize(0);
     _X.resize(_NP);
     _k = 0;
@@ -125,10 +126,10 @@ void Lshade::Init()
 void Lshade::Evaluation()
 {
     _Gen=0;
-    while (_FessNow < _FESS)
+    while (_FessNow < _Fess)
     {
         // check in Evaluation times
-        if (_FessNow+_NPnow > _FESS)
+        if (_FessNow+_NPnow > _Fess)
             break;
 
         vector<double> deltaF; // to store fitness to calculate mean
@@ -301,7 +302,7 @@ void Lshade::Evaluation()
 
         // new: Population Reduction, Update NPnow
         _FessNow += _NPnow;
-        int _NPnext = (int) round((((_NPmin - _NP) / (double)_FESS) *  (double)_FessNow) + _NP );
+        int _NPnext = (int) round((((_NPmin - _NP) / (double)_Fess) *  (double)_FessNow) + _NP );
         
         if (_NPnext > _NPmin){
             if (_NPnow > _NPnext) {
@@ -327,7 +328,9 @@ void Lshade::Evaluation()
             if (tmp > _X[p]._fitness)
                 tmp = _X[p]._fitness;
         }
-        show.SetDataDouble(_Run, tmp, _Gen);
+        
+        if (_FessNow+_NPnow <= _Fess)
+            show.SetDataDouble(_Run, tmp, _FessNow+_NPnow);
         _Gen++;
     }
 }

@@ -71,6 +71,7 @@ void De::RunALG(int Run, int Func, int Pop, int Fess, int Dim, double Cr, double
 
 void De::Init()
 {
+    show.init();
     _Swarm.resize(_Pop);
     _Offspring._position.resize(_Dim);
     for (int i = 0; i < _Dim; i++)

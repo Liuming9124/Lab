@@ -85,6 +85,7 @@ void Shade::RunALG(int Run, int Func, int NP, int FESS, int Dim, int Arch, int H
 
 void Shade::Init()
 {
+    show.init();
     _A.resize(0);
     _X.resize(_NP);
     _k = 0;
