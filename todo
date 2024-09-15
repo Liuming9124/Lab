@@ -1,8 +1,5 @@
 Show result
 - result type: times, value
-- best_so_far
-- (std Dev)
-
-
-Modify Show type
-- use fitness to evaluate
+- best_so_far, worst, median
+- record time
+- use shell to set result save folder, and maybe add one test txt at first to check

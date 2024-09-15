@@ -77,12 +77,13 @@ void Jade::RunALG(int Run, int Func, int NP, int Fess, int Dim, int Arch, double
         Evaluation();
         Reset();
     }
-    show.PrintToFileDouble("./crcmp/crcmp2_" + to_string(Func) + "_GEN" + to_string(_Gen) + "_DIM" + to_string(_Dim) + "_NP" + to_string(_NP) + "_FESS" + to_string(_Fess) + ".txt", _Gen);
+    show.PrintToFileDouble("./result/result" + to_string(Func) + "_GEN" + to_string(_Gen) + "_DIM" + to_string(_Dim) + "_NP" + to_string(_NP) + "_FESS" + to_string(_Fess) + ".txt", _Gen);
     cout << "end" << endl;
 }
 
 void Jade::Init()
 {
+    show.init();
     _mCR = 0.5;
     _mF = 0.5;
     _A.resize(0);

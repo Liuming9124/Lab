@@ -11,7 +11,8 @@ class AlgPrint{
 public:
     AlgPrint(){}
     AlgPrint( int run, const string& folder, const string& alg) : _run(run), _folder(folder), _alg(alg){
-        _lastPrint = 0;
+        _lastPrint = -1;
+        _maxPrint = _lastPrint;
     }
     
     void clearResult(const string& filename) {
@@ -51,16 +52,24 @@ public:
 
     template<typename T>
     void SetData(int run, vector<vector<T>>& data, T num, int iter){
-        if (_lastPrint==iter){
-            data[run][iter] = num;
-            // cout << "Run" << run << " iter: " << iter << " num: " << num << endl;
-        }
-        else{
-            for (int i = _lastPrint+1; i <= iter; i++){
+        if (_lastPrint==-1){
+            for (int i=0; i <= iter; i++){
                 data[run][i] = num;
-                // cout << "Run" << run << " iter: " << i << " num: " << num << endl;
             }
             _lastPrint = iter;
+        }
+        else {
+            if (_lastPrint==iter){
+                data[run][iter] = num;
+                // cout << "Run" << run << " iter: " << iter << " num: " << num << endl;
+            }
+            else{
+                for (int i = _lastPrint+1; i <= iter; i++){
+                    data[run][i] = num;
+                    // cout << "Run" << run << " iter: " << i << " num: " << num << endl;
+                }
+                _lastPrint = iter;
+            }
         }
         if (_lastPrint != _maxPrint)
             _maxPrint = _lastPrint;
@@ -75,10 +84,19 @@ public:
         if (file.is_open()) {
             vector<double> AvgData(_maxPrint, 0);
 
+            // for (int i=0; i<_maxPrint; i++) {
+            //     for (int j=0; j<_run; j++){
+            //         cout << "Iter " << to_string(i) << " Run " << to_string(j) << " , data: " << to_string(data[j][i]) <<  endl;
+            //     }
+            // }
+
+            // cout << "start print" << endl;
             // mean avg
             for (int i = 0; i < _run; i++){
+                // cout << "Run " << to_string(i) << endl;
                 for (int j = 0; j < _maxPrint; j++){
                     AvgData[j] += data[i][j];
+                    // cout << "iter " << to_string(j) << " : " << to_string(data[i][j]) << endl;
                 }
             }
             for(const double& elem : AvgData){
@@ -121,6 +139,11 @@ public:
 
     void PrintToFileDouble(string fileName, int iter){
         PrintToFile(fileName, _dataDouble, iter);
+    }
+
+    void init() {
+        _lastPrint = -1;
+        _maxPrint = _lastPrint;
     }
 
 
