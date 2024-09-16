@@ -69,7 +69,7 @@ void Lshade::RunALG(int Run, int Func, int NP, int Fess, int Dim, int Arch, int 
     _NPnow = _NP;
     if (Arch != 0)
     {
-        _Arch = _NP;
+        _Arch = Arch;
     }
     show = AlgPrint(_Run, "./result", "Lshade");
     show.NewShowDataDouble(_Fess);
