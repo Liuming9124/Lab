@@ -4,7 +4,7 @@
 #include <cmath>
 #include <string>
 #include <memory>
-#include "./cec14-c-code/cec14_test_func.cpp"
+#include "./cec14_test_func.cpp"
 #include "../../Tool.h"
 using namespace std;
 
@@ -36,11 +36,11 @@ public:
     }
 
     double getBounderMin() const {
-        return -100.0;
+        return -50.0;
     }
 
     double getBounderMax() const {
-        return 100.0;
+        return 50.0;
     }
 
 private:
