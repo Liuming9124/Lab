@@ -18,7 +18,7 @@ int main(int argc, char *argv[]){
     ss >> NetLength;
     ss >> History;
 
-    // VN vn;
-    // vn.RunALG(Run, Func, Evals, Dim, NetLength, History);
+    VN vn;
+    vn.RunALG(Run, Func, Evals, Dim, NetLength, History);
     return 0;
 }

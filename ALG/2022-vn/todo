@@ -1,0 +1,3 @@
+BUG: Expected value would be nan
+
+更新的時候可能挑到更差的解更新

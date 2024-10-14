@@ -59,7 +59,6 @@ private:
     vector<double> SF, SCR;
     int index_success = 0;
 
-    vector<double> best_sol;
     double best_value;
 
     // evaluation count
@@ -72,7 +71,6 @@ private:
 
     void Init();
     void Evaluation();
-    void Reset();
 
     void expected_value();
     void net_update();
@@ -102,7 +100,6 @@ void VN::RunALG(int Run, int Func, int Evals, int Dim, int NetLength, double His
         cout << "-------------------Run" << Run - num_Run << "---------------------" << endl;
         Init();
         Evaluation();
-        Reset();
     }
     show.PrintToFileDouble("./result/result" + to_string(Func) + "_DIM" + to_string(num_Dim) + "_NetLen" + to_string(num_Netlen) + "_Fess" + to_string(NetLength) + ".txt", Run);
     cout << "end" << endl;
@@ -111,19 +108,18 @@ void VN::RunALG(int Run, int Func, int Evals, int Dim, int NetLength, double His
 void VN::Init()
 {
     eval_count = 0;
-    best_sol.assign(num_Dim, 0);
     best_value = 0;
 
     // history memory size
     history_index = 0;
     HistoryTable.assign(num_History, {0.3, 0.3});
-    
-    
     SCR.resize(num_Netlen * num_Netlen);
     SF.resize(num_Netlen * num_Netlen);
 
     // init point
     len_x = num_Netlen * num_Netlen;
+    X.resize(len_x);
+    X_previous.resize(len_x);
     for (int i=0; i<len_x; i++){
         // init X
         X[i]._index = i;
@@ -141,27 +137,35 @@ void VN::Init()
         X_previous[i]._fitness = 0;
         X_previous[i]._inCR = X_previous[i]._inF = 0;
     }
+
+    
     // init net
     len_net = (num_Netlen-1)*(num_Netlen-1);
-    for (int i=0; i<len_net; i++){
-        Net[i].net_index = i;
-        Net[i].point_index.assign(4, 0);
-        for (int j=0; j<num_Netlen; j++){
-            Net[i].point_index[0] = i + j*num_Netlen;
-            Net[i].point_index[1] = i + j*num_Netlen + 1;
-            Net[i].point_index[2] = i + j*num_Netlen + num_Netlen;
-            Net[i].point_index[3] = i + j*num_Netlen + num_Netlen + 1; 
-        }
-        Net[i]._Ia = Net[i]._Ib = 1;
-        Net[i]._E = 0;
-        // calculate Ebest
-        Net[i]._Ebest  = X[Net[i].point_index[0]]._fitness;
-        for (int j=1; j<4; j++){
-            if (Net[i]._Ebest > X[Net[i].point_index[j]]._fitness){
-                Net[i]._Ebest = X[Net[i].point_index[j]]._fitness;
+    Net.resize(len_net);
+    for (int i=0; i<num_Netlen-1; i++){
+        for (int j=0; j<num_Netlen-1; j++){
+            Net[i*(num_Netlen-1)+j].net_index = i*(num_Netlen-1)+j;
+            Net[i*(num_Netlen-1)+j].point_index.assign(4, 0);
+            Net[i*(num_Netlen-1)+j].point_index[0] = i*num_Netlen + j;
+            Net[i*(num_Netlen-1)+j].point_index[1] = i*num_Netlen + j + 1;
+            Net[i*(num_Netlen-1)+j].point_index[2] = (i+1)*num_Netlen + j;
+            Net[i*(num_Netlen-1)+j].point_index[3] = (i+1)*num_Netlen + j + 1;
+            Net[i*(num_Netlen-1)+j]._Ia = Net[i*(num_Netlen-1)+j]._Ib = 1;
+            Net[i*(num_Netlen-1)+j]._E = 0;
+            // calculate Ebest
+            Net[i*(num_Netlen-1)+j]._Ebest  = X[Net[i*(num_Netlen-1)+j].point_index[0]]._fitness;
+            for (int k=1; k<4; k++){
+                if (Net[i*(num_Netlen-1)+j]._Ebest > X[Net[i*(num_Netlen-1)+j].point_index[k]]._fitness){
+                    Net[i*(num_Netlen-1)+j]._Ebest = X[Net[i*(num_Netlen-1)+j].point_index[k]]._fitness;
+                }
             }
         }
     }
+    // sort point and save to tmp variable and set best value
+    vector<T_Point> tmp = X;
+    sort(tmp.begin(), tmp.end(), PointCompareFitness);
+    best_value = tmp[0]._fitness;
+    show.SetDataDouble(num_Run, tmp[0]._fitness, eval_count);
 }
 
 void VN::Evaluation()
@@ -173,7 +177,12 @@ void VN::Evaluation()
         // net update
         net_update();
         // show data
+        vector<T_Point> tmp = X;
+        sort(tmp.begin(), tmp.end(), PointCompareFitness);
+        if (best_value > tmp[0]._fitness)
+            best_value = tmp[0]._fitness;
         show.SetDataDouble(num_Run, best_value, eval_count);
+        // cout << "eval_count: " << eval_count << " best: " << best_value << endl;
     }
 }
 
@@ -205,13 +214,16 @@ void VN::expected_value()
     {
         visit_ratio[i] = (visit_ratio[i] - min_visit_ratio) / (max_visit_ratio - min_visit_ratio);
         increase_ratio[i] = (increase_ratio[i] - min_increase_ratio) / (max_increase_ratio - min_increase_ratio);
-        E[i] = (E[i] - min_E) / (max_E - min_E);
+        E[i] = 1 - (E[i] - min_E) / (max_E - min_E); // due to minimize problem
+        // E[i] = (E[i] - min_E) / (max_E - min_E);
     }
     // compute expected value
     double omega = 1.5 - (0.5*eval_count)/num_Fess;
     for (int i = 0; i < len_net; i++)
     {
+        // bug at non E;
         Net[i]._E = visit_ratio[i] + increase_ratio[i] + E[i] * omega;
+        cout << "Net[" << i << "]: " << Net[i]._E << endl;
     }
 }
 
@@ -224,9 +236,8 @@ void VN::net_update()
     SF.clear();
 
     // select pbest net
-    int pbest = 0.4 - ( (0.2/eval_count) / num_Fess );
+    double pbest = 0.4 - ( (0.2/eval_count) / num_Fess );
     int net_pbest = NetSelectTopPBest(Net, pbest);
-
     // update Ia, Ib
     for (int i = 0; i < len_net; i++)
     {
@@ -243,70 +254,115 @@ void VN::net_update()
 
     // select pbest point in pbest net
     int point_pbest = PointSelectTopPBest(Net[net_pbest].point_index, pbest);
-    
+
     // update every point in net
-    vector<T_Point> tmp;
-    tmp.resize(len_x);
+    vector<T_Point> U, V;
+    U.resize(len_x);
+    V.resize(len_x);
+    // init U & V
+    for (int i=0; i<len_x; i++){
+        U[i]._index = V[i]._index =  i;
+        U[i]._position.resize(num_Dim);
+        V[i]._position.resize(num_Dim);
+        for (int j=0; j<num_Dim; j++)
+            U[i]._position[j] = V[i]._position[j] = 0;
+        U[i]._fitness = V[i]._fitness = 0;
+        U[i]._inCR = U[i]._inF = V[i]._inCR = V[i]._inF = 0;
+    }
+
     for (int i=0; i<len_x; i++){
         // randomly select cr&f from history table
         int index = tool.rand_int(0, num_History - 1);
         // CR
-        tmp[i]._inCR = tool.rand_normal(HistoryTable[index]._MCR, 0.1);
-        if (tmp[i]._inCR > 1)
-            tmp[i]._inCR = 1;
-        else if (tmp[i]._inCR < 0)
-            tmp[i]._inCR = 0;
+        X[i]._inCR = tool.rand_normal(HistoryTable[index]._MCR, 0.1);
+        if (X[i]._inCR > 1)
+            X[i]._inCR = 1;
+        else if (X[i]._inCR < 0)
+            X[i]._inCR = 0;
         // F
-        tmp[i]._inF = 0;
+        X[i]._inF = 0;
         do
         {
-            tmp[i]._inF = tool.rand_cauchy(HistoryTable[index]._MF, 0.1);
-            if (tmp[i]._inF >= 1)
-                tmp[i]._inF = 1;
-        } while (tmp[i]._inF <= 0);
+            X[i]._inF = tool.rand_cauchy(HistoryTable[index]._MF, 0.1);
+            if (X[i]._inF >= 1)
+                X[i]._inF = 1;
+        } while (X[i]._inF <= 0);
 
+        // random select r1, r2
+        int r1 = tool.rand_int(0, len_x - 1);
+        int r2 = tool.rand_int(0, len_x - 1);
+        while (r1 == i)
+            r1 = tool.rand_int(0, len_x - 1);
+        while (r2 == i || r2 == r1)
+            r2 = tool.rand_int(0, len_x - 1);
         for (int j=0; j<num_Dim; j++){
-            // random select r1, r2
-            int r1 = tool.rand_int(0, len_x - 1);
-            int r2 = tool.rand_int(0, len_x - 1);
-            while (r1 == i)
-                r1 = tool.rand_int(0, len_x - 1);
-            while (r2 == i || r2 == r1)
-                r2 = tool.rand_int(0, len_x - 1);
             // mutation
-            tmp[i]._position[j] = X[i]._position[j] 
-                                + tmp[i]._inF * (X[point_pbest]._position[j] - X[i]._position[j]) 
-                                + tmp[i]._inF * (X[r1]._position[j] - X[r2]._position[j]);
+            V[i]._position[j] = X[i]._position[j] 
+                                + X[i]._inF * (X[point_pbest]._position[j] - X[i]._position[j]) 
+                                + X[i]._inF * (X[r1]._position[j] - X[r2]._position[j]);
             // check boundary
-            if (tmp[i]._position[j] < problem.getBounderMin())
-                tmp[i]._position[j] = tool.rand_double(problem.getBounderMin(), problem.getBounderMax());
+            if (V[i]._position[j] < problem.getBounderMin() || V[i]._position[j] > problem.getBounderMax())
+                V[i]._position[j] = tool.rand_double(problem.getBounderMin(), problem.getBounderMax());
 
             // crossover
             int jrand = tool.rand_int(0, num_Dim - 1);
-            if (jrand == j || tool.rand_double(0, 1) < tmp[i]._inCR)
-                tmp[i]._position[j] = X[i]._position[j];
+            if (jrand == j || tool.rand_double(0, 1) < X[i]._inCR)
+                U[i]._position[j] = V[i]._position[j];
+            else
+                U[i]._position[j] = X[i]._position[j];
         }
-        tmp[i]._fitness = problem.executeStrategy(tmp[i]._position, num_Dim);
+        U[i]._fitness = problem.executeStrategy(U[i]._position, num_Dim);
+        eval_count++;
         // update scr & sf
-        if (X[i]._fitness > tmp[i]._fitness)
+        if (X[i]._fitness > U[i]._fitness)
         {
-            SCR.push_back(tmp[i]._inCR);
-            SF.push_back(tmp[i]._inF);
-            // deltaF.push_back(tmp[i]._fitness - _U._fitness);
+            SCR.push_back(U[i]._inCR);
+            SF.push_back(U[i]._inF);
+            deltaF.push_back(X[i]._fitness - U[i]._fitness);
         }
-
+        // update solution
+        X_previous[i] = X[i];
+        X[i] = U[i];
     }
 
-}
+    // Update HS
+    if (SCR.size() != 0 && SF.size() != 0)
+    {
+        // prepare param
+        double mCR, mF, WKdenominator, numerator, denominator;
+        mCR = mF = WKdenominator = numerator = denominator = 0;
 
-void VN::Reset()
-{
-}
+        for (int t = 0; t < SCR.size(); t++)
+            WKdenominator += deltaF[t];
 
+        // Update MCR
+        for (int t = 0; t < SCR.size(); t++)
+        {
+            // mean weight Scr
+            mCR += (deltaF[t] / WKdenominator) * SCR[t];
+        }
+        HistoryTable[history_index]._MCR = mCR;
+
+        // Update MF
+        for (int t = 0; t < SCR.size(); t++)
+        {
+            // Lehmer mean
+            numerator += (deltaF[t] / WKdenominator) * SF[t] * SF[t];
+            denominator += (deltaF[t] / WKdenominator) * SF[t];
+        }
+        mF = numerator / denominator;
+        HistoryTable[history_index]._MF = mF;
+
+        history_index++;
+        if (history_index == num_History)
+            history_index = 0;
+    }
+}
 
 
 bool VN::NetCompareFitness(const T_Net &a, const T_Net &b)
 {
+    // TODO return descending order or ascending order
     return a._E < b._E;
 }
 
@@ -322,19 +378,22 @@ int VN::NetSelectTopPBest(vector<T_Net> xx, double p)
 
 bool VN::PointCompareFitness(const T_Point &a, const T_Point &b)
 {
+    // return ascending order
     return a._fitness < b._fitness;
 }
 
 int VN::PointSelectTopPBest(vector<int> xx, double p)
 {
     vector<T_Point> tmp;
+    tmp.resize(4);
     for (int i = 0; i < 4; i++)
     {
-        tmp.push_back(X[xx[i]]);
+        tmp[i] = X[xx[i]];
+        tmp[i]._index = xx[i];
     }
     sort(tmp.begin(), tmp.end(), PointCompareFitness);
     int place;
-    place = p * len_net;
+    place = p * 3;
     place = tool.rand_int(0, place);
     return tmp[place]._index;
 }
