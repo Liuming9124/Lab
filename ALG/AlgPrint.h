@@ -62,12 +62,12 @@ public:
         else {
             if (_lastPrint==iter){
                 data[run][iter] = num;
-                // cout << "Run" << run << " iter: " << iter << " num: " << num << endl;
+                // cout << "Run" << run << " iter: " << iter << " num: " << data[run][iter] << " should be : " << num << endl;
             }
             else{
                 for (int i = _lastPrint+1; i <= iter; i++){
                     data[run][i] = num;
-                    // cout << "Run" << run << " iter: " << i << " num: " << num << endl;
+                    // cout << "Run" << run << " iter: " << iter << " num: " << data[run][iter] << " should be : " << num << endl;
                 }
                 _lastPrint = iter;
             }

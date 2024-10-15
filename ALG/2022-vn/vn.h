@@ -3,7 +3,7 @@
 
 #include "../AlgPrint.h"
 #include "../Tool.h"
-#include "../CEC/test13.cpp"
+#include "./cec2021.cpp"
 #include <vector>
 #include <algorithm>
 #include <cmath>
@@ -31,8 +31,8 @@ public:
         int net_index;
         vector<int> point_index;
         double _Ia, _Ib;
-        double _Ebest;
-        double _E;
+        double _EVbest;
+        double _EV;
     } T_Net;
 
 public:
@@ -101,12 +101,13 @@ void VN::RunALG(int Run, int Func, int Evals, int Dim, int NetLength, double His
         Init();
         Evaluation();
     }
-    show.PrintToFileDouble("./result/result" + to_string(Func) + "_DIM" + to_string(num_Dim) + "_NetLen" + to_string(num_Netlen) + "_Fess" + to_string(NetLength) + ".txt", Run);
+    show.PrintToFileDouble("./result/result" + to_string(Func) + "_DIM" + to_string(num_Dim) + "_NetLen" + to_string(num_Netlen) + "_Fess" + to_string(num_Fess) + ".txt", num_Fess);
     cout << "end" << endl;
 }
 
 void VN::Init()
 {
+    show.init();
     eval_count = 0;
     best_value = 0;
 
@@ -151,12 +152,12 @@ void VN::Init()
             Net[i*(num_Netlen-1)+j].point_index[2] = (i+1)*num_Netlen + j;
             Net[i*(num_Netlen-1)+j].point_index[3] = (i+1)*num_Netlen + j + 1;
             Net[i*(num_Netlen-1)+j]._Ia = Net[i*(num_Netlen-1)+j]._Ib = 1;
-            Net[i*(num_Netlen-1)+j]._E = 0;
+            Net[i*(num_Netlen-1)+j]._EV = 0;
             // calculate Ebest
-            Net[i*(num_Netlen-1)+j]._Ebest  = X[Net[i*(num_Netlen-1)+j].point_index[0]]._fitness;
+            Net[i*(num_Netlen-1)+j]._EVbest  = X[Net[i*(num_Netlen-1)+j].point_index[0]]._fitness;
             for (int k=1; k<4; k++){
-                if (Net[i*(num_Netlen-1)+j]._Ebest > X[Net[i*(num_Netlen-1)+j].point_index[k]]._fitness){
-                    Net[i*(num_Netlen-1)+j]._Ebest = X[Net[i*(num_Netlen-1)+j].point_index[k]]._fitness;
+                if (Net[i*(num_Netlen-1)+j]._EVbest > X[Net[i*(num_Netlen-1)+j].point_index[k]]._fitness){
+                    Net[i*(num_Netlen-1)+j]._EVbest = X[Net[i*(num_Netlen-1)+j].point_index[k]]._fitness;
                 }
             }
         }
@@ -172,6 +173,8 @@ void VN::Evaluation()
 {
     while (eval_count < num_Fess)
     {
+        if (eval_count > num_Fess)
+            break;
         // expected value
         expected_value();
         // net update
@@ -181,7 +184,14 @@ void VN::Evaluation()
         sort(tmp.begin(), tmp.end(), PointCompareFitness);
         if (best_value > tmp[0]._fitness)
             best_value = tmp[0]._fitness;
-        show.SetDataDouble(num_Run, best_value, eval_count);
+        // if (eval_count > num_Fess){
+        //     show.SetDataDouble(num_Run, best_value, num_Fess);
+        //     // break;
+        // }
+        if (eval_count >= num_Fess)
+            show.SetDataDouble(num_Run, best_value, num_Fess);
+        else
+            show.SetDataDouble(num_Run, best_value, eval_count);
         // cout << "eval_count: " << eval_count << " best: " << best_value << endl;
     }
 }
@@ -191,52 +201,45 @@ void VN::expected_value()
     // compute each net's expected value
     vector<double> visit_ratio(len_net, 0);
     vector<double> increase_ratio(len_net, 0);
-    vector<double> E(len_net, 0);
+    vector<double> EV(len_net, 0);
 
     for (int i = 0; i < len_net; i++)
     {
         visit_ratio[i] = Net[i]._Ib / Net[i]._Ia;
         for (int j = 0; j < 4; j++)
         {
-            // cout << i << " : " << Net[i].point_index[j] << " : " << X[Net[i].point_index[j]]._fitness << " : " << X_previous[Net[i].point_index[j]]._fitness << endl;
             increase_ratio[i] += X[Net[i].point_index[j]]._fitness - X_previous[Net[i].point_index[j]]._fitness;
         }
         increase_ratio[i] /= 4;
-        E[i] = Net[i]._Ebest;
+        EV[i] = Net[i]._EVbest;
     }
     // min-max normalization of three items
     double max_visit_ratio = *max_element(visit_ratio.begin(), visit_ratio.end());
     double min_visit_ratio = *min_element(visit_ratio.begin(), visit_ratio.end());
     double max_increase_ratio = *max_element(increase_ratio.begin(), increase_ratio.end());
     double min_increase_ratio = *min_element(increase_ratio.begin(), increase_ratio.end());
-    double max_E = *max_element(E.begin(), E.end());
-    double min_E = *min_element(E.begin(), E.end());
+    double max_EV = *max_element(EV.begin(), EV.end());
+    double min_EV = *min_element(EV.begin(), EV.end());
     for (int i = 0; i < len_net; i++)
     {
         if (max_visit_ratio - min_visit_ratio == 0)
             visit_ratio[i] = 0;
         else
             visit_ratio[i] = (visit_ratio[i] - min_visit_ratio) / (max_visit_ratio - min_visit_ratio);
-        // cout << "visit_ratio[" << i << "]: " << visit_ratio[i] << endl;
         if (max_increase_ratio - min_increase_ratio == 0)
             increase_ratio[i] = 0;
         else
             increase_ratio[i] = (increase_ratio[i] - min_increase_ratio) / (max_increase_ratio - min_increase_ratio);
-        // cout << "increase_ratio[" << i << "]: " << increase_ratio[i] << endl;
-        if (max_E - min_E == 0)
-            E[i] = 0;
+        if (max_EV - min_EV == 0)
+            EV[i] = 0;
         else
-            E[i] = 1 - (E[i] - min_E) / (max_E - min_E); // due to minimize problem
-        // cout << "E[" << i << "]: " << E[i] << endl;
-        // E[i] = (E[i] - min_E) / (max_E - min_E);
+            EV[i] = 1 - (EV[i] - min_EV) / (max_EV - min_EV); // due to minimize problem
     }
     // compute expected value
     double omega = 1.5 - (0.5*eval_count)/num_Fess;
     for (int i = 0; i < len_net; i++)
     {
-        // bug at non E;
-        Net[i]._E = visit_ratio[i] + increase_ratio[i] + E[i] * omega;
-        // cout << "Net[" << i << "]: " << Net[i]._E << endl;
+        Net[i]._EV = visit_ratio[i] + increase_ratio[i] + EV[i] * omega;
     }
 }
 
@@ -326,7 +329,6 @@ void VN::net_update()
         U[i]._inCR = X[i]._inCR;
         U[i]._inF = X[i]._inF;
         
-        // cout << "U[" << i << "]: " << U[i]._fitness << endl;
         eval_count++;
         // update scr & sf
         if (X[i]._fitness > U[i]._fitness)
@@ -378,7 +380,7 @@ void VN::net_update()
 bool VN::NetCompareFitness(const T_Net &a, const T_Net &b)
 {
     // return descending order
-    return a._E > b._E;
+    return a._EV > b._EV;
 }
 
 int VN::NetSelectTopPBest(vector<T_Net> xx, double p)
