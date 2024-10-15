@@ -198,6 +198,7 @@ void VN::expected_value()
         visit_ratio[i] = Net[i]._Ib / Net[i]._Ia;
         for (int j = 0; j < 4; j++)
         {
+            // cout << i << " : " << Net[i].point_index[j] << " : " << X[Net[i].point_index[j]]._fitness << " : " << X_previous[Net[i].point_index[j]]._fitness << endl;
             increase_ratio[i] += X[Net[i].point_index[j]]._fitness - X_previous[Net[i].point_index[j]]._fitness;
         }
         increase_ratio[i] /= 4;
@@ -212,9 +213,21 @@ void VN::expected_value()
     double min_E = *min_element(E.begin(), E.end());
     for (int i = 0; i < len_net; i++)
     {
-        visit_ratio[i] = (visit_ratio[i] - min_visit_ratio) / (max_visit_ratio - min_visit_ratio);
-        increase_ratio[i] = (increase_ratio[i] - min_increase_ratio) / (max_increase_ratio - min_increase_ratio);
-        E[i] = 1 - (E[i] - min_E) / (max_E - min_E); // due to minimize problem
+        if (max_visit_ratio - min_visit_ratio == 0)
+            visit_ratio[i] = 0;
+        else
+            visit_ratio[i] = (visit_ratio[i] - min_visit_ratio) / (max_visit_ratio - min_visit_ratio);
+        // cout << "visit_ratio[" << i << "]: " << visit_ratio[i] << endl;
+        if (max_increase_ratio - min_increase_ratio == 0)
+            increase_ratio[i] = 0;
+        else
+            increase_ratio[i] = (increase_ratio[i] - min_increase_ratio) / (max_increase_ratio - min_increase_ratio);
+        // cout << "increase_ratio[" << i << "]: " << increase_ratio[i] << endl;
+        if (max_E - min_E == 0)
+            E[i] = 0;
+        else
+            E[i] = 1 - (E[i] - min_E) / (max_E - min_E); // due to minimize problem
+        // cout << "E[" << i << "]: " << E[i] << endl;
         // E[i] = (E[i] - min_E) / (max_E - min_E);
     }
     // compute expected value
@@ -223,7 +236,7 @@ void VN::expected_value()
     {
         // bug at non E;
         Net[i]._E = visit_ratio[i] + increase_ratio[i] + E[i] * omega;
-        cout << "Net[" << i << "]: " << Net[i]._E << endl;
+        // cout << "Net[" << i << "]: " << Net[i]._E << endl;
     }
 }
 
@@ -247,9 +260,7 @@ void VN::net_update()
             Net[i]._Ib = 1;
         }
         else
-        {
             Net[i]._Ib++;
-        }
     }
 
     // select pbest point in pbest net
@@ -312,6 +323,10 @@ void VN::net_update()
                 U[i]._position[j] = X[i]._position[j];
         }
         U[i]._fitness = problem.executeStrategy(U[i]._position, num_Dim);
+        U[i]._inCR = X[i]._inCR;
+        U[i]._inF = X[i]._inF;
+        
+        // cout << "U[" << i << "]: " << U[i]._fitness << endl;
         eval_count++;
         // update scr & sf
         if (X[i]._fitness > U[i]._fitness)
@@ -362,8 +377,8 @@ void VN::net_update()
 
 bool VN::NetCompareFitness(const T_Net &a, const T_Net &b)
 {
-    // TODO return descending order or ascending order
-    return a._E < b._E;
+    // return descending order
+    return a._E > b._E;
 }
 
 int VN::NetSelectTopPBest(vector<T_Net> xx, double p)
