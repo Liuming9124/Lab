@@ -58,12 +58,8 @@ private:
     int num_Region;
 
     bool flag_first = true;
-
     vector<double> SF, SCR;
-    int index_success = 0;
-
     double best_value;
-
     // evaluation count
     int eval_count; 
         
@@ -83,7 +79,6 @@ private:
 
     static bool NetCompareFitness(const T_Net &a, const T_Net &b);
     int NetSelectTopPBest(vector<T_Net> xx, double p);
-    
     static bool PointCompareFitness(const T_Point &a, const T_Point &b);
 };
 
@@ -122,8 +117,8 @@ void VN::Init()
     // history memory size
     history_index = 0;
     HistoryTable.assign(num_History, {0.3, 0.3});
-    SCR.resize(num_Netlen * num_Netlen);
-    SF.resize(num_Netlen * num_Netlen);
+    SCR.resize(num_Point);
+    SF.resize(num_Point);
     // init point
     Init_T_point( X,          num_Point, num_Dim, true);
     Init_T_point( X_previous, num_Point, num_Dim, false);
