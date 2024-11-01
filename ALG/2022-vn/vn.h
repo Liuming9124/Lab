@@ -54,8 +54,10 @@ private:
     vector<T_Point> X, X_previous;    // point
     vector<T_Net> Net;    // net
 
-    int len_x;
-    int len_net;
+    int num_Point;
+    int num_Region;
+
+    bool flag_first = true;
 
     vector<double> SF, SCR;
     int index_success = 0;
@@ -89,6 +91,8 @@ void VN::RunALG(int Run, int Func, int Evals, int Dim, int NetLength, double His
     num_Fess = Evals;
     num_Dim = Dim;
     num_Netlen = NetLength;
+    num_Region = (num_Netlen-1)*(num_Netlen-1);
+    num_Point = num_Netlen*num_Netlen;
     num_History = History * num_Dim;
 
     show = AlgPrint(num_Run, "./result", "vn");
@@ -111,6 +115,7 @@ void VN::Init()
     show.init();
     eval_count = 0;
     best_value = 0;
+    flag_first = true;
 
     // history memory size
     history_index = 0;
@@ -119,10 +124,9 @@ void VN::Init()
     SF.resize(num_Netlen * num_Netlen);
 
     // init point
-    len_x = num_Netlen * num_Netlen;
-    X.resize(len_x);
-    X_previous.resize(len_x);
-    for (int i=0; i<len_x; i++){
+    X.resize(num_Point);
+    X_previous.resize(num_Point);
+    for (int i=0; i<num_Point; i++){
         // init X
         X[i]._index = i;
         X[i]._position.assign(num_Dim, 0);
@@ -142,8 +146,7 @@ void VN::Init()
 
     
     // init net
-    len_net = (num_Netlen-1)*(num_Netlen-1);
-    Net.resize(len_net);
+    Net.resize(num_Region);
     for (int i=0; i<num_Netlen-1; i++){
         for (int j=0; j<num_Netlen-1; j++){
             Net[i*(num_Netlen-1)+j].net_index = i*(num_Netlen-1)+j;
@@ -185,35 +188,36 @@ void VN::Evaluation()
         sort(tmp.begin(), tmp.end(), PointCompareFitness);
         if (best_value > tmp[0]._fitness)
             best_value = tmp[0]._fitness;
-        // if (eval_count > num_Fess){
-        //     show.SetDataDouble(num_Run, best_value, num_Fess);
-        //     // break;
-        // }
-        if (eval_count >= num_Fess)
-            show.SetDataDouble(num_Run, best_value, num_Fess);
-        else
+        if (eval_count <= num_Fess){
             show.SetDataDouble(num_Run, best_value, eval_count);
-        // cout << "eval_count: " << eval_count << " best: " << best_value << endl;
+            // cout << "eval_count: " << eval_count << " best: " << best_value << endl;
+        }
     }
 }
 
 void VN::expected_value()
 {
     // compute each net's expected value
-    vector<double> visit_ratio(len_net, 0);
-    vector<double> increase_ratio(len_net, 0);
-    vector<double> EV(len_net, 0);
+    vector<double> visit_ratio(num_Region, 0);
+    vector<double> increase_ratio(num_Region, 0);
+    vector<double> EV(num_Region, 0);
 
-    for (int i = 0; i < len_net; i++)
-    {
+    for (int i = 0; i < num_Region; i++) {
         visit_ratio[i] = Net[i]._Ib / Net[i]._Ia;
-        for (int j = 0; j < 4; j++)
-        {
-            increase_ratio[i] += X[Net[i].point_index[j]]._fitness - X_previous[Net[i].point_index[j]]._fitness;
+
+        double increase_sum = 0.0;
+        for (int j = 0; j < 4; j++) {
+            if (flag_first)
+                increase_sum += X[Net[i].point_index[j]]._fitness;
+            else
+                increase_sum += X[Net[i].point_index[j]]._fitness - X_previous[Net[i].point_index[j]]._fitness;
         }
-        increase_ratio[i] /= 4;
+        increase_ratio[i] = increase_sum / 4.0;
+
         EV[i] = Net[i]._EVbest;
     }
+    flag_first = false;
+
     // min-max normalization of three items
     double max_visit_ratio = *max_element(visit_ratio.begin(), visit_ratio.end());
     double min_visit_ratio = *min_element(visit_ratio.begin(), visit_ratio.end());
@@ -223,7 +227,7 @@ void VN::expected_value()
     double min_EV = *min_element(EV.begin(), EV.end());
     double omega = 1.5 - (0.5*eval_count)/num_Fess;
     
-    for (int i = 0; i < len_net; i++)
+    for (int i = 0; i < num_Region; i++)
     {
         if (max_visit_ratio - min_visit_ratio == 0)
             visit_ratio[i] = 1e-6;
@@ -237,6 +241,7 @@ void VN::expected_value()
             EV[i] = 1e-6;
         else
             EV[i] = 1 - (EV[i] - min_EV) / (max_EV - min_EV); // due to minimize problem
+            // EV[i] = (EV[i] - min_EV) / (max_EV - min_EV);
         // compute expected value
         Net[i]._EV = visit_ratio[i] + increase_ratio[i] + EV[i] * omega;
     }
@@ -251,10 +256,14 @@ void VN::net_update()
     SF.clear();
 
     // select pbest net
-    double pbest = 0.4 - ( (0.2/eval_count) / num_Fess );
+    double pbest = 0.4 - ( (0.2*eval_count) / num_Fess ); // TODO -> fixed formula 3.11
+    
+    // cout << "pbest: " << pbest << " , "; // test
     int net_pbest = NetSelectTopPBest(Net, pbest);
+    // cout << "net_pbest: " << net_pbest << endl; // test
+
     // update Ia, Ib
-    for (int i = 0; i < len_net; i++)
+    for (int i = 0; i < num_Region; i++)
     {
         if (i == net_pbest)
         {
@@ -270,10 +279,10 @@ void VN::net_update()
 
     // update every point in net
     vector<T_Point> U, V;
-    U.resize(len_x);
-    V.resize(len_x);
+    U.resize(num_Point);
+    V.resize(num_Point);
     // init U & V
-    for (int i=0; i<len_x; i++){
+    for (int i=0; i<num_Point; i++){
         U[i]._index = V[i]._index =  i;
         U[i]._position.resize(num_Dim);
         V[i]._position.resize(num_Dim);
@@ -283,7 +292,7 @@ void VN::net_update()
         U[i]._inCR = U[i]._inF = V[i]._inCR = V[i]._inF = 0;
     }
 
-    for (int i=0; i<len_x; i++){
+    for (int i=0; i<num_Point; i++){
         // randomly select cr&f from history table
         int index = tool.rand_int(0, num_History - 1);
         // CR
@@ -302,12 +311,12 @@ void VN::net_update()
         } while (X[i]._inF <= 0);
 
         // random select r1, r2
-        int r1 = tool.rand_int(0, len_x - 1);
-        int r2 = tool.rand_int(0, len_x - 1);
+        int r1 = tool.rand_int(0, num_Point - 1);
+        int r2 = tool.rand_int(0, num_Point - 1);
         while (r1 == i)
-            r1 = tool.rand_int(0, len_x - 1);
+            r1 = tool.rand_int(0, num_Point - 1);
         while (r2 == i || r2 == r1)
-            r2 = tool.rand_int(0, len_x - 1);
+            r2 = tool.rand_int(0, num_Point - 1);
         for (int j=0; j<num_Dim; j++){
             // mutation
             V[i]._position[j] = X[i]._position[j] 
@@ -387,7 +396,7 @@ int VN::NetSelectTopPBest(vector<T_Net> xx, double p)
     vector<T_Net> tmp = xx;
     sort(tmp.begin(), tmp.end(), NetCompareFitness);
     int place;
-    place = p * len_net;
+    place = p * num_Region;
     place = tool.rand_int(0, place);
     return tmp[place].net_index;
 }
