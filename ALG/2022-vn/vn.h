@@ -77,12 +77,14 @@ private:
 
     void expected_value();
     void net_update();
- 
+
+    void Init_T_point(vector<T_Point> &points, int size, int dim, bool posInitRand);
+    void Init_T_net(vector<T_Net> &nets, int size, int num_region);
+
     static bool NetCompareFitness(const T_Net &a, const T_Net &b);
     int NetSelectTopPBest(vector<T_Net> xx, double p);
     
     static bool PointCompareFitness(const T_Point &a, const T_Point &b);
-    int PointSelectTopPBest(vector<int> xx, double p);
 };
 
 void VN::RunALG(int Run, int Func, int Evals, int Dim, int NetLength, double History)
@@ -122,50 +124,11 @@ void VN::Init()
     HistoryTable.assign(num_History, {0.3, 0.3});
     SCR.resize(num_Netlen * num_Netlen);
     SF.resize(num_Netlen * num_Netlen);
-
     // init point
-    X.resize(num_Point);
-    X_previous.resize(num_Point);
-    for (int i=0; i<num_Point; i++){
-        // init X
-        X[i]._index = i;
-        X[i]._position.assign(num_Dim, 0);
-        for (int j = 0; j < num_Dim; j++)
-        {
-            X[i]._position[j] = tool.rand_double(problem.getBounderMin(), problem.getBounderMax());
-        }
-        X[i]._fitness = problem.executeStrategy(X[i]._position, num_Dim);
-        X[i]._inCR = X[i]._inF = 0;
-        eval_count++;
-        // init X_previous
-        X_previous[i]._index = i;
-        X_previous[i]._position.assign(num_Dim, 0);
-        X_previous[i]._fitness = 0;
-        X_previous[i]._inCR = X_previous[i]._inF = 0;
-    }
-
-    
+    Init_T_point( X,          num_Point, num_Dim, true);
+    Init_T_point( X_previous, num_Point, num_Dim, false);
     // init net
-    Net.resize(num_Region);
-    for (int i=0; i<num_Netlen-1; i++){
-        for (int j=0; j<num_Netlen-1; j++){
-            Net[i*(num_Netlen-1)+j].net_index = i*(num_Netlen-1)+j;
-            Net[i*(num_Netlen-1)+j].point_index.assign(4, 0);
-            Net[i*(num_Netlen-1)+j].point_index[0] = i*num_Netlen + j;
-            Net[i*(num_Netlen-1)+j].point_index[1] = i*num_Netlen + j + 1;
-            Net[i*(num_Netlen-1)+j].point_index[2] = (i+1)*num_Netlen + j;
-            Net[i*(num_Netlen-1)+j].point_index[3] = (i+1)*num_Netlen + j + 1;
-            Net[i*(num_Netlen-1)+j]._Ia = Net[i*(num_Netlen-1)+j]._Ib = 1;
-            Net[i*(num_Netlen-1)+j]._EV = 0;
-            // calculate Ebest
-            Net[i*(num_Netlen-1)+j]._EVbest  = X[Net[i*(num_Netlen-1)+j].point_index[0]]._fitness;
-            for (int k=1; k<4; k++){
-                if (Net[i*(num_Netlen-1)+j]._EVbest > X[Net[i*(num_Netlen-1)+j].point_index[k]]._fitness){
-                    Net[i*(num_Netlen-1)+j]._EVbest = X[Net[i*(num_Netlen-1)+j].point_index[k]]._fitness;
-                }
-            }
-        }
-    }
+    Init_T_net(Net, num_Region, num_Netlen-1);
     // sort point and save to tmp variable and set best value
     vector<T_Point> tmp = X;
     sort(tmp.begin(), tmp.end(), PointCompareFitness);
@@ -177,12 +140,11 @@ void VN::Evaluation()
 {
     while (eval_count < num_Fess)
     {
-        if (eval_count > num_Fess)
-            break;
         // expected value
         expected_value();
         // net update
         net_update();
+        flag_first = false;
         // show data
         vector<T_Point> tmp = X;
         sort(tmp.begin(), tmp.end(), PointCompareFitness);
@@ -216,7 +178,6 @@ void VN::expected_value()
 
         EV[i] = Net[i]._EVbest;
     }
-    flag_first = false;
 
     // min-max normalization of three items
     double max_visit_ratio = *max_element(visit_ratio.begin(), visit_ratio.end());
@@ -230,18 +191,17 @@ void VN::expected_value()
     for (int i = 0; i < num_Region; i++)
     {
         if (max_visit_ratio - min_visit_ratio == 0)
-            visit_ratio[i] = 1e-6;
+            visit_ratio[i] = 1;
         else
             visit_ratio[i] = (visit_ratio[i] - min_visit_ratio) / (max_visit_ratio - min_visit_ratio);
         if (max_increase_ratio - min_increase_ratio == 0)
-            increase_ratio[i] = 1e-6;
+            increase_ratio[i] = 1;
         else
             increase_ratio[i] = (increase_ratio[i] - min_increase_ratio) / (max_increase_ratio - min_increase_ratio);
         if (max_EV - min_EV == 0)
-            EV[i] = 1e-6;
+            EV[i] = 1;
         else
             EV[i] = 1 - (EV[i] - min_EV) / (max_EV - min_EV); // due to minimize problem
-            // EV[i] = (EV[i] - min_EV) / (max_EV - min_EV);
         // compute expected value
         Net[i]._EV = visit_ratio[i] + increase_ratio[i] + EV[i] * omega;
     }
@@ -256,11 +216,8 @@ void VN::net_update()
     SF.clear();
 
     // select pbest net
-    double pbest = 0.4 - ( (0.2*eval_count) / num_Fess ); // TODO -> fixed formula 3.11
-    
-    // cout << "pbest: " << pbest << " , "; // test
+    double pbest = 0.4 - ( (0.2*eval_count) / num_Fess );
     int net_pbest = NetSelectTopPBest(Net, pbest);
-    // cout << "net_pbest: " << net_pbest << endl; // test
 
     // update Ia, Ib
     for (int i = 0; i < num_Region; i++)
@@ -270,27 +227,19 @@ void VN::net_update()
             Net[i]._Ia++;
             Net[i]._Ib = 1;
         }
-        else
+        else{
+            Net[i]._Ia = 1;
             Net[i]._Ib++;
+        }
     }
 
-    // select pbest point in pbest net
-    int point_pbest = PointSelectTopPBest(Net[net_pbest].point_index, pbest);
+    // select random point in net(pbest)
+    int point_pbest = Net[net_pbest].point_index[tool.rand_int(0, 3)];
 
     // update every point in net
-    vector<T_Point> U, V;
-    U.resize(num_Point);
-    V.resize(num_Point);
-    // init U & V
-    for (int i=0; i<num_Point; i++){
-        U[i]._index = V[i]._index =  i;
-        U[i]._position.resize(num_Dim);
-        V[i]._position.resize(num_Dim);
-        for (int j=0; j<num_Dim; j++)
-            U[i]._position[j] = V[i]._position[j] = 0;
-        U[i]._fitness = V[i]._fitness = 0;
-        U[i]._inCR = U[i]._inF = V[i]._inCR = V[i]._inF = 0;
-    }
+    vector<T_Point> U, V; // v is mutation result, u is final result
+    Init_T_point(U, num_Point, num_Dim, false);
+    Init_T_point(V, num_Point, num_Dim, false);
 
     for (int i=0; i<num_Point; i++){
         // randomly select cr&f from history table
@@ -311,12 +260,16 @@ void VN::net_update()
         } while (X[i]._inF <= 0);
 
         // random select r1, r2
-        int r1 = tool.rand_int(0, num_Point - 1);
-        int r2 = tool.rand_int(0, num_Point - 1);
-        while (r1 == i)
+        int r1, r2;
+        do {
             r1 = tool.rand_int(0, num_Point - 1);
-        while (r2 == i || r2 == r1)
+        } while (r1 == i);
+        do {
             r2 = tool.rand_int(0, num_Point - 1);
+        } while (r2 == i || r2 == r1);
+
+        // mutation & check boundary & crossover
+        int jrand = tool.rand_int(0, num_Dim - 1);
         for (int j=0; j<num_Dim; j++){
             // mutation
             V[i]._position[j] = X[i]._position[j] 
@@ -325,19 +278,17 @@ void VN::net_update()
             // check boundary
             if (V[i]._position[j] < problem.getBounderMin() || V[i]._position[j] > problem.getBounderMax())
                 V[i]._position[j] = tool.rand_double(problem.getBounderMin(), problem.getBounderMax());
-
             // crossover
-            int jrand = tool.rand_int(0, num_Dim - 1);
             if (jrand == j || tool.rand_double(0, 1) < X[i]._inCR)
                 U[i]._position[j] = V[i]._position[j];
             else
                 U[i]._position[j] = X[i]._position[j];
         }
         U[i]._fitness = problem.executeStrategy(U[i]._position, num_Dim);
+        eval_count++;
         U[i]._inCR = X[i]._inCR;
         U[i]._inF = X[i]._inF;
         
-        eval_count++;
         // update scr & sf
         if (X[i]._fitness > U[i]._fitness)
         {
@@ -407,20 +358,44 @@ bool VN::PointCompareFitness(const T_Point &a, const T_Point &b)
     return a._fitness < b._fitness;
 }
 
-int VN::PointSelectTopPBest(vector<int> xx, double p)
-{
-    vector<T_Point> tmp;
-    tmp.resize(4);
-    for (int i = 0; i < 4; i++)
-    {
-        tmp[i] = X[xx[i]];
-        tmp[i]._index = xx[i];
+void VN::Init_T_point(vector<T_Point> &points, int size, int dim, bool posInitRand){
+    points.resize(size);
+    for (int i=0; i<size; i++){
+        points[i]._index = i;
+        points[i]._position.assign(dim, 0);
+        if (posInitRand){
+            for (int j = 0; j < dim; j++)
+            {
+                points[i]._position[j] = tool.rand_double(problem.getBounderMin(), problem.getBounderMax());
+            }
+            X[i]._fitness = problem.executeStrategy(X[i]._position, num_Dim);
+            eval_count++;
+        }
+        X[i]._inCR = X[i]._inF = 0;
     }
-    sort(tmp.begin(), tmp.end(), PointCompareFitness);
-    int place;
-    place = p * 3;
-    place = tool.rand_int(0, place);
-    return tmp[place]._index;
+}
+
+void VN::Init_T_net(vector<T_Net> &nets, int size, int num_region){
+    Net.resize(size);
+    for (int i=0; i<num_region; i++){
+        for (int j=0; j<num_region; j++){
+            Net[i*(num_region)+j].net_index = i*(num_region)+j;
+            Net[i*(num_region)+j].point_index.assign(4, 0);
+            Net[i*(num_region)+j].point_index[0] = i*num_Netlen + j;
+            Net[i*(num_region)+j].point_index[1] = i*num_Netlen + j + 1;
+            Net[i*(num_region)+j].point_index[2] = (i+1)*num_Netlen + j;
+            Net[i*(num_region)+j].point_index[3] = (i+1)*num_Netlen + j + 1;
+            Net[i*(num_region)+j]._Ia = Net[i*(num_region)+j]._Ib = 1;
+            Net[i*(num_region)+j]._EV = 0;
+            // calculate Ebest
+            Net[i*(num_region)+j]._EVbest  = X[Net[i*(num_region)+j].point_index[0]]._fitness;
+            for (int k=1; k<4; k++){
+                if (Net[i*(num_region)+j]._EVbest > X[Net[i*(num_region)+j].point_index[k]]._fitness){
+                    Net[i*(num_region)+j]._EVbest = X[Net[i*(num_region)+j].point_index[k]]._fitness;
+                }
+            }
+        }
+    }
 }
 
 #endif
