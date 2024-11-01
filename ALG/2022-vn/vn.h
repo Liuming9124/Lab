@@ -4,6 +4,7 @@
 #include "../AlgPrint.h"
 #include "../Tool.h"
 #include "./cec2021.cpp"
+// #include "../CEC/test13.cpp"
 #include <vector>
 #include <algorithm>
 #include <cmath>
@@ -220,25 +221,23 @@ void VN::expected_value()
     double min_increase_ratio = *min_element(increase_ratio.begin(), increase_ratio.end());
     double max_EV = *max_element(EV.begin(), EV.end());
     double min_EV = *min_element(EV.begin(), EV.end());
+    double omega = 1.5 - (0.5*eval_count)/num_Fess;
+    
     for (int i = 0; i < len_net; i++)
     {
         if (max_visit_ratio - min_visit_ratio == 0)
-            visit_ratio[i] = 0;
+            visit_ratio[i] = 1e-6;
         else
             visit_ratio[i] = (visit_ratio[i] - min_visit_ratio) / (max_visit_ratio - min_visit_ratio);
         if (max_increase_ratio - min_increase_ratio == 0)
-            increase_ratio[i] = 0;
+            increase_ratio[i] = 1e-6;
         else
             increase_ratio[i] = (increase_ratio[i] - min_increase_ratio) / (max_increase_ratio - min_increase_ratio);
         if (max_EV - min_EV == 0)
-            EV[i] = 0;
+            EV[i] = 1e-6;
         else
             EV[i] = 1 - (EV[i] - min_EV) / (max_EV - min_EV); // due to minimize problem
-    }
-    // compute expected value
-    double omega = 1.5 - (0.5*eval_count)/num_Fess;
-    for (int i = 0; i < len_net; i++)
-    {
+        // compute expected value
         Net[i]._EV = visit_ratio[i] + increase_ratio[i] + EV[i] * omega;
     }
 }
