@@ -57,7 +57,6 @@ private:
     int num_Point;
     int num_Region;
 
-    bool flag_first = true;
     vector<double> SF, SCR;
     double best_value;
     // evaluation count
@@ -112,7 +111,6 @@ void VN::Init()
     show.init();
     eval_count = 0;
     best_value = 0;
-    flag_first = true;
 
     // history memory size
     history_index = 0;
@@ -139,7 +137,6 @@ void VN::Evaluation()
         expected_value();
         // net update
         net_update();
-        flag_first = false;
         // show data
         vector<T_Point> tmp = X;
         sort(tmp.begin(), tmp.end(), PointCompareFitness);
@@ -164,10 +161,7 @@ void VN::expected_value()
 
         double increase_sum = 0.0;
         for (int j = 0; j < 4; j++) {
-            if (flag_first)
-                increase_sum += X[Net[i].point_index[j]]._fitness;
-            else
-                increase_sum += X[Net[i].point_index[j]]._fitness - X_previous[Net[i].point_index[j]]._fitness;
+            increase_sum += X[Net[i].point_index[j]]._fitness - X_previous[Net[i].point_index[j]]._fitness;
         }
         increase_ratio[i] = increase_sum / 4.0;
 
@@ -293,7 +287,10 @@ void VN::net_update()
         }
         // update solution
         X_previous[i] = X[i];
+        // TODO update bug appear
+        cout << X[i]._fitness << " ";
         X[i] = U[i];
+        cout << X[i]._fitness << endl;
     }
 
     // Update HS
@@ -358,19 +355,18 @@ void VN::Init_T_point(vector<T_Point> &points, int size, int dim, bool posInitRa
     for (int i=0; i<size; i++){
         points[i]._index = i;
         points[i]._position.assign(dim, 0);
+        points[i]._inCR = points[i]._inF = 0;
+        points[i]._fitness = 0;
         if (posInitRand){
             for (int j = 0; j < dim; j++)
-            {
                 points[i]._position[j] = tool.rand_double(problem.getBounderMin(), problem.getBounderMax());
-            }
-            X[i]._fitness = problem.executeStrategy(X[i]._position, num_Dim);
+            points[i]._fitness = problem.executeStrategy(points[i]._position, num_Dim);
             eval_count++;
         }
-        X[i]._inCR = X[i]._inF = 0;
     }
 }
 
-void VN::Init_T_net(vector<T_Net> &nets, int size, int num_region){
+void VN::Init_T_net(vector<T_Net> &Net, int size, int num_region){
     Net.resize(size);
     for (int i=0; i<num_region; i++){
         for (int j=0; j<num_region; j++){
