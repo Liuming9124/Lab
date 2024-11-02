@@ -278,19 +278,17 @@ void VN::net_update()
         U[i]._inCR = X[i]._inCR;
         U[i]._inF = X[i]._inF;
         
+        X_previous[i] = X[i];
         // update scr & sf
         if (X[i]._fitness > U[i]._fitness)
         {
             SCR.push_back(U[i]._inCR);
             SF.push_back(U[i]._inF);
             deltaF.push_back(X[i]._fitness - U[i]._fitness);
+            // update solution
+            // TODO update bug appear
+            X[i] = U[i];
         }
-        // update solution
-        X_previous[i] = X[i];
-        // TODO update bug appear
-        cout << X[i]._fitness << " ";
-        X[i] = U[i];
-        cout << X[i]._fitness << endl;
     }
 
     // Update HS
