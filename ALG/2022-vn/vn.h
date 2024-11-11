@@ -286,7 +286,6 @@ void VN::net_update()
             SF.push_back(U[i]._inF);
             deltaF.push_back(X[i]._fitness - U[i]._fitness);
             // update solution
-            // TODO update bug appear
             X[i] = U[i];
         }
     }
