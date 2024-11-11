@@ -107,7 +107,7 @@ void SE::RunALG(int Run, int Func, int Evals, int Bits, int Searchers, int Regio
             marketing_search(Best);
             // if (eval_count <= num_Fess){
                 show.SetDataInt(num_Run, Best, eval_count);
-                cout << "Run: " << num_Run << " eval_count: " << eval_count << " Best: " << Best << endl;
+                // cout << "Run: " << num_Run << " eval_count: " << eval_count << " Best: " << Best << endl;
             // }
             num_Iter++;
         }
@@ -318,6 +318,114 @@ void SE::compute_expected_value(int eval){
         for (int j=0; j<num_Regions; j++)
             expected_value[i][j] = T_j[j] * M_j[j];
 }
+
+// void SE::compute_expected_value(int eval){
+//     // set fitness of all regions of all searchers 
+//     if (eval == 0) {
+//         for (int i = 0; i < num_Searchers; i++) {
+//             searcher_sol_fit[i] = problem.executeStrategy(searcher_sol[i], num_Dim);
+//             eval_count++;
+//         }
+//     } else {
+//         // fitness of sampleV_sol (new candidate solutions)
+//         for (int i = 0; i < num_Searchers; i++) {
+//             int j = searcher_region_id[i];
+//             for (int k = 0; k < num_Samples; k++) {
+//                 int n = tool.rand_int(0, 2 * num_Samples - 1);
+//                 int f = problem.executeStrategy(sampleV_sol[i][j][n], num_Dim);
+//                 eval_count++;
+
+//                 // 更新搜尋者的解和適應值
+//                 if (f > searcher_sol_fit[i]) {
+//                     searcher_sol[i] = sampleV_sol[i][j][n];
+//                     searcher_sol_fit[i] = f;
+//                 }
+//                 // 更新樣本的解和適應值
+//                 if (f > sample_sol_fit[j][k]) {
+//                     sample_sol[j][k] = sampleV_sol[i][j][n];
+//                     sample_sol_fit[j][k] = f;
+//                 }
+//             }
+//         }
+//     }
+
+//     // fitness value of samples
+//     if (eval == 0) {
+//         for (int j = 0; j < num_Regions; j++) {
+//             for (int k = 0; k < num_Samples; k++) {
+//                 sample_sol_fit[j][k] = problem.executeStrategy(sample_sol[j][k], num_Dim);
+//                 eval_count++;
+//             }
+//         }
+//     }
+
+//     double total_sample_fitness = 0.0; // f(m_j)
+//     for (int j = 0; j < num_Regions; j++) {
+//         double region_best_fit = 0.0; // 區域最佳化適應值
+//         int b = -1; // index of best sample
+
+//         for (int k = 0; k < num_Samples; k++) {
+//             total_sample_fitness += sample_sol_fit[j][k];
+//             // update best sample
+//             if (sample_sol_fit[j][k] > region_best_fit) {
+//                 b = k;
+//                 region_best_fit = sample_sol_fit[j][k];
+//             }
+//         }
+//         if (b >= 0) {
+//             sample_best_fit[j] = region_best_fit;
+//             sample_best[j] = sample_sol[j][b];
+//         }
+//     }
+
+//     // 正規化 M_J
+//     double max_Mj = *std::max_element(sample_best_fit.begin(), sample_best_fit.end());
+//     double min_Mj = *std::min_element(sample_best_fit.begin(), sample_best_fit.end());
+
+//     for (int j = 0; j < num_Regions; j++) {
+//         if (max_Mj - min_Mj != 0) {
+//             M_j[j] = (sample_best_fit[j] - min_Mj) / (max_Mj - min_Mj);
+//         } else {
+//             M_j[j] = 0;
+//         }
+//     }
+
+//     // 正規化 T_J
+//     double min_Tj = *std::min_element(T_j.begin(), T_j.end());
+//     double max_Tj = *std::max_element(T_j.begin(), T_j.end());
+
+
+//     for (int j = 0; j < num_Regions; j++) {
+//         if (max_Tj - min_Tj != 0) {
+//             T_j[j] = (T_j[j] - min_Tj) / (max_Tj - min_Tj);
+//         } else {
+//             T_j[j] = 0;
+//         }
+//     }
+
+//     // 計算並正規化期望值
+//     double max_expected = -1e9, min_expected = 1e9;
+
+//     for (int i = 0; i < num_Searchers; i++) {
+//         for (int j = 0; j < num_Regions; j++) {
+//             expected_value[i][j] = T_j[j] * M_j[j];
+//             if (expected_value[i][j] > max_expected) max_expected = expected_value[i][j];
+//             if (expected_value[i][j] < min_expected) min_expected = expected_value[i][j];
+//         }
+//     }
+
+//     // 將期望值正規化
+//     for (int i = 0; i < num_Searchers; i++) {
+//         for (int j = 0; j < num_Regions; j++) {
+//             if (max_expected - min_expected != 0) {
+//                 expected_value[i][j] = (expected_value[i][j] - min_expected) / (max_expected - min_expected);
+//             } else {
+//                 expected_value[i][j] = 0;
+//             }
+//         }
+//     }
+// }
+
 
 void SE::vision_selection(int player,int eval){
     // add times of non-investment

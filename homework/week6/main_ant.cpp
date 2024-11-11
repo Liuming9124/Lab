@@ -12,8 +12,8 @@ int main(int argc, char *argv[]){
     int Alpha = atoi(argv[5]);
     int Beta = atoi(argv[6]);
     int Q = atoi(argv[7]);
-    double Rho = atoi(argv[8]);
-    double Pmute = atoi(argv[9]);
+    double Rho = atof(argv[8]);
+    double Pmute = atof(argv[9]);
 
     AntTsp ant;
     ant.RunALG(InputName, Run, Iter, NumAnts, Alpha, Beta, Q, Rho, Pmute);
