@@ -5,8 +5,8 @@
 using namespace std;
 
 int main(int argc, char *argv[]){
-    int Run, Func, Evals, Dim, NetLength, Explorer, MinerInit, MinerFinal, AdjustmentMax;
-    double Rho, mf, mc, Alpha, Beta, Archive;
+    int Run, Func, Evals, Dim, NetLength, Population, AdjustmentMax;
+    double MinerInit, MinerRate, Rho, mf, mc, Alpha, Beta, Archive;
 
     stringstream ss;
     for (int i = 1; i < argc; i++)
@@ -16,10 +16,10 @@ int main(int argc, char *argv[]){
     ss >> Evals;
     ss >> Dim;
     ss >> NetLength;
-    ss >> Explorer;
+    ss >> Population;
+    ss >> AdjustmentMax; // adjust_number
     ss >> MinerInit;
-    ss >> MinerFinal;
-    ss >> AdjustmentMax;
+    ss >> MinerRate;
     ss >> Rho;
     ss >> mf;
     ss >> mc;
@@ -28,6 +28,6 @@ int main(int argc, char *argv[]){
     ss >> Archive;
 
     SNO sno;
-    sno.RunALG(Run, Func, Evals, Dim, NetLength, Explorer, MinerInit, MinerFinal, AdjustmentMax, Rho, mf, mc, Alpha, Beta, Archive);
+    sno.RunALG(Run, Func, Evals, Dim, NetLength, Population, AdjustmentMax, MinerInit, MinerRate, Rho, mf, mc, Alpha, Beta, Archive);
     return 0;
 }

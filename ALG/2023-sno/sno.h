@@ -32,7 +32,7 @@ public:
     } T_Net;
 
 public:
-    void RunALG(int, int, int, int, int, int, int, int, int, double, double, double, double, double, double);
+    void RunALG(int, int, int, int, int, int, int, double, double, double, double, double, double, double, double);
 private:
     //env
     int num_Run;
@@ -42,7 +42,7 @@ private:
     int num_Netlen;
     int num_Explorer;
     int num_MinerInit;
-    int num_MinerFinal;
+    int num_MinerRate;
     int num_Adjustment;
     double num_rho;
     double num_mf;
@@ -62,6 +62,7 @@ private:
     // var
     int eval_count;
     int num_Point;
+    int num_Population;
     int num_Region;
 
     double best_value;
@@ -79,7 +80,7 @@ private:
     void regionSearch();
     void pointSearch();
     void spaceNetAdjustment();
-    void populationAdjustment();
+    void populationAdjustment(int init_size);
     void updateBestSoFar();
 
     // DS
@@ -91,16 +92,19 @@ private:
     static bool PointCompareFitness(const T_Point &a, const T_Point &b);
 
 };
-// Run, Func, Evals, Dim, NetLength, Explorer, MinerInit, MinerFinal, AdjustmentMax, Rho, mf, mc, Alpha, Beta, Archive
-void SNO::RunALG(int Run, int Func, int Eval, int Dim, int NetLength, int Explorer, int MinerInit, int MinerFinal, int Adjustment, double rho, double mf, double mc, double Alpha, double Beta, double Archive)
+// Run, Func, Evals, Dim, NetLength, Explorer, MinerInit, MinerRate, AdjustmentMax, Rho, mf, mc, Alpha, Beta, Archive
+void SNO::RunALG(int Run, int Func, int Eval, int Dim, 
+                 int NetLength, int Population, int Adjustment, double MinerInit, double MinerRate, 
+                 double rho, double mf, double mc, double Alpha, double Beta, double Archive)
 {
     num_Run = Run;
     num_Eval = Eval;
     num_Dim = Dim;
     num_Netlen = NetLength;
-    num_Explorer = Explorer;
+    num_Population = Population;
+    num_Explorer = num_Population;
     num_MinerInit = MinerInit;
-    num_MinerFinal = MinerFinal;
+    num_MinerRate = MinerRate;
     num_Adjustment = Adjustment;
     num_rho = rho;
     num_mf = mf;
@@ -135,9 +139,10 @@ void SNO::Init()
     best_value = 0;
     eval_count = 0;
     
+    num_Miner = num_MinerInit * num_Population;
     Init_T_point(s, num_Explorer, num_Dim, true);
     Init_T_point(x, num_Miner   , num_Dim, true);
-    Init_T_point(A, num_archive , num_Dim, false);
+    Init_T_point(A, num_archive*num_Population , num_Dim, false);
     Init_T_point(Points         , num_Point, num_Dim, true);
     Init_T_point(Points_previous, num_Point, num_Dim, false);
     Init_T_net(Net, num_Region, num_Netlen-1);
@@ -161,8 +166,7 @@ void SNO::Evaluation()
         expectedValue();
         regionSearch();
         pointSearch();
-        spaceNetAdjustment();
-        populationAdjustment();
+        populationAdjustment(num_Population);
         updateBestSoFar();
     }
 }
@@ -179,7 +183,7 @@ void SNO::expectedValue(){ // TODO check δ
 
         double increase_sum = 0.0;
         for (int j = 0; j < 4; j++) {
-            increase_sum += Points[Net[i].point_index[j]]._fitness - Points_previous[Net[i].point_index[j]]._fitness;
+            increase_sum += Points[Net[i].point_index[j]]._fitness - Points_previous[Net[i].point_index[j]]._fitness; // TODO Point_previous
         }
         increase_ratio[i] = increase_sum / 4.0;
 
@@ -218,7 +222,7 @@ void SNO::regionSearch(){
     // update every point in s
     vector<T_Point> V; // v for mutation & crossover
     Init_T_point(V, num_Explorer, num_Dim, false);
-
+    double cr, f;
     vector<double> select_region;
     vector<double> select_point;
     select_region.resize(num_Explorer);
@@ -244,18 +248,18 @@ void SNO::regionSearch(){
         }
         // update visited
         Net[select_region[k]]._Va ++;
-        // CR
-        Net[select_region[k]]._mC = tool.rand_cauchy(Net[select_region[k]]._mC, 0.1);
-        if (Net[select_region[k]]._mC > 1)
-            Net[select_region[k]]._mC = 1;
-        else if (Net[select_region[k]]._mC < 0)
-            Net[select_region[k]]._mC = 0;
+        // CR TODO fix cr & f should not same with mc & mf
+        cr = tool.rand_cauchy(Net[select_region[k]]._mC, 0.1);
+        if (cr > 1)
+            cr = 1;
+        else if (cr < 0)
+            cr = 0;
         // F
         do {
-            Net[select_region[k]]._mF = tool.rand_cauchy(Net[select_region[k]]._mF, 0.1);
-            if (Net[select_region[k]]._mF >= 1)
-                Net[select_region[k]]._mF = 1;
-        } while (Net[select_region[k]]._mF <= 0);
+            f = tool.rand_cauchy(Net[select_region[k]]._mF, 0.1);
+            if (f >= 1)
+                f = 1;
+        } while (f <= 0);
         // Select a point in the region to explore by roulette or best point in region
         vector<T_Point> tofindPoint;
         Init_T_point(tofindPoint, 4, num_Dim, false);
@@ -286,7 +290,7 @@ void SNO::regionSearch(){
         // Mutation & Crossover
         int jrand = tool.rand_int(0, num_Dim - 1);
         for (int j=0; j<num_Dim; j++){
-            if (tool.rand_double(0,1) < Net[select_region[i]]._mC || i == jrand){
+            if (tool.rand_double(0,1) < cr || i == jrand){
                 int r2 = 0;          
                 do{
                     r2 = tool.rand_int(0, (num_Explorer - 1) + (A.size() - 1));
@@ -300,14 +304,14 @@ void SNO::regionSearch(){
                     // mutation
                     if (r2<num_Explorer)
                         V[i]._position[j] = Points[select_point[i]]._position[j] +
-                                            Net[select_region[i]]._mF * (s[r1]._position[j] - s[r2]._position[j]);
+                                            f * (s[r1]._position[j] - s[r2]._position[j]);
                     else
                         V[i]._position[j] = s[i]._position[j] +
-                                            Net[select_region[i]]._mF * (s[r1]._position[j] - A[r2-num_Explorer]._position[j]);
+                                            f * (s[r1]._position[j] - A[r2-num_Explorer]._position[j]);
                 }
                 else {
                     V[i]._position[j] = s[i]._position[j] +
-                                            Net[select_region[i]]._mF * (Points[select_point[i]]._position[j] - A[r2-num_Explorer]._position[j]);
+                                        f * (Points[select_point[i]]._position[j] - A[r2-num_Explorer]._position[j]);
                 }
             }
             else {
@@ -386,18 +390,129 @@ void SNO::regionSearch(){
     }
 }
 
-void SNO::pointSearch(){
-
+void SNO::pointSearch() {
+    for (int i=0; i<num_Miner; i++){
+        // Rank all net points
+        vector<T_Point> tmpPoints = Points;
+        sort(tmpPoints.begin(), tmpPoints.end(), PointCompareFitness);
+        // select point
+        int num_access = ((0.1-num_rho)*(eval_count/num_Fess) + num_rho) * num_Point;
+        // select a region to get mf, mc
+        int select_region = tool.rand_int(0, num_Region-1);
+        // Generate CR & F
+        double cr, f;
+        // CR
+        cr = tool.rand_cauchy(Net[select_region]._mC, 0.1);
+        if (cr > 1)
+            cr = 1;
+        else if (cr < 0)
+            cr = 0;
+        // F
+        do {
+            f = tool.rand_cauchy(Net[select_region]._mF, 0.1);
+            if (f >= 1)
+                f = 1;
+        } while (f <= 0);
+        // tmp variable
+        vector<T_Point> V; // v for mutation & crossover
+        Init_T_point(V, 1, num_Dim, false);
+        // randomly select a miner
+        int select_miner = tool.rand_int(0, num_Miner-1);
+        // Generate new solution
+        int jrand = tool.rand_int(0, num_Dim - 1);
+        for (int j=0; j<num_Dim; j++){
+            // mutation & crossover
+            if (tool.rand_double(0,1) < cr || j == jrand) {
+                int r1, r2;
+                do {
+                    r1 = tool.rand_int(0, num_Miner - 1);
+                } while (r1==i);
+                do {
+                    r2 = tool.rand_int(0, num_Miner - 1);
+                } while (r2==r1 || r2==i);
+                
+                if (tool.rand_double(0,1) < powf(eval_count/num_Eval, num_beta))
+                    V[0]._position[j] = x[select_miner]._position[j] + f * (x[r1]._position[j] - x[r2]._position[j]);
+                else
+                    V[0]._position[j] = x[select_miner]._position[j] + f * (tmpPoints[r1]._position[j] - x[r2]._position[j]);
+            }
+            else
+                V[0]._position[j] = x[select_miner]._position[j];
+            // check boundary
+            if (V[0]._position[j] < problem.getBounderMin() || V[0]._position[j] > problem.getBounderMax())
+                V[0]._position[j] = tool.rand_double(problem.getBounderMin(), problem.getBounderMax());
+            // update fitness
+            V[0]._fitness = problem.executeStrategy(V[0]._position, num_Dim);
+            eval_count++;
+            // update net
+            spaceNetAdjustment();
+            // update best so far
+            updateBestSoFar();
+        }
+    }
 }
 
 void SNO::spaceNetAdjustment(){
 
 }
 
-void SNO::populationAdjustment(){
+void SNO::populationAdjustment(int init_size){
+    int min_size = 10;
+    double change_rate = sqrt(eval_count/num_Fess);
+    num_Population = (num_Point - min_size) * powf(change_rate, (1-change_rate)) + min_size;
 
+    while(s.size() > num_Population) {
+        vector<T_Point> tmp = s;
+        sort(tmp.begin(), tmp.end(), PointCompareFitness);
+        reverse(tmp.begin(), tmp.end()); // worst at first
+        s.erase(s.begin() + tmp[0]._index);
+    }
+
+    while (num_archive > round(num_archive*num_Population))
+    {
+        int rand_index = (int)round(tool.rand_double(0,1) * (A.size() - 1));
+        A.erase(A.begin() + rand_index);
+    }
+
+    double p_best = (0.1 - num_rho) * ((double) eval_count / num_Fess) + num_rho;
+    int s_init_size = (int)round(num_MinerInit * init_size);
+    int s_new_size = (int)round(num_MinerRate * pow(change_rate, 1.0 - change_rate) * init_size + s_init_size);
+    vector<T_Point> rankPoints = Points;
+    sort(rankPoints.begin(), rankPoints.end(), PointCompareFitness);
+
+    while (x.size() < s_new_size){
+        int rand_index = (int)round(tool.rand_double(0,1) * p_best * (num_Point - 1));
+        vector<T_Point> vnewx;
+        Init_T_point(vnewx, 1, num_Dim, false);
+        T_Point new_x = vnewx[0];
+        new_x._index = x.size();
+
+
+        for(int i=0; i<num_Dim; ++i){
+            if (tool.rand_double(0,1) < 0.5){
+                double rand_value = (problem.getBounderMax() - problem.getBounderMin()) * tool.rand_double(0,1) + problem.getBounderMin();
+                new_x._position[i] = num_alpha * Points[rankPoints[rand_index]._index]._position[i] + (1 - num_alpha) * rand_value;
+            }
+            else {
+                new_x._position[i] = Points[rankPoints[rand_index]._index]._position[i];
+            }
+        }
+        new_x._fitness = problem.executeStrategy(new_x._position, num_Dim);
+        eval_count++;
+
+        if (new_x._fitness < best_value){
+            best_value = new_x._fitness;
+            // replace the worst point in s
+            vector<T_Point> worsts = s;
+            sort(worsts.begin(), worsts.end(), PointCompareFitness);
+            reverse(worsts.begin(), worsts.end());
+            worsts[0]._position = new_x._position;
+            worsts[0]._fitness = new_x._fitness;
+        }
+        x.push_back(new_x);
+        num_Explorer++;
+    }
 }
-
 
 void SNO::updateBestSoFar(){
     double best = Points[0]._fitness;
