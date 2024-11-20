@@ -79,7 +79,7 @@ private:
     void expectedValue();
     void regionSearch();
     void pointSearch();
-    void spaceNetAdjustment();
+    void spaceNetAdjustment(T_Point &);
     void populationAdjustment(int init_size);
     void updateBestSoFar();
 
@@ -90,6 +90,8 @@ private:
     static bool NetCompareFitness(const T_Net &a, const T_Net &b);
     int NetSelectTopPBest(vector<T_Net> xx, double p);
     static bool PointCompareFitness(const T_Point &a, const T_Point &b);
+    void calDis(T_Point &a, T_Point &b, double &dis);
+    void rankDis(T_Point &target, vector<T_Point> &points, vector<int> &rank, vector<double>&distance); // rank distance between target and points, store rank in store 
 
 };
 // Run, Func, Evals, Dim, NetLength, Explorer, MinerInit, MinerRate, AdjustmentMax, Rho, mf, mc, Alpha, Beta, Archive
@@ -136,7 +138,6 @@ void SNO::Init()
 {
     A.clear();
     show.init();
-    best_value = 0;
     eval_count = 0;
     
     num_Miner = num_MinerInit * num_Population;
@@ -146,6 +147,9 @@ void SNO::Init()
     Init_T_point(Points         , num_Point, num_Dim, true);
     Init_T_point(Points_previous, num_Point, num_Dim, false);
     Init_T_net(Net, num_Region, num_Netlen-1);
+    
+    best_value = __DBL_MAX__;
+    updateBestSoFar();    
 
     SF.resize(num_Point);
     SCR.resize(num_Point);
@@ -339,10 +343,10 @@ void SNO::regionSearch(){
             }
             s[i] = V[i];
         }
+        // algo16 : line 20
+        spaceNetAdjustment(V[i]);
         updateBestSoFar();
     }
-    // algo16 : line 20
-    spaceNetAdjustment(); // TODO
     // update vb
     for (int i=0; i<num_Region; i++){
         bool flag = false;
@@ -444,16 +448,125 @@ void SNO::pointSearch() {
             // update fitness
             V[0]._fitness = problem.executeStrategy(V[0]._position, num_Dim);
             eval_count++;
-            // update net
-            spaceNetAdjustment();
-            // update best so far
-            updateBestSoFar();
+        }
+        // update net
+        spaceNetAdjustment(V[i]);
+        // update best so far
+        updateBestSoFar();
+    }
+}
+
+void SNO::spaceNetAdjustment(T_Point &search){
+    vector<int> rank(num_Point, 0);
+    vector<double> distance(num_Point, 0);
+    rankDis(search, Points, rank, distance);
+    int num_access = max((int)round(num_Adjustment * (double)eval_count/num_Fess), 1);
+    for (int i=0; i<num_access; i++){
+        double cr, f;
+        int rand_index = tool.rand_int(0, num_access-1);
+        // CR
+        cr = tool.rand_cauchy(Net[rank[rand_index]]._mC, 0.1);
+        if (cr > 1)
+            cr = 1;
+        else if (cr < 0)
+            cr = 0;
+        // F
+        do {
+            f = tool.rand_cauchy(Net[rank[rand_index]]._mF, 0.1);
+            if (f >= 1)
+                f = 1;
+        } while (f <= 0);
+        // prepare for mutation & crossover
+        vector<T_Point> prepare;
+        Init_T_point(prepare, 2, num_Dim, false);
+        int r1, r2;
+        do {
+            r1 = tool.rand_int(0, (num_Explorer-1) + (num_Miner-1));
+        } while (r1 == rand_index);
+        do {
+            r2 = tool.rand_int(0, (num_Explorer-1) + (num_Miner-1));
+        } while (r2 == rand_index || r2 == r1);
+        // prepare for mutation & crossover
+        for (int j=0; j<num_Dim; j++){
+            double pos_r1 = 0, pos_r2 = 0;
+            if (r1 < num_Explorer)
+                pos_r1 = s[r1]._position[j];
+            else
+                pos_r1 = x[r1-num_Explorer]._position[j];
+            if (r2 < num_Explorer)
+                pos_r2 = s[r2]._position[j];
+            else
+                pos_r2 = x[r2-num_Explorer]._position[j];
+            // prepare n1
+            prepare[0]._position[j] = search._position[j] + f * (pos_r1 - pos_r2);
+            // prepare n2
+            prepare[1]._position[j] = Points[rank[i]]._position[j] 
+                                    + f * (search._position[j] - Points[rank[i]]._position[j])
+                                    + f * (pos_r1 - pos_r2);
+        }
+        // select N'a,i to update
+        T_Point select_netPoint;
+        select_netPoint._position.assign(num_Dim, 0);
+        vector<int> tmp_rank(num_Point, 0);
+        vector<double> tmp_distance(num_Point, 0);
+        if (i==0){
+            int rand_index = tool.rand_int(0, (num_Explorer-1) + (num_Miner-1));
+            if (rand_index < num_Explorer)
+                select_netPoint = s[rand_index];
+            else
+                select_netPoint = x[rand_index-num_Explorer];
+            select_netPoint._fitness = problem.executeStrategy(select_netPoint._position, num_Dim);
+            eval_count++;
+        }
+        else if (tool.rand_double(0,1) < (eval_count/num_Fess)) {
+            double dis0, dis1;
+            calDis(prepare[0], search, dis0);
+            calDis(prepare[1], search, dis1);
+            if (dis0 < dis1)
+                select_netPoint = prepare[0];
+            else
+                select_netPoint = prepare[1];
+        }
+        else {
+            double dis0, dis1;
+            calDis(prepare[0], Points[rank[i]], dis0);
+            calDis(prepare[1], Points[rank[i]], dis1);
+            if (dis0 < dis1)
+                select_netPoint = prepare[0];
+            else
+                select_netPoint = prepare[1];
+        }
+        // adjust space net
+        rankDis(select_netPoint, Points, tmp_rank, tmp_distance);
+        if (select_netPoint._fitness < Points[tmp_rank[0]]._fitness) {
+            Points[tmp_rank[0]]._position = select_netPoint._position;
+            Points[tmp_rank[0]]._fitness = select_netPoint._fitness;
         }
     }
 }
 
-void SNO::spaceNetAdjustment(){
+void SNO::calDis(T_Point &a, T_Point &b, double &dis){
+    dis = 0;
+    for (int i=0; i<num_Dim; i++){
+        dis += pow(a._position[i] - b._position[i], 2);
+    }
+    dis = sqrt(dis);
+}
 
+void SNO::rankDis(T_Point &target, vector<T_Point> &points, vector<int> &rank, vector<double>&distance){
+    vector<T_Point> tmPoints = points;
+    // calculate distance
+    for (int i=0; i<points.size(); i++){
+        calDis(target, points[i], distance[i]);
+    }
+    // rank distance and store point_index in rank
+    for (int i=0; i<points.size(); i++){
+        tmPoints[i]._fitness = distance[i];
+    }
+    sort(tmPoints.begin(), tmPoints.end(), PointCompareFitness);
+    for (int i=0; i<points.size(); i++){
+        rank[tmPoints[i]._index] = i;
+    }
 }
 
 void SNO::populationAdjustment(int init_size){
@@ -512,6 +625,7 @@ void SNO::populationAdjustment(int init_size){
         x.push_back(new_x);
         num_Explorer++;
     }
+    num_Point = num_Population;
 }
 
 void SNO::updateBestSoFar(){
