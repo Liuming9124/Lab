@@ -167,9 +167,6 @@ void SNO::Evaluation()
         SF.clear();
         SRegion.clear();
         deltaF.clear();
-
-        cout << eval_count << endl;
-
         
         expectedValue();
         // cout << "finish expectedValue" << endl;
@@ -182,6 +179,10 @@ void SNO::Evaluation()
         updateBestSoFar();
         // cout << "finish updateBestSoFar" << endl;
         Points_previous = Points;
+
+        if (eval_count < num_Eval)
+            show.SetDataDouble(num_Run, best_value, eval_count);
+        cout << "Eval: " << eval_count << ", " << best_value << endl;
     }
 }
 
@@ -581,39 +582,6 @@ void SNO::spaceNetAdjustment(T_Point &search){
 // cout << "spaceNetAdjustment out" << endl;
 }
 
-void SNO::calDis(vector<double> &a, vector<double> &b, double &dis){
-    dis = 0;
-    for (int i=0; i<num_Dim; i++){
-        dis += pow(a[i] - b[i], 2);
-    }
-    dis = sqrt(dis);
-}
-
-void SNO::rankDis(T_Point &target, vector<T_Point> &points, vector<int> &rank){
-// cout << "rankDis in" << endl;
-    vector<double> distance;
-    distance.assign(points.size(), 0);
-    vector<T_Point> tmPoints;
-    tmPoints.resize(points.size());
-    tmPoints = points;
-    // calculate distance
-    for (int i=0; i<points.size(); i++){
-        calDis(target._position, points[i]._position, distance[i]);
-    }
-    // rank distance and store point_index in rank
-    for (int i=0; i<points.size(); i++){
-        tmPoints[i]._fitness = distance[i];
-    }
-    sort(tmPoints.begin(), tmPoints.end(), PointCompareFitness);
-    for (int i=0; i<points.size(); i++){
-        rank[tmPoints[i]._index] = i;
-    }
-    // release memory
-    vector<double>().swap(distance);
-    vector<T_Point>().swap(tmPoints);
-// cout << "rankDis out" << endl;
-}
-
 void SNO::populationAdjustment(int init_size){
 // cout << "populationAdjustment in " << eval_count << endl;
     int min_size = 10;
@@ -708,6 +676,38 @@ bool SNO::PointCompareFitness(const T_Point &a, const T_Point &b)
     return a._fitness < b._fitness;
 }
 
+void SNO::calDis(vector<double> &a, vector<double> &b, double &dis){
+    dis = 0;
+    for (int i=0; i<num_Dim; i++){
+        dis += pow(a[i] - b[i], 2);
+    }
+    dis = sqrt(dis);
+}
+
+void SNO::rankDis(T_Point &target, vector<T_Point> &points, vector<int> &rank){
+// cout << "rankDis in" << endl;
+    vector<double> distance;
+    distance.assign(points.size(), 0);
+    vector<T_Point> tmPoints;
+    tmPoints.resize(points.size());
+    tmPoints = points;
+    // calculate distance
+    for (int i=0; i<points.size(); i++){
+        calDis(target._position, points[i]._position, distance[i]);
+    }
+    // rank distance and store point_index in rank
+    for (int i=0; i<points.size(); i++){
+        tmPoints[i]._fitness = distance[i];
+    }
+    sort(tmPoints.begin(), tmPoints.end(), PointCompareFitness);
+    for (int i=0; i<points.size(); i++){
+        rank[tmPoints[i]._index] = i;
+    }
+    // release memory
+    vector<double>().swap(distance);
+    vector<T_Point>().swap(tmPoints);
+// cout << "rankDis out" << endl;
+}
 
 void SNO::Init_T_points(vector<T_Point> &points, int size, int dim, bool posInitRand) {
     points.resize(size);
