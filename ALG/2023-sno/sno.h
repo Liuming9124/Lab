@@ -2,7 +2,7 @@
 #define SNO_H
 // #include "../AlgPrint.h"
 #include "../Tool.h"
-#include "./cec2021.cpp" // TODO windows.h, change to linux os
+#include "./cec2021.cpp" // Only for windows platform
 #include <vector>
 #include <algorithm>
 #include <cmath>
@@ -35,13 +35,13 @@ public:
 private:
     //env
     int num_Run;
-    int num_Dim;
     int num_Eval;
+    int num_Dim;
     int num_Netlen;
-    int num_Explorer;
-    int num_MinerInit;
-    int num_MinerRate;
+    int num_Population;
     int num_Adjustment;
+    double num_MinerInit;
+    double num_MinerRate;
     double num_rho;
     double num_mf;
     double num_mc;
@@ -61,8 +61,9 @@ private:
     // var
     int eval_count, show_count;
     int num_Point;
-    int num_Population;
     int num_Region;
+    int num_Explorer;
+    int init_population;
 
     double best_value;
 
@@ -91,7 +92,8 @@ private:
     int NetSelectTopPBest(vector<T_Net> xx, double p);
     static bool PointCompareFitness(const T_Point &a, const T_Point &b);
     void calDis(vector<double> &a, vector<double> &b, double &dis);
-    void rankDis(T_Point &target, vector<T_Point> &points, vector<int> &rank); // rank distance between target and points, store rank in store 
+    void rankDis(T_Point &target, vector<T_Point> &points, vector<int> &rank); // rank distance between target and points, store rank in store
+    void genCRF (double mC, double mF, double &cr, double &f); 
 
 };
 // Run, Func, Evals, Dim, NetLength, Explorer, MinerInit, MinerRate, AdjustmentMax, Rho, mf, mc, Alpha, Beta, Archive
@@ -132,8 +134,7 @@ void SNO::RunALG(int Run, int Func, int Eval, int Dim,
 
 }
 
-void SNO::Init()
-{
+void SNO::Init() {
     Archives.clear();
     // show.init();
     eval_count = show_count = 0;
@@ -160,8 +161,7 @@ void SNO::Init()
     deltaF.resize(num_Point);
 }
 
-void SNO::Evaluation()
-{
+void SNO::Evaluation() {
     bool flag = false;
     while (eval_count < num_Eval)
     {
@@ -178,10 +178,7 @@ void SNO::Evaluation()
         populationAdjustment(num_Population);
         updateBestSoFar();
 
-        cout << "run: " << show_count << endl;
-        if (eval_count>=num_Eval)
-            break;
-        else {
+        if ((int)eval_count < (int)num_Eval){
             // show.SetDataDouble(num_Run, best_value, show_count);
             show_count = eval_count;
             cout << "final: " << num_Eval << " ,Eval: " << show_count << ", " << best_value << endl;
@@ -189,7 +186,7 @@ void SNO::Evaluation()
     }
     cout << "FINISH: " << show_count << endl;
 }
-void SNO::expectedValue(){   
+void SNO::expectedValue() {   
     // compute each net's expected value
     vector<double> visit_ratio(num_Region, 0);
     vector<double> increase_ratio(num_Region, 0);
@@ -242,9 +239,9 @@ void SNO::expectedValue(){
     vector<double>().swap(EV);
 }
 
-void SNO::regionSearch(){
+void SNO::regionSearch() {
     // update every point in s
-    vector<T_Point> V; // v for mutation & crossover // TODO if the mf & mc passwthrough from last generation
+    vector<T_Point> V; // v for mutation & crossover
     Init_T_points(V, num_Explorer, num_Dim, false);
     double cr, f;
     vector<int> select_region(num_Explorer, 0);
@@ -278,18 +275,8 @@ void SNO::regionSearch(){
         // update visited // algo 16 : line 4
         Net[select_region[i]]._Va ++;
         // algo 16 : line 5
-        // CR
-        cr = tool.rand_cauchy(Net[select_region[i]]._mC, 0.1);
-        if (cr > 1)
-            cr = 1;
-        else if (cr < 0)
-            cr = 0;
-        // F
-        do {
-            f = tool.rand_cauchy(Net[select_region[i]]._mF, 0.1);
-            if (f >= 1)
-                f = 1;
-        } while (f <= 0);
+        // CR and F
+        genCRF(Net[select_region[i]]._mC, Net[select_region[i]]._mF, cr, f);
         // algo 16 : line 6
         // Select a point in the region to explore by roulette or best point in region
         vector<T_Point> tofindPoint;
@@ -385,7 +372,7 @@ void SNO::regionSearch(){
                 flag = true;
                 break;
             }
-        // 沒被搜尋過的VB+1 , 論文中未提及搜尋過該如何處理 , 直接用VN的方式更新 // TODO double check
+        // 沒被搜尋過的VB+1 , 用與Vision Net相同的方式更新
         if (flag) {
             Net[i]._Va ++;
             Net[i]._Vb = 1;
@@ -429,23 +416,13 @@ void SNO::pointSearch() {
         sort(tmpPoints.begin(), tmpPoints.end(), PointCompareFitness);
         // select point
         int num_access = ((0.1-num_rho)*((double)eval_count/num_Eval) + num_rho) * num_Point;
-        int select_NSpoint = tool.rand_int(0, num_access-1);
+        int select_NSpoint = tmpPoints[tool.rand_int(0, num_access-1)]._index;
         // select a region to get mf, mc
         int select_region = tool.rand_int(0, num_Region-1);
         // Generate CR & F
         double cr, f;
-        // CR // TODO pack to function
-        cr = tool.rand_cauchy(Net[select_region]._mC, 0.1);
-        if (cr > 1)
-            cr = 1;
-        else if (cr < 0)
-            cr = 0;
-        // F
-        do {
-            f = tool.rand_cauchy(Net[select_region]._mF, 0.1);
-            if (f >= 1)
-                f = 1;
-        } while (f <= 0);
+        // CR and F
+        genCRF(Net[select_region]._mC, Net[select_region]._mF, cr, f);
         // tmp variable
         T_Point V; // v for mutation & crossover
         Init_T_point(V, 1, num_Dim, false);
@@ -463,11 +440,10 @@ void SNO::pointSearch() {
                 do {
                     r2 = tool.rand_int(0, num_Miner - 1);
                 } while (r2==r1 || r2==i);
-                
-                if (tool.rand_double(0,1) < powf((double)eval_count/num_Eval, num_beta))
+                if (tool.rand_double(0,1) < pow((double)eval_count/num_Eval, num_beta))
                     V._position[j] = Points[select_NSpoint]._position[j] + f * (x[r1]._position[j] - x[r2]._position[j]);
                 else
-                    V._position[j] = x[select_miner]._position[j] + f * (tmpPoints[r1]._position[j] - x[r2]._position[j]);
+                    V._position[j] = x[select_miner]._position[j] + f * (x[r1]._position[j] - x[r2]._position[j]);
             }
             else
                 V._position[j] = x[select_miner]._position[j];
@@ -490,37 +466,24 @@ void SNO::pointSearch() {
     }
 }
 
-void SNO::spaceNetAdjustment(T_Point &search){
+void SNO::spaceNetAdjustment(T_Point &search) {
     vector<int> rank(num_Point, 0);
-    rankDis(search, Points, rank);
     int num_access = max((int)round( (num_Point * num_Adjustment - 1) * ((double)eval_count/num_Eval)) + 1, 1);
+    rankDis(search, Points, rank);
     // prepare for mutation & crossover
-    vector<vector<double>> prepare;
-    prepare.resize(2);
-    prepare[0].assign(num_Dim, 0);
-    prepare[1].assign(num_Dim, 0);
+    vector<vector<double>> prepare(2, vector<double>(num_Dim, 0.0));
     for (int i=0; i<num_access; i++){
         int rand_index = tool.rand_int(0, num_access-1);
         int rand_region = tool.rand_int(0, num_Region-1);
         double cr, f;
-        // CR
-        cr = tool.rand_cauchy(Net[rand_region]._mC, 0.1);
-        if (cr > 1)
-            cr = 1;
-        else if (cr < 0)
-            cr = 0;
-        // F
-        do {
-            f = tool.rand_cauchy(Net[rand_region]._mF, 0.1);
-            if (f >= 1)
-                f = 1;
-        } while (f <= 0);
+        // CR and F
+        genCRF(Net[rand_region]._mC, Net[rand_region]._mF, cr, f);
         int r1, r2;
         do {
-            r1 = tool.rand_int(0, (num_Explorer-1) + (num_Miner-1));
+            r1 = tool.rand_int(0, (s.size()-1) + (x.size()-1));
         } while (r1 == rand_index);
         do {
-            r2 = tool.rand_int(0, (num_Explorer-1) + (num_Miner-1));
+            r2 = tool.rand_int(0, (s.size()-1) + (x.size()-1));
         } while (r2 == rand_index || r2 == r1);
         // prepare for mutation & crossover
         for (int j=0; j<num_Dim; j++){
@@ -533,26 +496,16 @@ void SNO::spaceNetAdjustment(T_Point &search){
                 pos_r2 = s[r2]._position[j];
             else
                 pos_r2 = x[r2-num_Explorer]._position[j];
-            // prepare n1
             prepare[0][j] = search._position[j] + f * (pos_r1 - pos_r2);
-            // prepare n2
-            prepare[1][j] = Points[rank[i]]._position[j] 
-                          + f * (search._position[j] - Points[rank[i]]._position[j])
-                          + f * (pos_r1 - pos_r2);
+            prepare[1][j] = Points[rank[i]]._position[j] // maybe have bug
+                        + f * (search._position[j] - Points[rank[i]]._position[j])
+                        + f * (pos_r1 - pos_r2);
         }
         // select N'a,i to update
         T_Point select_netPoint;
         select_netPoint._position.assign(num_Dim, 0);
-        rank.assign(num_Point, 0);
-        if (i==0){
-            int rand_index = tool.rand_int(0, (num_Explorer-1) + (num_Miner-1));
-            if (rand_index < num_Explorer)
-                select_netPoint = s[rand_index];
-            else
-                select_netPoint = x[rand_index-num_Explorer];
-            select_netPoint._fitness = problem.executeStrategy(select_netPoint._position, num_Dim);
-            eval_count++;
-        }
+        if (i==0)
+            select_netPoint = search;
         else if (tool.rand_double(0,1) < ((double)eval_count/num_Eval)) {
             double dis0, dis1;
             calDis(prepare[0], search._position, dis0);
@@ -572,17 +525,18 @@ void SNO::spaceNetAdjustment(T_Point &search){
                 select_netPoint._position = prepare[1];
         }
         // adjust space net
-        rankDis(select_netPoint, Points, rank);
-        if (select_netPoint._fitness < Points[rank[0]]._fitness) {
-            Points[rank[0]]._position = select_netPoint._position;
-            Points[rank[0]]._fitness = select_netPoint._fitness;
+        if (select_netPoint._fitness < Points[rank[i]]._fitness) {
+            Points[rank[i]]._position = select_netPoint._position;
+            Points[rank[i]]._fitness = select_netPoint._fitness;
         }
     }
+    
     vector<int>().swap(rank);
+    prepare.clear();
     vector<vector<double>>().swap(prepare);
 }
 
-void SNO::populationAdjustment(int init_size){
+void SNO::populationAdjustment(int init_size) {
     int min_size = 10;
     double change_rate = sqrt((double)eval_count/num_Eval);
     num_Population = (double)(min_size - init_size) * pow(change_rate, (1.0-change_rate)) + init_size;
@@ -592,26 +546,26 @@ void SNO::populationAdjustment(int init_size){
         sort(tmp.begin(), tmp.end(), PointCompareFitness);
         reverse(tmp.begin(), tmp.end()); // worst at first
         s.erase(s.begin() + tmp[0]._index);
+        tmp.erase(tmp.begin());
     }
     vector<T_Point>().swap(tmp);
     num_Explorer = s.size();
 
     // remove archive
     while (Archives.size() > round(num_archiveRate*num_Population)) {
-        int rand_index = (int)round(tool.rand_double(0,1) * (Archives.size() - 1));
+        int rand_index = tool.rand_int(0, Archives.size() - 1);
         Archives.erase(Archives.begin() + rand_index);
     }
     num_archive = Archives.size();
     
     double p_best = (0.1 - num_rho) * ((double) eval_count / num_Eval) + num_rho;
-    int s_init_size = num_Miner;
-    int s_new_size = (int)round(num_MinerRate * pow(change_rate, 1.0 - change_rate) * init_size + s_init_size);
+    int x_new_size = (int)((80) * ((double)eval_count/num_Eval)) + 20;
     vector<T_Point> rankPoints = Points;
     sort(rankPoints.begin(), rankPoints.end(), PointCompareFitness);
 
     // add new miner
     T_Point new_miner;
-    while (num_Miner < s_new_size){
+    while (num_Miner < x_new_size){
         int rand_index = (int)round(tool.rand_double(0,1) * p_best * (num_Point - 1));
         Init_T_point(new_miner, num_Miner, num_Dim, true);
         for(int i=0; i<num_Dim; ++i){
@@ -632,6 +586,7 @@ void SNO::populationAdjustment(int init_size){
             sort(worsts.begin(), worsts.end(), PointCompareFitness);
             reverse(worsts.begin(), worsts.end());
             s[worsts[0]._index]._position = new_miner._position;
+            cout << "update: " << s[worsts[0]._index]._fitness << " " << new_miner._fitness << endl;
             s[worsts[0]._index]._fitness  = new_miner._fitness;
             vector<T_Point>().swap(worsts);
         }
@@ -641,37 +596,32 @@ void SNO::populationAdjustment(int init_size){
     vector<T_Point>().swap(rankPoints);
 }
 
-void SNO::updateBestSoFar(){
+void SNO::updateBestSoFar() {
     for (int i=0; i<num_Point; i++)
-        if (best_value > Points[i]._fitness){
+        if (best_value > Points[i]._fitness)
             best_value = Points[i]._fitness;
-        }
 
     for (int i = 0; i < num_Explorer; i++)
-        if (best_value > s[i]._fitness){
+        if (best_value > s[i]._fitness)
             best_value = s[i]._fitness;
-        }
             
     for (int i = 0; i < num_Miner; i++)
-        if (best_value > x[i]._fitness){
+        if (best_value > x[i]._fitness)
             best_value = x[i]._fitness;
-        }
 }
 
 // DS Tool
-bool SNO::NetCompareFitness(const T_Net &a, const T_Net &b)
-{
+bool SNO::NetCompareFitness(const T_Net &a, const T_Net &b) {
     // return descending order
     return a._EV > b._EV;
 }
 
-bool SNO::PointCompareFitness(const T_Point &a, const T_Point &b)
-{
+bool SNO::PointCompareFitness(const T_Point &a, const T_Point &b) {
     // return ascending order
     return a._fitness < b._fitness;
 }
 
-void SNO::calDis(vector<double> &a, vector<double> &b, double &dis){
+void SNO::calDis(vector<double> &a, vector<double> &b, double &dis) {
     dis = 0;
     for (int i=0; i<num_Dim; i++){
         dis += pow(a[i] - b[i], 2);
@@ -679,7 +629,7 @@ void SNO::calDis(vector<double> &a, vector<double> &b, double &dis){
     dis = sqrt(dis);
 }
 
-void SNO::rankDis(T_Point &target, vector<T_Point> &points, vector<int> &rank){
+void SNO::rankDis(T_Point &target, vector<T_Point> &points, vector<int> &rank) {
     vector<T_Point> tmPoints;
     tmPoints.resize(points.size());
     tmPoints = points;
@@ -696,6 +646,19 @@ void SNO::rankDis(T_Point &target, vector<T_Point> &points, vector<int> &rank){
     vector<T_Point>().swap(tmPoints);
 }
 
+void SNO::genCRF(double mC, double mF, double &cr, double &f) {
+    cr = tool.rand_normal(mC, 0.1);
+    if (cr > 1)
+        cr = 1;
+    else if (cr < 0)
+        cr = 0;
+    do {
+        f = tool.rand_cauchy(mF, 0.1);
+        if (f >= 1)
+            f = 1;
+    } while (f <= 0);
+}
+
 void SNO::Init_T_points(vector<T_Point> &points, int size, int dim, bool posInitRand) {
     points.resize(size);
     for (int i = 0; i < size; i++) {
@@ -703,7 +666,7 @@ void SNO::Init_T_points(vector<T_Point> &points, int size, int dim, bool posInit
     }
 }
 
-void SNO::Init_T_point(T_Point &point, int index, int dim, bool posInitRand){
+void SNO::Init_T_point(T_Point &point, int index, int dim, bool posInitRand) {
     point._index = index;
     point._position.assign(dim, 0);
     point._inCR = num_mc;
@@ -717,7 +680,7 @@ void SNO::Init_T_point(T_Point &point, int index, int dim, bool posInitRand){
     }
 }
 
-void SNO::Init_T_net(vector<T_Net> &Net, int size, int num_region){
+void SNO::Init_T_net(vector<T_Net> &Net, int size, int num_region) {
     Net.resize(size);
     for (int i=0; i<num_region; i++){
         for (int j=0; j<num_region; j++){
