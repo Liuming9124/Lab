@@ -82,6 +82,12 @@ void NSGAII::RunALG(int Run, int Func, int Evals, int Dim, int Population, doubl
             Evaluation();
     }
     // show data
+    cout << "Pareto Front (Final Population):" << endl;
+    for (const auto& ind : population) {
+        if (ind.rank == 1) { // 只輸出第一層 Pareto 前沿
+            cout << "f1: " << ind.value1 << ", f2: " << ind.value2 << endl;
+        }
+    }
 }
 
 void NSGAII::Init() {
@@ -130,15 +136,15 @@ void NSGAII::Evaluation() {
 
 
 void NSGAII::FastNonDominatedSort() {
-    vector<vector<int>> fronts; // fronts[i] 表示第 i 層的個體索引
-    fronts.push_back(vector<int>()); // 初始化第一層前沿
+    vector<vector<int>> fronts;
+    fronts.push_back(vector<int>());
 
-    vector<int> dominationCount(num_Population, 0); // 被支配的次數
-    vector<vector<int>> dominatedSet(num_Population); // 支配其他個體的集合
+    int populationSize = population.size(); // 修正：动态获取种群大小
+    vector<int> dominationCount(populationSize, 0);
+    vector<vector<int>> dominatedSet(populationSize);
 
-    // 計算支配關係
-    for (int p = 0; p < num_Population; p++) {
-        for (int q = 0; q < num_Population; q++) {
+    for (int p = 0; p < populationSize; p++) {
+        for (int q = 0; q < populationSize; q++) {
             if (p == q) continue;
 
             bool dominatesPtoQ = 
@@ -150,28 +156,26 @@ void NSGAII::FastNonDominatedSort() {
                 (population[q].value1 < population[p].value1 || population[q].value2 < population[p].value2);
 
             if (dominatesPtoQ) {
-                dominatedSet[p].push_back(q); // p 支配 q
+                dominatedSet[p].push_back(q);
             } else if (dominatesQtoP) {
-                dominationCount[p]++; // p 被 q 支配
+                dominationCount[p]++;
             }
         }
 
-        // 如果 p 沒有被任何個體支配，則屬於第一層
         if (dominationCount[p] == 0) {
-            population[p].rank = 1; // 設定為第一層
+            population[p].rank = 1;
             fronts[0].push_back(p);
         }
     }
 
-    // 建立其他層的前沿
     int currentRank = 1;
     while (!fronts[currentRank - 1].empty()) {
-        vector<int> nextFront; // 下一層的個體
+        vector<int> nextFront;
         for (int p : fronts[currentRank - 1]) {
             for (int q : dominatedSet[p]) {
-                dominationCount[q]--; // 減少 q 被支配的次數
+                dominationCount[q]--;
                 if (dominationCount[q] == 0) {
-                    population[q].rank = currentRank + 1; // 屬於下一層
+                    population[q].rank = currentRank + 1;
                     nextFront.push_back(q);
                 }
             }
@@ -181,59 +185,53 @@ void NSGAII::FastNonDominatedSort() {
     }
 }
 
+
 void NSGAII::CrowdingDistanceAssignment() {
-    // 初始化所有個體的擁擠距離
     for (Individual& ind : population) {
         ind.crowdingDistance = 0.0;
     }
 
-    // 將個體根據 rank 分成不同的前沿層處理
     vector<vector<Individual*>> fronts;
     for (Individual& ind : population) {
         if (ind.rank > fronts.size()) {
-            fronts.resize(ind.rank); // 動態增加層數
+            fronts.resize(ind.rank);
         }
         fronts[ind.rank - 1].push_back(&ind);
     }
 
-    // 計算每個前沿層的擁擠距離
     for (auto& front : fronts) {
         if (front.size() <= 2) {
-            // 如果層內只有 1 或 2 個個體，直接設定無窮大擁擠距離
             for (Individual* ind : front) {
                 ind->crowdingDistance = std::numeric_limits<double>::infinity();
             }
             continue;
         }
 
-        // 對每個目標分別進行排序和擁擠距離計算
-        for (int m = 0; m < 2; m++) { // 假設有兩個目標
-            // 按目標 m 的值進行排序
+        for (int m = 0; m < 2; m++) {
             sort(front.begin(), front.end(), [m](Individual* a, Individual* b) {
                 return (m == 0) ? (a->value1 < b->value1) : (a->value2 < b->value2);
             });
 
-            // 邊界解的擁擠距離設置為無窮大
+            double range = (m == 0) 
+                ? (front.back()->value1 - front[0]->value1) 
+                : (front.back()->value2 - front[0]->value2);
+
+            if (range == 0) range = 1e-6; // 修正：避免范围为零的情况
+
             front[0]->crowdingDistance = std::numeric_limits<double>::infinity();
             front.back()->crowdingDistance = std::numeric_limits<double>::infinity();
 
-            // 計算內部個體的擁擠距離
             for (size_t i = 1; i < front.size() - 1; i++) {
-                double diff = (m == 0)
-                    ? (front[i + 1]->value1 - front[i - 1]->value1)
+                double diff = (m == 0) 
+                    ? (front[i + 1]->value1 - front[i - 1]->value1) 
                     : (front[i + 1]->value2 - front[i - 1]->value2);
 
-                double range = (m == 0)
-                    ? (front.back()->value1 - front[0]->value1)
-                    : (front.back()->value2 - front[0]->value2);
-
-                if (range > 0) {
-                    front[i]->crowdingDistance += diff / range;
-                }
+                front[i]->crowdingDistance += diff / range;
             }
         }
     }
 }
+
 
 void NSGAII::Crossover(vector<Individual>& offspring) {
     for (size_t i = 0; i < num_Population / 2; i++) {
@@ -257,6 +255,8 @@ void NSGAII::Crossover(vector<Individual>& offspring) {
                 child1.solution[j] = 0.5 * ((1 + beta) * parent1.solution[j] + (1 - beta) * parent2.solution[j]);
                 child2.solution[j] = 0.5 * ((1 - beta) * parent1.solution[j] + (1 + beta) * parent2.solution[j]);
             }
+            child1.solution[j] = max(problem1.getBounderMin(), min(problem1.getBounderMax(), child1.solution[j]));
+            child2.solution[j] = max(problem1.getBounderMin(), min(problem1.getBounderMax(), child2.solution[j]));
         }
         offspring.push_back(child1);
         offspring.push_back(child2);
@@ -276,6 +276,7 @@ void NSGAII::Mutation(vector<Individual>& offspring) {
                 }
                 ind.solution[j] += delta * (problem1.getBounderMax() - problem1.getBounderMin());
                 ind.solution[j] = max(problem1.getBounderMin(), min(problem1.getBounderMax(), ind.solution[j]));
+                
             }
         }
     }

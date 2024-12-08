@@ -30,8 +30,8 @@ protected:
 class Func1 : public Strategy {
 public:
     Func1() {
-        _BounderMin =  1000.0;
-        _BounderMax = -1000.0;
+        _BounderMin = -1000.0;
+        _BounderMax =  1000.0;
     }
     double execute(const vector<double>& xx, int dim) const override {
         double num=0;
@@ -45,8 +45,8 @@ public:
 class Func2 : public Strategy {
 public:
     Func2() {
-        _BounderMin =  1000.0;
-        _BounderMax = -1000.0;
+        _BounderMin = -1000.0;
+        _BounderMax =  1000.0;
     }
     double execute(const vector<double>& xx, int dim) const override {
         double num=0;
