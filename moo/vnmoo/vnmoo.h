@@ -159,11 +159,53 @@ void VNMOO::Evaluation()
         expected_value();
         // vision search
         vision_search();
-        // // net update
-        // net_update();
+        // net update
+        net_update();
 
         // save_to_saver();
+        
+        // print the Pareto Front
+        // 先排序X，把rank=1的放到前面
+        vector<T_Point> tmp = X;
+        sort(tmp.begin(), tmp.end(), PointCompareFitness);
+        cout << "Pareto Front" << endl;
+        // print all rank of points
+        FastNonDominatedSort(tmp);
+        for (const auto& point : tmp) {
+            // cout << "Rank: " << point._rank << ", Fitness: ";
+            // for (double f : point._fitness) {
+            //     cout << f << " ";
+            // }
+            // cout << ", Position: ";
+            // for (double p : point._position) {
+            //     cout << p << " ";
+            // }
+            // cout << endl;
+            if (point._rank == 0) {
+                cout << "Fitness: ";
+                for (double f : point._fitness) {
+                    cout << f << " ";
+                }
+                cout << ", Position: ";
+                for (double p : point._position) {
+                    cout << p << " ";
+                }
+                cout << endl;
+            }
+        }
     }
+    // for (const auto& point : external_archive) {
+    //     cout << "Fitness: ";
+    //     for (double f : point._fitness) {
+    //         cout << f << " ";
+    //     }
+    //     cout << ", Position: ";
+    //     for (double p : point._position) {
+    //         cout << p << " ";
+    //     }
+    //     cout << endl;
+    // }
+    
     {
     // // Print final results from the saver
     // cout << "Final Results:" << endl;
@@ -287,7 +329,6 @@ void VNMOO::vision_search() {
     const double alpha = 0.7; // 用於進步值衰退
     const double delta = 2.0; // 額外權重，用於強化非支配等級影響
     const double pbest_ratio = 0.2; // 參考前 pbest 比例的區域 TODO add in algorithm parameters
-
     // 更新遠見網中每個網格點
     for (int i = 0; i < num_Point; ++i) {
         // Step 1: 隨機生成交配率 c 和步伐大小 f
@@ -311,19 +352,23 @@ void VNMOO::vision_search() {
         
         // Step 2: 從前 pbest 比例的區域中隨機選擇區域 rj
         int num_top_regions = max(1, static_cast<int>(num_Region * pbest_ratio));
+        if (num_top_regions < 3) num_top_regions = 3; // 至少選擇 3 個區域
         vector<T_Net> sorted_nets = Net; // 排序的區域
         sort(sorted_nets.begin(), sorted_nets.end(), NetCompareFitness);
         int selected_region_idx = sorted_nets[tool.rand_int(0, num_top_regions - 1)].net_index;
 
         // Step 3: 隨機選擇兩個不同的區域 rr1 和 rr2
         int rr1_idx, rr2_idx;
-        do {
-            rr1_idx = tool.rand_int(0, num_Region - 1);
-        } while (rr1_idx == selected_region_idx);
-        do {
-            rr2_idx = tool.rand_int(0, num_Region - 1);
-        } while (rr2_idx == selected_region_idx || rr2_idx == rr1_idx);
-
+        
+        vector<int> candidate_regions; // 候選區域
+        for (int i = 0; i < num_Region; i++) {
+            if (i != selected_region_idx) {
+                candidate_regions.push_back(i);
+            }
+        }
+        rr1_idx = candidate_regions[tool.rand_int(0, candidate_regions.size() - 1)];
+        candidate_regions.erase(remove(candidate_regions.begin(), candidate_regions.end(), rr1_idx), candidate_regions.end());
+        rr2_idx = candidate_regions[tool.rand_int(0, candidate_regions.size() - 1)];
 
         // Step 4: 進行交配與突變
         T_Point& parent = X[i]; // 當前網格點
@@ -336,13 +381,11 @@ void VNMOO::vision_search() {
                 int best_idx = Net[selected_region_idx].net_best; // rj 中表現最好的點 TODO 把net_best加入struct
                 int rr1_idx_rand = Net[rr1_idx].point_index[tool.rand_int(0, 3)];
                 int rr2_idx_rand = Net[rr2_idx].point_index[tool.rand_int(0, 3)];
-                
                 child._position[d] = parent._position[d]
                     + f * (X[best_idx]._position[d] - parent._position[d])
                     + f * (X[rr1_idx_rand]._position[d] - X[rr2_idx_rand]._position[d]);
             }
         }
-
         // update Ia, Ib
         for (int i = 0; i < num_Region; i++)
         {
@@ -421,61 +464,69 @@ void VNMOO::update_HistoryTable() {
 
 
 void VNMOO::net_update() {
+    cout << "Net Update" << endl;
     // 設定必要參數
-    double l_min = 2.0;  // 最小邊長（依問題需要調整）
-    double l_current = sqrt(num_Region); // 當前的邊長（遠見網的邊長）
+    double l_min = 3.0;  // 最小邊長（依問題需要調整）
+    int l_current = num_Netlen; // 當前的邊長（遠見網的邊長）
     int max_eval = num_Fess; // 最大評估次數
     double t = eval_count;   // 當前評估次數
-
     // 計算新的遠見網邊長 l_new
     double l_new = floor(((l_min - l_current) / max_eval) * t + l_current);
-
+    // 更新新的 Netlen 及 num_Region 和 num_Point
+    num_Netlen = (int) l_new;
+    num_Region = (num_Netlen - 1) * (num_Netlen - 1);
+    num_Point = num_Netlen * num_Netlen;
     // 如果邊長未改變則不需要更新
-    if (l_new == l_current) return;
-
+    if (l_new == l_current){
+        cout << "net update done" << endl;
+        return;
+    }
     // 計算新的區域數量和點數量
     int new_region_size = pow(l_new - 1, 2); // 區域數
     int new_point_size = pow(l_new, 2);      // 網格點數
-
-    // 收集網格點的表現，移除最差點
-    vector<pair<int, double>> point_performance; // <網格點索引, 表現值>
+    // 收集網格點的表現，基於 pfitness 排序
+    vector<pair<int, double>> point_performance; // <網格點索引, pfitness 值>
     for (int i = 0; i < num_Point; i++) {
-        double fitness_sum = accumulate(X[i]._fitness.begin(), X[i]._fitness.end(), 0.0);
-        point_performance.emplace_back(i, fitness_sum);
+        point_performance.push_back({i, X[i]._pfitness});
     }
-
     // 按表現值從小到大排序（最差點優先）
     sort(point_performance.begin(), point_performance.end(), [](auto &a, auto &b) {
         return a.second < b.second;
     });
-
     // 保留表現較好的前 new_point_size 個網格點
     vector<T_Point> new_points;
     for (int i = 0; i < new_point_size; i++) {
         new_points.push_back(X[point_performance[i].first]);
     }
-
     // 更新網格點列表
     X = new_points;
     num_Point = new_point_size;
-
+    // renumber X
+    for (int i = 0; i < num_Point; i++) {
+        X[i]._index = i;
+    }
     // 重組遠見網
     vector<T_Net> new_net;
-    Init_T_net(new_net, new_region_size, l_new - 1); // 初始化新的遠見網
+    Init_T_net(new_net, num_Region, num_Netlen - 1);
     Net = new_net;
     num_Region = new_region_size;
 
-    // // 重置每個區域的統計資料
-    // for (auto &net : Net) {
-    //     net._Ia = net._Ib = 1;
-    //     net._EV = 0.0;
+    // // 輸出日誌（可選）
+    // cout << "Updated vision net: " << endl;
+    // cout << "New edge length: " << l_new << endl;
+    // cout << "New region size: " << new_region_size << endl;
+    // cout << "New point size: " << new_point_size << endl;
+
+    // // 印出新的遠見網（可選）
+    // for (int i = 0; i < num_Region; i++) {
+    //     cout << "Region " << i << ": ";
+    //     for (int idx : Net[i].point_index) {
+    //         cout << idx << " ";
+    //     }
+    //     cout << endl;
     // }
 
-    // 輸出日誌（可選）
-    cout << "Updated vision net: " << endl;
-    cout << "New edge length: " << l_new << endl;
-    cout << "New region size: " << new_region_size << endl;
-    cout << "New point size: " << new_point_size << endl;
+    cout << "Net Update Done" << endl;
 }
 
 
@@ -566,14 +617,12 @@ bool dominates(const vector<double>& a, const vector<double>& b) {
 }
 
 vector<vector<int>> VNMOO::FastNonDominatedSort(vector<T_Point>& points) {
-    cout << "Fast Non Dominated Sort" << endl;
+    // cout << "Fast Non Dominated Sort" << endl;
     vector<vector<int>> fronts; // 儲存每一層 Pareto 前沿
     fronts.emplace_back();      // 初始化第一層前沿
-// cout << "test 1" << endl;
     int size = points.size();
     vector<int> dominationCount(size, 0);         // 每個點被支配的次數
     vector<vector<int>> dominatedSet(size);       // 每個點支配的點集合
-// cout << "test 2" << endl;
     // 計算支配集合和支配次數
     for (int p = 0; p < size; p++) {
         for (int q = 0; q < size; q++) {
@@ -603,7 +652,6 @@ vector<vector<int>> VNMOO::FastNonDominatedSort(vector<T_Point>& points) {
             fronts[0].push_back(p);
         }
     }
-// cout << "test 3" << endl;
     // 按層次分類非支配前沿
     int currentRank = 1;
     while (!fronts[currentRank - 1].empty()) {
@@ -626,7 +674,7 @@ vector<vector<int>> VNMOO::FastNonDominatedSort(vector<T_Point>& points) {
         currentRank++;
     }
 
-cout << "Fast Non Dominated Sort Done" << endl;
+    // cout << "Fast Non Dominated Sort Done" << endl;
     return fronts;
 }
 
